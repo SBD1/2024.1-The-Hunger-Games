@@ -2,7 +2,7 @@
 
 <div align="center">
 
-<div align="center"><img src= "https://www.google.com/url?sa=i&url=https%3A%2F%2Fvsbattles.fandom.com%2Fwiki%2FThe_Hunger_Games&psig=AOvVaw2Fmh7rYKlD1OkEsK_pxBuN&ust=1721576095401000&source=images&cd=vfe&opi=89978449&ved=0CBEQjRxqFwoTCJC9x_D4tYcDFQAAAAAdAAAAABAE" width="auto"/></div>
+<div align="center"><img src= "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.pngegg.com%2Fen%2Fsearch%3Fq%3Dhunger%2BGames&psig=AOvVaw2Fmh7rYKlD1OkEsK_pxBuN&ust=1721576095401000&source=images&cd=vfe&opi=89978449&ved=0CBEQjRxqFwoTCJC9x_D4tYcDFQAAAAAdAAAAABAJ" width="auto"/></div>
 
 
 </div>

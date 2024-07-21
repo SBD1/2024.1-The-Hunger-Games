@@ -1,6 +1,11 @@
+## Modelo Relacional
+
+O modelo relacional consiste em uma forma de organização de dados de um banco de dados usando tabelas para representar os seus atributos e os relacionamentos entre estas. Segue o Modelo Relacional do jogo "The Hunger Games":
+
 <div align="center">
     <img src="/modulo_01/assets/MERV.png">
 </div>
+
 ### Tabelas de Chaves e Relacionamentos
 
 #### Personagem

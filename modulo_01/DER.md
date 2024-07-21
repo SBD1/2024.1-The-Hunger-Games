@@ -5,7 +5,7 @@
 | Versão | Data       | Modificação                                                                              | Autor                               |
 | ------ | ---------- | ---------------------------------------------------------------------------------------- | ----------------------------------- |
 | 0.0    | 19/07/2024 | Criação do Documento                                                                     | Natália Rodrigues                   |
-| 1.0    | 19/07/2024 | Adição da versão 1.0 do DER                                                              | Natália Rodrigues, Gabriel Monteiro |
+| 1.0    | 19/07/2024 | Adição da versão 0.0 do DER                                                              | Natália Rodrigues, Gabriel Monteiro |
 | 1.1    | 20/07/2024 | Adição da versão 1.0 do DER                                                              | Natália Rodrigues, Gabriel Monteiro |
 
 # Diagrama Entidade-Relacionamento (DER)

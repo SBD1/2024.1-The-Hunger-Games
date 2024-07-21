@@ -16,6 +16,9 @@ Um diagrama de entidade e relacionamento (ER) é uma ferramenta usada na modelag
 
 ![DER v1.0](./assets/DER.png)
 
+### Desenvolvimento do Diagrama Entidade-Relacionamento
+Versões anteriores do DER:
+
 <details>
 <summary>Clique para apresentar a versão 1.0 do DER</summary>
 

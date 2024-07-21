@@ -1,6 +1,7 @@
-Tabelas de chaves e relacionamentos
 
-### Personagem
+### Tabelas de Chaves e Relacionamentos
+
+#### Personagem
 
 | Campo         | Tipo   | Chave  |
 |---------------|--------|--------|
@@ -19,22 +20,25 @@ Tabelas de chaves e relacionamentos
 | nado          | INT    |        |
 | força         | INT    |        |
 | escalada      | INT    |        |
+| idInventario  | INT    | FK     |
+| idHis         | INT    | FK     |
+| idCap         | INT    | FK     |
 
-### Distrito
+#### Distrito
 
 | Campo      | Tipo   | Chave  |
 |------------|--------|--------|
 | idDistrito | INT    | PK     |
 | nome       | STRING | UNIQUE |
 
-### Inventário
+#### Inventário
 
 | Campo        | Tipo   | Chave  |
 |--------------|--------|--------|
 | idInventario | INT    | PK     |
-| capMax       | INT    |        |
+| capMax       | INT    | UNIQUE |
 
-### Item
+#### Item
 
 | Campo        | Tipo   | Chave  |
 |--------------|--------|--------|
@@ -54,15 +58,16 @@ Tabelas de chaves e relacionamentos
 | adSta        | INT    |        |
 | hpAtual      | INT    |        |
 | adHp         | INT    |        |
+| idInventario | INT    | FK     |
 
-### Mapa
+#### Mapa
 
 | Campo  | Tipo   | Chave  |
 |--------|--------|--------|
 | idMapa | INT    | PK     |
 | nome   | STRING | UNIQUE |
 
-### Região
+#### Região
 
 | Campo    | Tipo   | Chave  |
 |----------|--------|--------|
@@ -70,7 +75,7 @@ Tabelas de chaves e relacionamentos
 | nome     | STRING | UNIQUE |
 | idMapa   | INT    | FK     |
 
-### Sala
+#### Sala
 
 | Campo    | Tipo   | Chave  |
 |----------|--------|--------|
@@ -78,21 +83,21 @@ Tabelas de chaves e relacionamentos
 | nome     | STRING | UNIQUE |
 | idRegiao | INT    | FK     |
 
-### Instância de Item
+#### Instância de Item
 
 | Campo       | Tipo   | Chave  |
 |-------------|--------|--------|
 | idInstancia | INT    | PK     |
 | idItem      | INT    | FK     |
 
-### História
+#### História
 
 | Campo | Tipo   | Chave  |
 |-------|--------|--------|
 | idHis | INT    | PK     |
 | nome  | STRING | UNIQUE |
 
-### Capítulo
+#### Capítulo
 
 | Campo | Tipo   | Chave  |
 |-------|--------|--------|
@@ -100,15 +105,16 @@ Tabelas de chaves e relacionamentos
 | nome  | STRING | UNIQUE |
 | idHis | INT    | FK     |
 
-### Decisão
+#### Decisão
 
 | Campo      | Tipo   | Chave  |
 |------------|--------|--------|
 | idDec      | INT    | PK     |
 | descrição  | STRING |        |
 | idCap      | INT    | FK     |
+| idPersonagem | INT  | FK     |
 
-### Animal
+#### Animal
 
 | Campo      | Tipo   | Chave  |
 |------------|--------|--------|
@@ -117,32 +123,42 @@ Tabelas de chaves e relacionamentos
 | hpMax      | INT    |        |
 | fala       | STRING |        |
 | descrição  | STRING |        |
+| idMapa     | INT    | FK     |
 
-## Relacionamento
+## Relacionamentos
 
 ### Personagem - Distrito
-FK: idDistrito em Personagem referenciando idDistrito em Distrito
+- **FK**: `idDistrito` em **Personagem** referenciando `idDistrito` em **Distrito**
 
 ### Personagem - Inventário
-FK: idInventario em Personagem referenciando idInventario em Inventário
+- **FK**: `idInventario` em **Personagem** referenciando `idInventario` em **Inventário**
+
+### Personagem - História
+- **FK**: `idHis` em **Personagem** referenciando `idHis` em **História**
+
+### Personagem - Capítulo
+- **FK**: `idCap` em **Personagem** referenciando `idCap` em **Capítulo**
 
 ### Inventário - Item
-FK: idInventario em Item referenciando idInventario em Inventário
+- **FK**: `idInventario` em **Item** referenciando `idInventario` em **Inventário**
 
 ### Mapa - Região
-FK: idMapa em Região referenciando idMapa em Mapa
+- **FK**: `idMapa` em **Região** referenciando `idMapa` em **Mapa**
 
 ### Região - Sala
-FK: idRegiao em Sala referenciando idRegiao em Região
+- **FK**: `idRegiao` em **Sala** referenciando `idRegiao` em **Região**
 
-### Instância de Item - Personagem
-FK: idPersonagem em Instância de Item referenciando idPersonagem em Personagem
+### Instância de Item - Item
+- **FK**: `idItem` em **Instância de Item** referenciando `idItem` em **Item**
 
 ### História - Capítulo
-FK: idHis em Capítulo referenciando idHis em História
+- **FK**: `idHis` em **Capítulo** referenciando `idHis` em **História**
 
 ### Capítulo - Decisão
-FK: idCap em Decisão referenciando idCap em Capítulo
+- **FK**: `idCap` em **Decisão** referenciando `idCap` em **Capítulo**
 
-### Animal - Instância de Item
-FK: idInst em Instância de Item referenciando idInst em Animal
+### Decisão - Personagem
+- **FK**: `idPersonagem` em **Decisão** referenciando `idPersonagem` em **Personagem**
+
+### Animal - Mapa
+- **FK**: `idMapa` em **Animal** referenciando `idMapa` em **Mapa**

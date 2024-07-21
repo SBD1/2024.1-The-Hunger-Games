@@ -1,4 +1,4 @@
-Tabela de relacionamento
+Tabelas de chaves e relacionamentos
 
 ### Personagem
 

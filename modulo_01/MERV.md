@@ -117,3 +117,32 @@ Tabelas de chaves e relacionamentos
 | hpMax      | INT    |        |
 | fala       | STRING |        |
 | descrição  | STRING |        |
+
+## Relacionamento
+
+### Personagem - Distrito
+FK: idDistrito em Personagem referenciando idDistrito em Distrito
+
+### Personagem - Inventário
+FK: idInventario em Personagem referenciando idInventario em Inventário
+
+### Inventário - Item
+FK: idInventario em Item referenciando idInventario em Inventário
+
+### Mapa - Região
+FK: idMapa em Região referenciando idMapa em Mapa
+
+### Região - Sala
+FK: idRegiao em Sala referenciando idRegiao em Região
+
+### Instância de Item - Personagem
+FK: idPersonagem em Instância de Item referenciando idPersonagem em Personagem
+
+### História - Capítulo
+FK: idHis em Capítulo referenciando idHis em História
+
+### Capítulo - Decisão
+FK: idCap em Decisão referenciando idCap em Capítulo
+
+### Animal - Instância de Item
+FK: idInst em Instância de Item referenciando idInst em Animal

@@ -39,6 +39,9 @@ Versões anteriores do DER:
 
 </details>
 
+<details>
+<summary>Clique para apresentar a versão 2.1 do DER</summary>
+  
 ### DER v2.1
 
 ![DER v2.1](./assets/DERv/DERv2.1.png)

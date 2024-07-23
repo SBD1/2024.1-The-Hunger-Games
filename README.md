@@ -26,6 +26,6 @@ Você assume o papel de um tributo, competindo em desafios e batalhas enquanto e
 
 | Módulo 1                         |
 | -------------------------------- | 
-|  [DER](.assets/DER.md)           | 
-| [MERV](.assets/MERV.md)         | 
+|  [DER](./assets/DER.md)           | 
+| [MERV](./assets/MERV.md)         | 
 

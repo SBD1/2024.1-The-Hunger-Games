@@ -28,4 +28,5 @@ Você assume o papel de um tributo, competindo em desafios e batalhas enquanto e
 | -------------------------------- | 
 |  [DER](./modulo_01/DER.md)           | 
 | [MERV](./modulo_01/MERV.md)         | 
+| [Dicionário](./modulo_01/dicionario.md) | 
 

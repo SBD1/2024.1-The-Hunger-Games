@@ -131,7 +131,7 @@ Um dicionário de dados consiste em um sistema integrado no banco de dados que v
 
 ### Tabela: História
 
-- Descrição da Tabela: Armazena informações sobre histórias.
+- Descrição da Tabela: Armazena informações sobre a história.
 
 | Nome       | Descrição                | Tipo de Dado | Chave | 
 | ---------- | ------------------------ | ------------ | ----- | 

@@ -1,6 +1,7 @@
 # Dicionário de dados
 
-Aqui está o dicionário de dados com as colunas vazias eliminadas:
+## Introdução
+Um dicionário de dados consiste em um sistema integrado no banco de dados que visa fornecer uma descrição dos elementos usados no desenvolvimento do projeto. Segue o dicionário de dados do jogo "The Hunger Games":
 
 ### Tabela: Personagem
 

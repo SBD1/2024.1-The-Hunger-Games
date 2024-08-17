@@ -16,3 +16,17 @@ CREATE TABLE sala (
     nomeS VARCHAR(50) NOT NULL, --corrigir
     descricao TEXT DEFAULT '' --corrigir
 );
+
+--corrigir
+CREATE TABLE personagem (
+    idPersonagem SERIAL PRIMARY KEY,
+    idSala INTEGER REFERENCES sala(idSala) DEFAULT 1,
+    nomeP VARCHAR(50) NOT NULL,
+    nutricao INTEGER DEFAULT 100,
+    hidratacao INTEGER DEFAULT 100,
+    stamina INTEGER DEFAULT 100,
+    calor INTEGER DEFAULT 50,
+    hpMax INTEGER DEFAULT 100,
+    hpAtual INTEGER DEFAULT 100,
+    dano INTEGER DEFAULT 0
+);

@@ -27,7 +27,7 @@ Versões anteriores do DER:
 
 ### DER v1.1
 
-![DER v1.1](./assets/DERv/DERv1.0.png)
+![DER v1.1](../assets/DERv/DERv1.0.png)
 
 </details>
 
@@ -36,7 +36,7 @@ Versões anteriores do DER:
 
 ### DER v2.0
 
-![DER v2.0](docs/assets/DERv/DERv2.0.png)
+![DER v2.0](../assets/DERv/DERv2.0.png)
 
 </details>
 
@@ -45,7 +45,7 @@ Versões anteriores do DER:
   
 ### DER v2.1
 
-![DER v2.1](docs/assets/DERv/DERv2.1.png)
+![DER v2.1](../assets/DERv/DERv2.1.png)
 
 </details>
 
@@ -54,7 +54,7 @@ Versões anteriores do DER:
   
 ### DER v2.2
 
-![DER v2.2](docs/assets/DERv/DERv2.2.png)
+![DER v2.2](../assets/DERv/DERv2.2.png)
 
 </details>
 

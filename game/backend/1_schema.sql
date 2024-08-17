@@ -1,12 +1,18 @@
 CREATE TABLE mapa (
-    idmapa SERIAL PRIMARY KEY,
-    nomeM VARCHAR(50) NOT NULL
+    idMapa SERIAL PRIMARY KEY,
+    nomeM VARCHAR(50) NOT NULL --corrigir
 );
 
 CREATE TABLE regiao (
     idRegiao SERIAL PRIMARY KEY,
-    idmapa SERIAL REFERENCES mapa(idmapa),
-    nomeR VARCHAR(50) NOT NULL,
-    tempe REAL NOT NULL
+    idMapa INTEGER REFERENCES mapa(idMapa),
+    nomeR VARCHAR(50) NOT NULL, --corrigir
+    tempR REAL NOT NULL --corrigir
 );
 
+CREATE TABLE sala (
+    idSala SERIAL PRIMARY KEY,
+    idRegiao INTEGER REFERENCES regiao(idRegiao),
+    nomeS VARCHAR(50) NOT NULL, --corrigir
+    descricao TEXT DEFAULT '' --corrigir
+);

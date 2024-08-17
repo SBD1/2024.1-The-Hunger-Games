@@ -14,7 +14,7 @@ O Modelo Entidade-Relacionamento (MER) é uma metodologia de modelagem de dados 
 Um diagrama de entidade e relacionamento (ER) é uma ferramenta usada na modelagem de banco de dados para representar visualmente a estrutura de um sistema e suas relações. Ele ajuda a entender e planejar como os dados serão organizados e relacionados dentro de um banco de dados.
 
 <div align="center">
-    <img src="/modulo_01/assets/DER.png">
+    <img src="assets/DERv/DERv2.2.png">
 </div>
 
 ## Entidades

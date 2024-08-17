@@ -30,3 +30,21 @@ CREATE TABLE personagem (
     hpAtual INTEGER DEFAULT 100,
     dano INTEGER DEFAULT 0
 );
+
+--corrigir
+CREATE TABLE distrito (
+    idDistrito SERIAL,
+    idPersonagem INTEGER NOT NULL,
+    agilidade INTEGER,
+    forca INTEGER,
+    nado INTEGER,
+    carisma INTEGER,
+    combate INTEGER,
+    pespicacia INTEGER,
+    furtividade INTEGER,
+    sobrevivencia INTEGER,
+    precisao INTEGER,
+    PRIMARY KEY (idDistrito, idPersonagem),
+    FOREIGN KEY (idPersonagem) REFERENCES personagem (idPersonagem)
+    ON DELETE CASCADE
+);

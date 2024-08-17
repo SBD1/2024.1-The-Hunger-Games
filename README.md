@@ -30,7 +30,7 @@ https://youtu.be/5YzNXej9BE8?si=OnlFL7Rn5b7EIj5Y
 
 | Módulo 1                         |
 | -------------------------------- | 
-|  [DER](.docs/modulo_01/DER.md)           | 
-| [MERV](.docs/modulo_01/MERV.md)         | 
-| [Dicionário](.docs/modulo_01/dicionario.md) | 
+|  [DER](docs/modulo_01/DER.md)           | 
+| [MERV](docs/modulo_01/MERV.md)         | 
+| [Dicionário](docs/modulo_01/dicionario.md) | 
 

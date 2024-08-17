@@ -17,7 +17,7 @@
 
 Um diagrama de entidade e relacionamento (ER) é uma ferramenta usada na modelagem de banco de dados para representar visualmente a estrutura de um sistema e suas relações. Ele ajuda a entender e planejar como os dados serão organizados e relacionados dentro de um banco de dados.
 
-![DER v2.1](./assets/DERv/DERv2.2.png)
+![DER v2.1](../assets/DERv/DERv2.2.png)
 
 ### Desenvolvimento do Diagrama Entidade-Relacionamento
 Versões anteriores do DER:

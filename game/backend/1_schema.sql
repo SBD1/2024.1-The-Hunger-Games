@@ -6,5 +6,7 @@ CREATE TABLE mapa (
 CREATE TABLE regiao (
     idRegiao SERIAL PRIMARY KEY,
     idmapa SERIAL REFERENCES mapa(idmapa),
-
+    nomeR VARCHAR(50) NOT NULL,
+    tempe REAL NOT NULL
 );
+

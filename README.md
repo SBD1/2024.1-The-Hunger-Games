@@ -24,10 +24,10 @@ Você assume o papel de um tributo, competindo em desafios e batalhas enquanto e
 
 
 # Entregas
-|           |  Documentos                                |  Apresentação                                                     |
-|           | ------------------------------------------ | ----------------------------------------------------------------- |
-| MÓDULO 1  | [DER](docs/modulo_01/DER.md)               |                                                                   |
-|           | [MERV](docs/modulo_01/MERV.md)             | [LINK MÓDULO 1](https://youtu.be/5YzNXej9BE8?si=OnlFL7Rn5b7EIj5Y) |
-|           | [Dicionário](docs/modulo_01/dicionario.md) |                                                                   |
 
+| Módulo     | Documentos                                | Apresentação                                                     |
+|------------|-------------------------------------------|------------------------------------------------------------------|
+| MÓDULO 1   | [DER](docs/modulo_01/DER.md)              |                                                                  |
+|            | [MERV](docs/modulo_01/MERV.md)            | [LINK MÓDULO 1](https://youtu.be/5YzNXej9BE8?si=OnlFL7Rn5b7EIj5Y)|
+|            | [Dicionário](docs/modulo_01/dicionario.md)|                                                                  |
 

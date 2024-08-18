@@ -131,16 +131,19 @@ VALUES
         'Casaco'
     ),
     (
-        'Arco artesanal'
+        'Arco Artesanal'
     ),
     (
-        'Arco profissional'
+        'Arco Profissional'
     ),
     (
         'Tridente'
     ),
     (
-        'Lança'
+        'Lança Profissional'
+    ),
+    (
+        'Lança Artesanal'
     ),
     (
         'Espada'
@@ -153,6 +156,12 @@ VALUES
     ),
     (
         'Galho Longo'
+    ),
+    (
+        'Flecha Artesanal'
+    ),
+    (
+        'Flecha Profissional'
     ),
     (
         'Pedra'
@@ -223,4 +232,146 @@ VALUES
         20  
     );
 
+--verificar o dano das armas
+
+INSERT INTO
+    arma(idArma, descricao,adDano)
+VALUES 
+    (
+        (SELECT idItem FROM item WHERE nome = 'Arco Artesanal' LIMIT 1),
+        'Arco feito de Galhos e corda',
+        5
+    ),
+    (
+        (SELECT idItem FROM item WHERE nome = 'Arco Profissional' LIMIT 1),
+        'Arco feito de metal',
+        10  
+    ),
+    (
+        (SELECT idItem FROM item WHERE nome = 'Flecha Artesanal' LIMIT 1),
+        'Flecha feita de galho e pedra lascada',
+        5
+    ),
+    (
+        (SELECT idItem FROM item WHERE nome = 'Flecha Profissional' LIMIT 1),
+        'Flecha feita de metal',
+        10
+    ),
+    (
+        (SELECT idItem FROM item WHERE nome = 'Tridente' LIMIT 1),
+        'Tridente longo feito de metal',
+        20
+    ),
+    (
+        (SELECT idItem FROM item WHERE nome = 'Lança Profissional' LIMIT 1),
+        'Lança feita de metal',
+        15
+    ),
+    (
+        (SELECT idItem FROM item WHERE nome = 'Lança Artesanal' LIMIT 1),
+        'Flecha feita de galho e pedra lascada',
+        10
+    ),
+    (
+        (SELECT idItem FROM item WHERE nome = 'Espada' LIMIT 1),
+        'Espada grande feita de aço',
+        20
+    ),
+    (
+        (SELECT idItem FROM item WHERE nome = 'Faca' LIMIT 1),
+        'Faca pequena feita de aço',
+        5
+    );
+
+--itens construtores
+--itens utilidade
+
+
+INSERT INTO
+    consumivel(idConsumivel, adHid, adNut, adSta, adHp, adCalor)
+VALUES 
+    (
+        (SELECT idItem FROM item WHERE nome = 'Carne Crua' LIMIT 1),
+        10,
+        10,
+        10,
+        10,
+        5
+    ),
+    (
+        (SELECT idItem FROM item WHERE nome = 'Carne Assada' LIMIT 1),
+        20,  
+        20,  
+        15,  
+        15,  
+        10  
+    ),
+    (
+        (SELECT idItem FROM item WHERE nome = 'Sopa' LIMIT 1),
+        15,  
+        15,  
+        10,  
+        10,  
+        5    
+    ),
+    (
+        (SELECT idItem FROM item WHERE nome = 'Amora' LIMIT 1),
+        5,   
+        10,  
+        0,   
+        5,   
+        0    
+    ),
+    (
+        (SELECT idItem FROM item WHERE nome = 'Amora Cadeado' LIMIT 1),
+        10,  
+        10,  
+        5,   
+        10,  
+        5    
+    ),
+    (
+        (SELECT idItem FROM item WHERE nome = 'Ração' LIMIT 1),
+        25,  
+        25,  
+        20,  
+        20,  
+        15   
+    ),
+    (
+        (SELECT idItem FROM item WHERE nome = 'Barra de Energia' LIMIT 1),
+        10,  
+        5,   
+        25,  
+        10,  
+        20   
+    ),
+    (
+        (SELECT idItem FROM item WHERE nome = 'Água' LIMIT 1),
+        50,  
+        0,   
+        0,   
+        0,   
+        0    
+    );
+
+INSERT INTO
+    legivel(idLegivel, conteudo)
+VALUES 
+    (
+        (SELECT idItem FROM item WHERE nome = 'Bilhete' LIMIT 1),
+        'Leia-me'
+    );
+
+INSERT INTO
+    compartimento(idCompartimento, adCapMax)
+VALUES 
+    (
+        (SELECT idItem FROM item WHERE nome = 'Mochila Pequena' LIMIT 1),
+        10
+    ),
+    (
+        (SELECT idItem FROM item WHERE nome = 'Mochila Grande' LIMIT 1),
+        15
+    ),
 

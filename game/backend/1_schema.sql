@@ -1,3 +1,5 @@
+--revisar a questão do craft
+
 CREATE TABLE mapa (
     idMapa SERIAL PRIMARY KEY,
     nomeM VARCHAR(50) NOT NULL,
@@ -123,7 +125,6 @@ CREATE TABLE arma (
 CREATE TABLE consumivel (
     idConsumivel SERIAL PRIMARY KEY,
     idItem INTEGER NOT NULL,
-    descricao TEXT DEFAULT '',
     adHid INTEGER,
     adNut INTEGER,
     adSta INTEGER,
@@ -142,7 +143,6 @@ CREATE TABLE legivel (
 CREATE TABLE compartimento (
     idCompartimento SERIAL PRIMARY KEY,
     idItem INTEGER NOT NULL,
-    descricao TEXT DEFAULT '',
     adCapMax INTEGER NOT NULL,
     FOREIGN KEY (idItem) REFERENCES item(idItem) ON DELETE CASCADE
 );
@@ -161,7 +161,6 @@ CREATE TABLE utilidade (
 CREATE TABLE construtor (
     idConstrutor SERIAL PRIMARY KEY,
     idItem INTEGER NOT NULL,
-    descricao TEXT DEFAULT '',
     FOREIGN KEY (idItem) REFERENCES item(idItem) ON DELETE CASCADE
 );
 

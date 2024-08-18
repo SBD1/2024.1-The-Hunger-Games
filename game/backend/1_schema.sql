@@ -22,10 +22,10 @@ CREATE TABLE sala (
 CREATE TABLE personagem (
     idPersonagem SERIAL PRIMARY KEY,
     idSala INTEGER REFERENCES sala(idSala) DEFAULT 1,
+    tipoP VARCHAR(25),
     nomeP VARCHAR(50) NOT NULL,
     hpMax INTEGER DEFAULT 100,
     hpAtual INTEGER DEFAULT 100,
-    descricao TEXT DEFAULT ''
 );
 
 CREATE TABLE vitalidade(
@@ -70,6 +70,7 @@ CREATE TABLE inventario (
 CREATE TABLE personagem_jogavel (
     idPersonagem INTEGER PRIMARY KEY,
     idDistrito INTEGER REFERENCES distrito(idDistrito)
+    --história
 );
 
 CREATE TABLE animal (
@@ -92,9 +93,10 @@ CREATE TABLE bestante (
 CREATE TABLE tributo (
     idTributo SERIAL PRIMARY KEY,
     idPersonagem INTEGER NOT NULL,
+    idDistrito INTEGER NOT NULL,
     statusT BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (idPersonagem) REFERENCES personagem(idPersonagem)
-    ON DELETE CASCADE
+    FOREIGN KEY (idPersonagem) REFERENCES personagem(idPersonagem) ON DELETE CASCADE,
+    FOREIGN KEY (idDistrito) REFERENCES distrito(idDistrito) ON DELETE CASCADE
 );
 
 CREATE TABLE item (

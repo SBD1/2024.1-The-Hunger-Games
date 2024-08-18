@@ -2,16 +2,17 @@ INSERT INTO
     mapa(nomeM, descricao)
 VALUES
     (
-        'Centro de Treinamento'
+        'Centro de Treinamento',
         'O Centro de Treinamento é um arranha-céu onde os tributos moram, treinam e se preparam para os Jogos Vorazes'
     ),
     (
-        'Arena'
+        'Arena',
         'Aqui é onde os 24 tributos se enfrentarão até que reste apenas um vencedor'
     );
 
 --Fazer as regiões do mapa "Arena"
 --Fazer as salas do mapa "Arena"
+--Inserir os distritos
 
 INSERT INTO
     regiao(idMapa, nomeR, tempR, descricao)
@@ -99,3 +100,127 @@ VALUES
         'Sala de Entrevistas',
         'É aqui onde você fará a sua entrevista que te apresentará para todo o povo do Panem.'
     );
+
+--inserindo personagem jogável
+
+BEGIN;
+
+WITH personagem_inserido AS (
+    INSERT INTO
+        personagem (tipoP, nomeP, hpMax, hpAtual)
+    VALUES ('Jogavel', 'Nome do Personagem', 150, 150) 
+    RETURNING idPersonagem
+)
+
+INSERT INTO 
+    personagem_jogavel (idPersonagem, idDistrito)
+SELECT idPersonagem, 1 FROM personagem_inserido;
+
+INSERT INTO vitalidade (idPersonagem)
+SELECT idPersonagem FROM personagem_inserido;
+
+COMMIT;
+
+INSERT INTO
+    item (nome)
+VALUES
+    (
+        'Uniforme'
+    ),
+    (
+        'Casaco'
+    ),
+    (
+        'Arco artesanal'
+    ),
+    (
+        'Arco profissional'
+    ),
+    (
+        'Tridente'
+    ),
+    (
+        'Lança'
+    ),
+    (
+        'Espada'
+    ),
+    (
+        'Faca'
+    ),
+    (
+        'Galho Seco'
+    ),
+    (
+        'Galho Longo'
+    ),
+    (
+        'Pedra'
+    ),
+    (
+        'Pedra Lascada'
+    ),
+    (
+        'Corda'
+    ),
+    (
+        'Carne Crua'
+    ),
+    (
+        'Carne Assada'
+    ),
+    (
+        'Sopa'
+    ),
+    (
+        'Amora'
+    ),
+    (
+        'Amora Cadeado'
+    ),
+    (
+        'Ração'
+    ),
+    (
+        'Barra de Energia'
+    ),
+    (
+        'Água'
+    ),
+    (
+        'Armadilha Pequena'
+    ),
+    (
+        'Armadilha Grande'
+    ),
+    (
+        'Fogueira Grande'
+    ),
+    (
+        'Fogueira Pequena'
+    ),
+    (
+        'Bilhete'
+    ),
+    (
+        'Mochila Pequena'
+    ),
+    (
+        'Mochila Grande'
+    );
+
+INSERT INTO
+    vestimenta(idVestimenta, descricao,adCalor)
+VALUES 
+    (
+        (SELECT idItem FROM item WHERE nome = 'Uniforme' LIMIT 1),
+        'Vestimenta padrão de todos os tributos na Arena',
+        5
+    ),
+    (
+        (SELECT idItem FROM item WHERE nome = 'Casaco' LIMIT 1),
+        'Um casaco resistente que te protegerá contra o frio',
+        20  
+    );
+
+

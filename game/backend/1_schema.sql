@@ -106,6 +106,14 @@ CREATE TABLE item (
     nome VARCHAR(50) NOT NULL
 );
 
+CREATE TABLE item_inventario (
+    idItemInventario SERIAL PRIMARY KEY,
+    idInventario INTEGER NOT NULL,
+    idItem INTEGER NOT NULL,
+    FOREIGN KEY (idInventario) REFERENCES inventario(idInventario) ON DELETE CASCADE,
+    FOREIGN KEY (idItem) REFERENCES item(idItem) ON DELETE CASCADE
+);
+
 CREATE TABLE vestimenta (
     idVestimenta SERIAL PRIMARY KEY,
     idItem INTEGER NOT NULL,

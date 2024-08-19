@@ -27,8 +27,8 @@ Você assume o papel de um tributo, competindo em desafios e batalhas enquanto e
 
 | MÓDULO 1                                  | MÓDULO 2                                                         |
 |-------------------------------------------|------------------------------------------------------------------|
-| [DER](docs/modulo_01/DER.md)              |                                                                  |
-| [MERV](docs/modulo_01/MERV.md)            |                                                                  |
-| [Dicionário](docs/modulo_01/dicionario.md)|                                                                  |
+| [DER](docs/modulo_01/DER.md)              |         [DDL](docs/modulo_02/DDL.md)                                                         |
+| [MERV](docs/modulo_01/MERV.md)            |         [DML](docs/modulo_02/DML.md)                                                       |
+| [Dicionário](docs/modulo_01/dicionario.md)|         [DQL](docs/modulo_02/DQL.md)                               |
 | [APRESENTAÇÃO MÓDULO 1](https://youtu.be/5YzNXej9BE8?si=OnlFL7Rn5b7EIj5Y)|                                   |
 

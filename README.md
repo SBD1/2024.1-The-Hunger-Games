@@ -22,13 +22,15 @@ The Hunger Games é um RPG imersivo ambientado em um universo distópico. Neste 
 
 Você assume o papel de um tributo, competindo em desafios e batalhas enquanto explora um ambiente rico e perigoso. Forme alianças com companheiros, enfrente bestantes e lute contra tributos rivais. Com habilidades únicas baseadas em seu distrito e a capacidade de adaptar suas estratégias, você deve usar todos os recursos disponíveis para sair vitorioso.
 
+# Apresentações
+
+- [MÓDULO 1](https://youtu.be/5YzNXej9BE8?si=OnlFL7Rn5b7EIj5Y)
 
 # Entregas
 
 | MÓDULO 1                                  | MÓDULO 2                                                         |
 |-------------------------------------------|------------------------------------------------------------------|
-| [DER](docs/modulo_01/DER.md)              |         [DDL](docs/modulo_02/DDL.md)                                                         |
-| [MERV](docs/modulo_01/MERV.md)            |         [DML](docs/modulo_02/DML.md)                                                       |
-| [Dicionário](docs/modulo_01/dicionario.md)|         [DQL](docs/modulo_02/DQL.md)                               |
-| [APRESENTAÇÃO MÓDULO 1](https://youtu.be/5YzNXej9BE8?si=OnlFL7Rn5b7EIj5Y)|                                   |
+| [DER](docs/modulo_01/DER.md)              |         [DDL](docs/modulo_02/DDL.md)                             |
+| [MERV](docs/modulo_01/MERV.md)            |         [DML](docs/modulo_02/DML.md)                             |
+| [Dicionário](docs/modulo_01/dicionario.md)|         [DQL](docs/modulo_02/DQL.md)                             |
 

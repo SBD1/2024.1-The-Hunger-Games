@@ -1,6 +1,6 @@
 import os
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Text, Boolean, Float
-from sqlalchemy.orm import declarative_base, sessionmaker, relationship  # Atualizado aqui
+from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 
 # Configuração do banco de dados
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -9,7 +9,7 @@ DATABASE_URL = f"sqlite:///{os.path.join(BASE_DIR, 'data.db')}"
 engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind=engine)
 session = Session()
-Base = declarative_base()  # Esta linha foi ajustada
+Base = declarative_base()
 
 # Classes correspondentes às tabelas do banco de dados
 class Mapa(Base):

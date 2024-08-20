@@ -30,9 +30,6 @@ CREATE TABLE personagem (
     hpAtual INTEGER DEFAULT 100,
 );
 
-
-INSERT INTO personagem (idPersonagem, idSala, nomeP, hpMax, hpAtual) VALUES (1, 1, 'Personagem1', 100, 100);
-
 CREATE TABLE vitalidade(
     idVitalidade SERIAL PRIMARY KEY,
     idPersonagem INTEGER NOT NULL,
@@ -177,3 +174,28 @@ CREATE TABLE construtor (
 
 --tabela do companheiro
 --tabelas sobre a história
+
+
+INSERT INTO personagem (idPersonagem, idSala, nomeP, hpMax, hpAtual) VALUES (1, 1, 'Personagem1', 100, 100);
+INSERT INTO mapa (nomeM, descricao) VALUES ('Mapa Central', 'O mapa principal do jogo.');
+INSERT INTO regiao (idMapa, nomeR, tempR, descricao) VALUES (1, 'Floresta', 22.5, 'Uma floresta densa e úmida.');
+INSERT INTO sala (idRegiao, nomeS, descricao) VALUES (1, 'Clareira', 'Uma clareira aberta no meio da floresta.');
+INSERT INTO personagem (idSala, tipoP, nomeP, hpMax, hpAtual) VALUES (1, 'Guerreiro', 'Arthas', 120, 120);
+INSERT INTO vitalidade (idPersonagem, nutricao, hidratacao, stamina, calor, dano) VALUES (1, 80, 90, 100, 50, 0);
+INSERT INTO distrito (idPersonagem, popularidade, agilidade, forca, nado, carisma, combate, pespicacia, furtividade, sobrevivencia, precisao, descricao) 
+VALUES (1, 10, 8, 7, 6, 5, 7, 9, 6, 8, 7, 'Distrito especializado em sobrevivência.');
+INSERT INTO inventario (idPersonagem, capMax, capAtual) VALUES (1, 5, 2);
+INSERT INTO personagem_jogavel (idPersonagem, idDistrito) VALUES (1, 1);
+INSERT INTO animal (idPersonagem) VALUES (1);
+INSERT INTO bestante (idPersonagem, agilidade, nado, voo) VALUES (1, 10, 7, 0);
+INSERT INTO tributo (idPersonagem, idDistrito, statusT) VALUES (1, 1, TRUE);
+INSERT INTO item (nome) VALUES ('Espada');
+INSERT INTO item_inventario (idInventario, idItem) VALUES (1, 1);
+INSERT INTO vestimenta (idItem, descricao, adCalor) VALUES (1, 'Uma armadura resistente.', 15);
+INSERT INTO arma (idItem, descricao, adDano) VALUES (1, 'Uma espada afiada.', 20);
+INSERT INTO consumivel (idItem, adHid, adNut, adSta, adHp, adCalor) VALUES (1, 10, 5, 20, 15, 0);
+INSERT INTO legivel (idItem, conteudo) VALUES (1, 'Um antigo pergaminho com escrituras esquecidas.');
+INSERT INTO compartimento (idItem, adCapMax) VALUES (1, 10);
+INSERT INTO utilidade (idItem, nome, descricao, geraItem, capturaInimigo, geraCalor) 
+VALUES (1, 'Kit de Sobrevivência', 'Um kit completo para sobrevivência.', TRUE, FALSE, TRUE);
+INSERT INTO construtor (idItem) VALUES (1);

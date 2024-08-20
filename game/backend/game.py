@@ -1,20 +1,22 @@
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship
+import os
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Text, Boolean, Float
+from sqlalchemy.orm import declarative_base, sessionmaker, relationship  # Atualizado aqui
 
 # Configuração do banco de dados
-DATABASE_URL = "postgresql://gabriel:gabriel123@localhost:5432/data"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATABASE_URL = f"sqlite:///{os.path.join(BASE_DIR, 'data.db')}"
+
 engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind=engine)
 session = Session()
-Base = declarative_base()
+Base = declarative_base()  # Esta linha foi ajustada
 
 # Classes correspondentes às tabelas do banco de dados
 class Mapa(Base):
     __tablename__ = 'mapa'
     idMapa = Column(Integer, primary_key=True)
     nomeM = Column(String)
-    descricao = Column(String)
+    descricao = Column(Text)
     regioes = relationship('Regiao', back_populates='mapa')
 
 class Regiao(Base):
@@ -22,8 +24,8 @@ class Regiao(Base):
     idRegiao = Column(Integer, primary_key=True)
     idMapa = Column(Integer, ForeignKey('mapa.idMapa'))
     nomeR = Column(String)
-    tempR = Column(Integer)
-    descricao = Column(String)
+    tempR = Column(Float)
+    descricao = Column(Text)
     mapa = relationship('Mapa', back_populates='regioes')
     salas = relationship('Sala', back_populates='regiao')
 
@@ -32,27 +34,70 @@ class Sala(Base):
     idSala = Column(Integer, primary_key=True)
     idRegiao = Column(Integer, ForeignKey('regiao.idRegiao'))
     nomeS = Column(String)
-    descricao = Column(String)
+    descricao = Column(Text)
     regiao = relationship('Regiao', back_populates='salas')
     personagens = relationship('Personagem', back_populates='sala')
 
 class Personagem(Base):
     __tablename__ = 'personagem'
     idPersonagem = Column(Integer, primary_key=True)
-    idSala = Column(Integer, ForeignKey('sala.idSala'))
+    idSala = Column(Integer, ForeignKey('sala.idSala'), default=1)
+    tipoP = Column(String(25))
     nomeP = Column(String)
-    hpMax = Column(Integer)
-    hpAtual = Column(Integer)
+    hpMax = Column(Integer, default=100)
+    hpAtual = Column(Integer, default=100)
     sala = relationship('Sala', back_populates='personagens')
+
+class Vitalidade(Base):
+    __tablename__ = 'vitalidade'
+    idVitalidade = Column(Integer, primary_key=True)
+    idPersonagem = Column(Integer, ForeignKey('personagem.idPersonagem'))
+    nutricao = Column(Integer, default=100)
+    hidratacao = Column(Integer, default=100)
+    stamina = Column(Integer, default=100)
+    calor = Column(Integer, default=50)
+    dano = Column(Integer, default=0)
+    personagem = relationship('Personagem', back_populates='vitalidade')
+
+Personagem.vitalidade = relationship('Vitalidade', back_populates='personagem', uselist=False)
+
+class Distrito(Base):
+    __tablename__ = 'distrito'
+    idDistrito = Column(Integer, primary_key=True)
+    idPersonagem = Column(Integer, ForeignKey('personagem.idPersonagem'))
+    popularidade = Column(Integer, default=0)
+    agilidade = Column(Integer)
+    forca = Column(Integer)
+    nado = Column(Integer)
+    carisma = Column(Integer)
+    combate = Column(Integer)
+    pespicacia = Column(Integer)
+    furtividade = Column(Integer)
+    sobrevivencia = Column(Integer)
+    precisao = Column(Integer)
+    descricao = Column(Text, default='')
+    personagem = relationship('Personagem', back_populates='distrito')
+
+Personagem.distrito = relationship('Distrito', back_populates='personagem', uselist=False)
+
+class Inventario(Base):
+    __tablename__ = 'inventario'
+    idInventario = Column(Integer, primary_key=True)
+    idPersonagem = Column(Integer, ForeignKey('personagem.idPersonagem'))
+    capMax = Column(Integer, default=2)
+    capAtual = Column(Integer, default=0)
+    personagem = relationship('Personagem', back_populates='inventario')
+
+Personagem.inventario = relationship('Inventario', back_populates='personagem', uselist=False)
 
 # Criação das tabelas no banco de dados
 Base.metadata.create_all(engine)
 
 # Funções do jogo
 class Game:
-    def __init__(self, personagem_id):
-        self.personagem_id = personagem_id
-        self.personagem = session.query(Personagem).filter_by(idPersonagem=personagem_id).first()
+    def __init__(self, personagemId):
+        self.personagemId = personagemId
+        self.personagem = session.query(Personagem).filter_by(idPersonagem=personagemId).first()
 
         if not self.personagem:
             raise ValueError("Personagem não encontrado!")
@@ -89,9 +134,9 @@ class Game:
 
 # Interface de Linha de Comando
 def iniciar_jogo():
-    personagem_id = int(input("Digite o ID do seu personagem: "))
+    personagemId = int(input("Digite o ID do seu personagem: "))
     try:
-        jogo = Game(personagem_id)
+        jogo = Game(personagemId)
         
         while True:
             print("\nEscolha uma ação:")

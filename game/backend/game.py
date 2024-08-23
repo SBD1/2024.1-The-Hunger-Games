@@ -17,32 +17,7 @@ Session = sessionmaker(bind=engine)
 session = Session()
 Base = declarative_base()
 
-# try:
-#     with engine.connect() as con:
-#         con.execute(text("INSERT INTO personagem (idPersonagem, idSala, nomeP, hpMax, hpAtual) VALUES (1, 1, 'Personagem1', 100, 100);"))
-#         con.execute(text("INSERT INTO mapa (nomeM, descricao) VALUES ('Mapa Central', 'O mapa principal do jogo.');"))
-#         con.execute(text("INSERT INTO regiao (idMapa, nomeR, tempR, descricao) VALUES (1, 'Floresta', 22.5, 'Uma floresta densa e úmida.');"))
-#         con.execute(text("INSERT INTO sala (idRegiao, nomeS, descricao) VALUES (1, 'Clareira', 'Uma clareira aberta no meio da floresta.');"))
-#         con.execute(text("INSERT INTO personagem (idSala, tipoP, nomeP, hpMax, hpAtual) VALUES (1, 'Guerreiro', 'Arthas', 120, 120);"))
-#         con.execute(text("INSERT INTO vitalidade (idPersonagem, nutricao, hidratacao, stamina, calor, dano) VALUES (1, 80, 90, 100, 50, 0);"))
-#         con.execute(text("INSERT INTO distrito (idPersonagem, popularidade, agilidade, forca, nado, carisma, combate, pespicacia, furtividade, sobrevivencia, precisao, descricao) VALUES (1, 10, 8, 7, 6, 5, 7, 9, 6, 8, 7, 'Distrito especializado em sobrevivência.');"))
-#         con.execute(text("INSERT INTO inventario (idPersonagem, capMax, capAtual) VALUES (1, 5, 2);"))
-#         con.execute(text("INSERT INTO personagem_jogavel (idPersonagem, idDistrito) VALUES (1, 1);"))
-#         con.execute(text("INSERT INTO animal (idPersonagem) VALUES (1);"))
-#         con.execute(text("INSERT INTO bestante (idPersonagem, agilidade, nado, voo) VALUES (1, 10, 7, 0);"))
-#         con.execute(text("INSERT INTO tributo (idPersonagem, idDistrito, statusT) VALUES (1, 1, TRUE);"))
-#         con.execute(text("INSERT INTO item (nome) VALUES ('Espada');"))
-#         con.execute(text("INSERT INTO item_inventario (idInventario, idItem) VALUES (1, 1);"))
-#         con.execute(text("INSERT INTO vestimenta (idItem, descricao, adCalor) VALUES (1, 'Uma armadura resistente.', 15);"))
-#         con.execute(text("INSERT INTO arma (idItem, descricao, adDano) VALUES (1, 'Uma espada afiada.', 20);"))
-#         con.execute(text("INSERT INTO consumivel (idItem, adHid, adNut, adSta, adHp, adCalor) VALUES (1, 10, 5, 20, 15, 0);"))
-#         con.execute(text("INSERT INTO legivel (idItem, conteudo) VALUES (1, 'Um antigo pergaminho com escrituras esquecidas.');"))
-#         con.execute(text("INSERT INTO compartimento (idItem, adCapMax) VALUES (1, 10);"))
-#         con.execute(text("INSERT INTO utilidade (idItem, nome, descricao, geraItem, capturaInimigo, geraCalor) VALUES (1, 'Kit de Sobrevivência', 'Um kit completo para sobrevivência.', TRUE, FALSE, TRUE);"))
-#         con.execute(text("INSERT INTO construtor (idItem) VALUES (1);"))
-#         con.commit()
-# except Exception as e:
-#     print(f"Erro ao inserir dados: {e}")
+
 
 
 class Mapa(Base):
@@ -236,6 +211,33 @@ class Construtor(Base):
 # Criação das tabelas no banco de dados
 
 Base.metadata.create_all(engine)
+
+try:
+    with engine.connect() as con:
+        con.execute(text("INSERT INTO personagem (idPersonagem, idSala, nomeP, hpMax, hpAtual) VALUES (1, 1, 'Personagem1', 100, 100);"))
+        con.execute(text("INSERT INTO mapa (nomeM, descricao) VALUES ('Mapa Central', 'O mapa principal do jogo.');"))
+        con.execute(text("INSERT INTO regiao (idMapa, nomeR, tempR, descricao) VALUES (1, 'Floresta', 22.5, 'Uma floresta densa e úmida.');"))
+        con.execute(text("INSERT INTO sala (idRegiao, nomeS, descricao) VALUES (1, 'Clareira', 'Uma clareira aberta no meio da floresta.');"))
+        con.execute(text("INSERT INTO personagem (idSala, tipoP, nomeP, hpMax, hpAtual) VALUES (1, 'Guerreiro', 'Arthas', 120, 120);"))
+        con.execute(text("INSERT INTO vitalidade (idPersonagem, nutricao, hidratacao, stamina, calor, dano) VALUES (1, 80, 90, 100, 50, 0);"))
+        con.execute(text("INSERT INTO distrito (idPersonagem, popularidade, agilidade, forca, nado, carisma, combate, pespicacia, furtividade, sobrevivencia, precisao, descricao) VALUES (1, 10, 8, 7, 6, 5, 7, 9, 6, 8, 7, 'Distrito especializado em sobrevivência.');"))
+        con.execute(text("INSERT INTO inventario (idPersonagem, capMax, capAtual) VALUES (1, 5, 2);"))
+        con.execute(text("INSERT INTO personagem_jogavel (idPersonagem, idDistrito) VALUES (1, 1);"))
+        con.execute(text("INSERT INTO animal (idPersonagem) VALUES (1);"))
+        con.execute(text("INSERT INTO bestante (idPersonagem, agilidade, nado, voo) VALUES (1, 10, 7, 0);"))
+        con.execute(text("INSERT INTO tributo (idPersonagem, idDistrito, statusT) VALUES (1, 1, TRUE);"))
+        con.execute(text("INSERT INTO item (nome) VALUES ('Espada');"))
+        con.execute(text("INSERT INTO item_inventario (idInventario, idItem) VALUES (1, 1);"))
+        con.execute(text("INSERT INTO vestimenta (idItem, descricao, adCalor) VALUES (1, 'Uma armadura resistente.', 15);"))
+        con.execute(text("INSERT INTO arma (idItem, descricao, adDano) VALUES (1, 'Uma espada afiada.', 20);"))
+        con.execute(text("INSERT INTO consumivel (idItem, adHid, adNut, adSta, adHp, adCalor) VALUES (1, 10, 5, 20, 15, 0);"))
+        con.execute(text("INSERT INTO legivel (idItem, conteudo) VALUES (1, 'Um antigo pergaminho com escrituras esquecidas.');"))
+        con.execute(text("INSERT INTO compartimento (idItem, adCapMax) VALUES (1, 10);"))
+        con.execute(text("INSERT INTO utilidade (idItem, nome, descricao, geraItem, capturaInimigo, geraCalor) VALUES (1, 'Kit de Sobrevivência', 'Um kit completo para sobrevivência.', TRUE, FALSE, TRUE);"))
+        con.execute(text("INSERT INTO construtor (idItem) VALUES (1);"))
+        con.commit()
+except Exception as e:
+    print(f"Erro ao inserir dados: {e}")
 
 # Funções do jogo
 class Game:

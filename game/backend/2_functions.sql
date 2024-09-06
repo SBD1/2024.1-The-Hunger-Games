@@ -1,8 +1,10 @@
 CREATE OR REPLACE FUNCTION criar_inventario()
 RETURNS TRIGGER AS $$
 BEGIN
+    -- Insere um novo inventário para o personagem recém-criado
     INSERT INTO inventario (idPersonagem)
     VALUES (NEW.idPersonagem);
+    
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -42,7 +44,7 @@ BEGIN
     INSERT INTO item_inventario (idInventario, idItem)
     VALUES (v_idInventario, p_idItem);
 
-    -- Atualiza a capacidade atual
+    -- Atualiza a capacidade atual do inventário
     UPDATE inventario
     SET capAtual = capAtual + 1
     WHERE idInventario = v_idInventario;
@@ -50,5 +52,3 @@ BEGIN
     RETURN 'Item adicionado com sucesso ao inventário.';
 END;
 $$ LANGUAGE plpgsql;
-
---Para usar a função: SELECT adicionar_item_ao_inventario(1, 2);

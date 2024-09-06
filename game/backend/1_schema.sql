@@ -1,5 +1,3 @@
---revisar a questão do craft
-
 CREATE TABLE mapa (
     idMapa SERIAL PRIMARY KEY,
     nomeM VARCHAR(50) NOT NULL,
@@ -27,10 +25,10 @@ CREATE TABLE personagem (
     tipoP VARCHAR(25),
     nomeP VARCHAR(50) NOT NULL,
     hpMax INTEGER DEFAULT 100,
-    hpAtual INTEGER DEFAULT 100,
+    hpAtual INTEGER DEFAULT 100
 );
 
-CREATE TABLE vitalidade(
+CREATE TABLE vitalidade (
     idVitalidade SERIAL PRIMARY KEY,
     idPersonagem INTEGER NOT NULL,
     nutricao INTEGER DEFAULT 100,
@@ -38,8 +36,7 @@ CREATE TABLE vitalidade(
     stamina INTEGER DEFAULT 100,
     calor INTEGER DEFAULT 50,
     dano INTEGER DEFAULT 0,
-    FOREIGN KEY (idPersonagem) REFERENCES personagem(idPersonagem)
-    ON DELETE CASCADE
+    FOREIGN KEY (idPersonagem) REFERENCES personagem(idPersonagem) ON DELETE CASCADE
 );
 
 CREATE TABLE distrito (
@@ -51,13 +48,12 @@ CREATE TABLE distrito (
     nado INTEGER,
     carisma INTEGER,
     combate INTEGER,
-    pespicacia INTEGER,
+    perspicacia INTEGER,
     furtividade INTEGER,
     sobrevivencia INTEGER,
     precisao INTEGER,
     descricao TEXT DEFAULT '',
-    FOREIGN KEY (idPersonagem) REFERENCES personagem(idPersonagem)
-    ON DELETE CASCADE
+    FOREIGN KEY (idPersonagem) REFERENCES personagem(idPersonagem) ON DELETE CASCADE
 );
 
 CREATE TABLE inventario (
@@ -65,21 +61,18 @@ CREATE TABLE inventario (
     idPersonagem INTEGER NOT NULL,
     capMax INTEGER DEFAULT 2,
     capAtual INTEGER DEFAULT 0,
-    FOREIGN KEY (idPersonagem) REFERENCES personagem(idPersonagem)
-    ON DELETE CASCADE
+    FOREIGN KEY (idPersonagem) REFERENCES personagem(idPersonagem) ON DELETE CASCADE
 );
 
 CREATE TABLE personagem_jogavel (
     idPersonagem INTEGER PRIMARY KEY,
     idDistrito INTEGER REFERENCES distrito(idDistrito)
-    --história
 );
 
 CREATE TABLE animal (
     idAnimal SERIAL PRIMARY KEY,
     idPersonagem INTEGER NOT NULL,
-    FOREIGN KEY (idPersonagem) REFERENCES personagem(idPersonagem)
-    ON DELETE CASCADE
+    FOREIGN KEY (idPersonagem) REFERENCES personagem(idPersonagem) ON DELETE CASCADE
 );
 
 CREATE TABLE bestante (
@@ -88,8 +81,7 @@ CREATE TABLE bestante (
     agilidade INTEGER,
     nado INTEGER,
     voo INTEGER,
-    FOREIGN KEY (idPersonagem) REFERENCES personagem(idPersonagem)
-    ON DELETE CASCADE
+    FOREIGN KEY (idPersonagem) REFERENCES personagem(idPersonagem) ON DELETE CASCADE
 );
 
 CREATE TABLE tributo (
@@ -172,5 +164,5 @@ CREATE TABLE construtor (
     FOREIGN KEY (idItem) REFERENCES item(idItem) ON DELETE CASCADE
 );
 
---tabela do companheiro
---tabelas sobre a história
+-- tabela do companheiro
+-- tabelas sobre a história

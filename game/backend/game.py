@@ -1,313 +1,189 @@
 import os
 import sqlalchemy
-from sqlalchemy import create_engine
-from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey, Text, Float, Boolean
-from sqlalchemy import inspect
-from sqlalchemy.sql import text
+from sqlalchemy import create_engine, Table, Column, Integer, String, MetaData, ForeignKey, Text, Float, Boolean
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
-
-# Configuração do banco de dados
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-print(f"sqlite:///{os.path.join(BASE_DIR, 'dataa.db')}")
-DATABASE_URL = f"sqlite:///{os.path.join(BASE_DIR, 'dataa.db')}"
-
-
-engine = create_engine(DATABASE_URL)
-Session = sessionmaker(bind=engine)
-session = Session()
-Base = declarative_base()
+import curses
+import sys
+import termios
+import tty
+import time
+from mapas import mapa1, mapa2, mapa3
+import banco
 
 
+def main(stdscr):
+    curses.curs_set(0)
+    stdscr.nodelay(1)
+    stdscr.timeout(100)
+
+mapas = {
+    'mapa1': mapa1,
+    'mapa2': mapa2,
+    'mapa3': mapa3,
+}
+
+estado_jogo = {
+    'mapa_atual': 'mapa1',  # Mapa inicial
+    'posicao_personagem': (18, 3),  # Posição inicial do personagem
+}
 
 
-class Mapa(Base):
-    __tablename__ = 'mapa'
-    idMapa = Column(Integer, primary_key=True)
-    nomeM = Column(String)
-    descricao = Column(Text)
-    regioes = relationship('Regiao', back_populates='mapa')
 
-class Regiao(Base):
-    __tablename__ = 'regiao'
-    idRegiao = Column(Integer, primary_key=True)
-    idMapa = Column(Integer, ForeignKey('mapa.idMapa'))
-    nomeR = Column(String)
-    tempR = Column(Float)
-    descricao = Column(Text)
-    mapa = relationship('Mapa', back_populates='regioes')
-    salas = relationship('Sala', back_populates='regiao')
+def verificar_transicao(posicao, mapa_atual):
+    x, y = posicao
+    
+    transicoes = {
+        'mapa1': {
+            'mapa2': (123, 31),  # 1 para o 2
+        },
+        'mapa2': {
+            'mapa1': (7, 1),    # Volta para o mapa 1
+            'mapa3': (51, 32),   # Mapa 2 leva ao mapa 3
+        },
+        'mapa3': {
+            'mapa2': (25, 0),    # Mapa 3 volta para o mapa 2
+        },
+    }
 
-class Sala(Base):
-    __tablename__ = 'sala'
-    idSala = Column(Integer, primary_key=True)
-    idRegiao = Column(Integer, ForeignKey('regiao.idRegiao'))
-    nomeS = Column(String)
-    descricao = Column(Text)
-    regiao = relationship('Regiao', back_populates='salas')
-    personagens = relationship('Personagem', back_populates='sala')
+    
+    if mapa_atual in transicoes:
+        for mapa_destino, posicao_transicao in transicoes[mapa_atual].items():
+            if posicao == posicao_transicao:
+                return mapa_destino  # Retorna o mapa para o qual deve transitar
+    
+    return mapa_atual
 
-class Personagem(Base):
-    __tablename__ = 'personagem'
-    idPersonagem = Column(Integer, primary_key=True)
-    idSala = Column(Integer, ForeignKey('sala.idSala'), default=1)
-    tipoP = Column(String(25))
-    nomeP = Column(String)
-    hpMax = Column(Integer, default=100)
-    hpAtual = Column(Integer, default=100)
-    sala = relationship('Sala', back_populates='personagens')
-    vitalidade = relationship('Vitalidade', back_populates='personagem', uselist=False)
-    distrito = relationship('Distrito', back_populates='personagem', uselist=False)
-    inventario = relationship('Inventario', back_populates='personagem', uselist=False)
-    personagem_jogavel = relationship('PersonagemJogavel', back_populates='personagem', uselist=False)
-    animal = relationship('Animal', back_populates='personagem', uselist=False)
-    bestante = relationship('Bestante', back_populates='personagem', uselist=False)
-    tributo = relationship('Tributo', back_populates='personagem', uselist=False)
+def desenhar_mapa(stdscr, mapa, pos_x, pos_y):
+    for y, linha in enumerate(mapa):
+        stdscr.addstr(y, 0, linha)
+    stdscr.addch(pos_y, pos_x, '@')
 
-class Vitalidade(Base):
-    __tablename__ = 'vitalidade'
-    idVitalidade = Column(Integer, primary_key=True)
-    idPersonagem = Column(Integer, ForeignKey('personagem.idPersonagem'))
-    nutricao = Column(Integer, default=100)
-    hidratacao = Column(Integer, default=100)
-    stamina = Column(Integer, default=100)
-    calor = Column(Integer, default=50)
-    dano = Column(Integer, default=0)
-    personagem = relationship('Personagem', back_populates='vitalidade')
+def mover_personagem(tecla, pos_x, pos_y, mapa):
+    nova_x, nova_y = pos_x, pos_y
+    if tecla == 'w' and pos_y > 0 and mapa[pos_y - 1][pos_x] == ' ':
+        nova_y -= 1
+    elif tecla == 's' and pos_y < len(mapa) - 1 and mapa[pos_y + 1][pos_x] == ' ':
+        nova_y += 1
+    elif tecla == 'a' and pos_x > 0 and mapa[pos_y][pos_x - 1] == ' ':
+        nova_x -= 1
+    elif tecla == 'd' and pos_x < len(mapa[0]) - 1 and mapa[pos_y][pos_x + 1] == ' ':
+        nova_x += 1
 
-class Distrito(Base):
-    __tablename__ = 'distrito'
-    idDistrito = Column(Integer, primary_key=True)
-    idPersonagem = Column(Integer, ForeignKey('personagem.idPersonagem'))
-    popularidade = Column(Integer, default=0)
-    agilidade = Column(Integer)
-    forca = Column(Integer)
-    nado = Column(Integer)
-    carisma = Column(Integer)
-    combate = Column(Integer)
-    pespicacia = Column(Integer)
-    furtividade = Column(Integer)
-    sobrevivencia = Column(Integer)
-    precisao = Column(Integer)
-    descricao = Column(Text, default='')
-    personagem = relationship('Personagem', back_populates='distrito')
+    return nova_x, nova_y
 
-class Inventario(Base):
-    __tablename__ = 'inventario'
-    idInventario = Column(Integer, primary_key=True)
-    idPersonagem = Column(Integer, ForeignKey('personagem.idPersonagem'))
-    capMax = Column(Integer, default=2)
-    capAtual = Column(Integer, default=0)
-    personagem = relationship('Personagem', back_populates='inventario')
-    itens = relationship('ItemInventario', back_populates='inventario')
+def main(stdscr):
+    curses.curs_set(0)
+    pos_x, pos_y = estado_jogo['posicao_personagem']
+    
+    while True:
+        stdscr.clear()
+        mapa_atual = estado_jogo['mapa_atual']
+        mapa = mapas[mapa_atual]
+        desenhar_mapa(stdscr, mapa, pos_x, pos_y)
+        stdscr.refresh()
 
-class PersonagemJogavel(Base):
-    __tablename__ = 'personagem_jogavel'
-    idPersonagem = Column(Integer, ForeignKey('personagem.idPersonagem'), primary_key=True)
-    idDistrito = Column(Integer, ForeignKey('distrito.idDistrito'))
-    personagem = relationship('Personagem', back_populates='personagem_jogavel')
-    distrito = relationship('Distrito')
+        tecla = stdscr.getch()
+        if tecla == ord('q'):
+            break
+        elif tecla in [ord('w'), ord('a'), ord('s'), ord('d')]:
+            pos_x, pos_y = mover_personagem(chr(tecla), pos_x, pos_y, mapa)
 
-class Animal(Base):
-    __tablename__ = 'animal'
-    idAnimal = Column(Integer, primary_key=True)
-    idPersonagem = Column(Integer, ForeignKey('personagem.idPersonagem'))
-    personagem = relationship('Personagem', back_populates='animal')
-
-class Bestante(Base):
-    __tablename__ = 'bestante'
-    idBestante = Column(Integer, primary_key=True)
-    idPersonagem = Column(Integer, ForeignKey('personagem.idPersonagem'))
-    agilidade = Column(Integer)
-    nado = Column(Integer)
-    voo = Column(Integer)
-    personagem = relationship('Personagem', back_populates='bestante')
-
-class Tributo(Base):
-    __tablename__ = 'tributo'
-    idTributo = Column(Integer, primary_key=True)
-    idPersonagem = Column(Integer, ForeignKey('personagem.idPersonagem'))
-    idDistrito = Column(Integer, ForeignKey('distrito.idDistrito'))
-    statusT = Column(Boolean, default=False)
-    personagem = relationship('Personagem', back_populates='tributo')
-    distrito = relationship('Distrito')
-
-class Item(Base):
-    __tablename__ = 'item'
-    idItem = Column(Integer, primary_key=True)
-    nome = Column(String(50), nullable=False)
-    vestimenta = relationship('Vestimenta', back_populates='item', uselist=False)
-    arma = relationship('Arma', back_populates='item', uselist=False)
-    consumivel = relationship('Consumivel', back_populates='item', uselist=False)
-    legivel = relationship('Legivel', back_populates='item', uselist=False)
-    compartimento = relationship('Compartimento', back_populates='item', uselist=False)
-    utilidade = relationship('Utilidade', back_populates='item', uselist=False)
-    construtor = relationship('Construtor', back_populates='item', uselist=False)
-
-class ItemInventario(Base):
-    __tablename__ = 'item_inventario'
-    idItemInventario = Column(Integer, primary_key=True)
-    idInventario = Column(Integer, ForeignKey('inventario.idInventario'))
-    idItem = Column(Integer, ForeignKey('item.idItem'))
-    inventario = relationship('Inventario', back_populates='itens')
-    item = relationship('Item')
-
-class Vestimenta(Base):
-    __tablename__ = 'vestimenta'
-    idVestimenta = Column(Integer, primary_key=True)
-    idItem = Column(Integer, ForeignKey('item.idItem'))
-    descricao = Column(Text, default='')
-    adCalor = Column(Integer, nullable=False)
-    item = relationship('Item', back_populates='vestimenta')
-
-class Arma(Base):
-    __tablename__ = 'arma'
-    idArma = Column(Integer, primary_key=True)
-    idItem = Column(Integer, ForeignKey('item.idItem'))
-    descricao = Column(Text, default='')
-    adDano = Column(Integer, nullable=False)
-    item = relationship('Item', back_populates='arma')
-
-class Consumivel(Base):
-    __tablename__ = 'consumivel'
-    idConsumivel = Column(Integer, primary_key=True)
-    idItem = Column(Integer, ForeignKey('item.idItem'))
-    adHid = Column(Integer)
-    adNut = Column(Integer)
-    adSta = Column(Integer)
-    adHp = Column(Integer)
-    adCalor = Column(Integer)
-    item = relationship('Item', back_populates='consumivel')
-
-class Legivel(Base):
-    __tablename__ = 'legivel'
-    idLegivel = Column(Integer, primary_key=True)
-    idItem = Column(Integer, ForeignKey('item.idItem'))
-    conteudo = Column(Text, default='')
-    item = relationship('Item', back_populates='legivel')
-
-class Compartimento(Base):
-    __tablename__ = 'compartimento'
-    idCompartimento = Column(Integer, primary_key=True)
-    idItem = Column(Integer, ForeignKey('item.idItem'))
-    adCapMax = Column(Integer, nullable=False)
-    item = relationship('Item', back_populates='compartimento')
-
-class Utilidade(Base):
-    __tablename__ = 'utilidade'
-    idUtilidade = Column(Integer, primary_key=True)
-    idItem = Column(Integer, ForeignKey('item.idItem'))
-    nome = Column(String(50), nullable=False)
-    descricao = Column(Text, default='')
-    geraItem = Column(Boolean, default=False)
-    capturaInimigo = Column(Boolean, default=False)
-    geraCalor = Column(Boolean, default=False)
-    item = relationship('Item', back_populates='utilidade')
-
-class Construtor(Base):
-    __tablename__ = 'construtor'
-    idConstrutor = Column(Integer, primary_key=True)
-    idItem = Column(Integer, ForeignKey('item.idItem'))
-    item = relationship('Item', back_populates='construtor')
-# Criação das tabelas no banco de dados
-
-Base.metadata.create_all(engine)
-
-try:
-    with engine.connect() as con:
-        con.execute(text("INSERT INTO personagem (idPersonagem, idSala, nomeP, hpMax, hpAtual) VALUES (1, 1, 'Personagem1', 100, 100);"))
-        con.execute(text("INSERT INTO mapa (nomeM, descricao) VALUES ('Mapa Central', 'O mapa principal do jogo.');"))
-        con.execute(text("INSERT INTO regiao (idMapa, nomeR, tempR, descricao) VALUES (1, 'Floresta', 22.5, 'Uma floresta densa e úmida.');"))
-        con.execute(text("INSERT INTO sala (idRegiao, nomeS, descricao) VALUES (1, 'Clareira', 'Uma clareira aberta no meio da floresta.');"))
-        con.execute(text("INSERT INTO personagem (idSala, tipoP, nomeP, hpMax, hpAtual) VALUES (1, 'Guerreiro', 'Arthas', 120, 120);"))
-        con.execute(text("INSERT INTO vitalidade (idPersonagem, nutricao, hidratacao, stamina, calor, dano) VALUES (1, 80, 90, 100, 50, 0);"))
-        con.execute(text("INSERT INTO distrito (idPersonagem, popularidade, agilidade, forca, nado, carisma, combate, pespicacia, furtividade, sobrevivencia, precisao, descricao) VALUES (1, 10, 8, 7, 6, 5, 7, 9, 6, 8, 7, 'Distrito especializado em sobrevivência.');"))
-        con.execute(text("INSERT INTO inventario (idPersonagem, capMax, capAtual) VALUES (1, 5, 2);"))
-        con.execute(text("INSERT INTO personagem_jogavel (idPersonagem, idDistrito) VALUES (1, 1);"))
-        con.execute(text("INSERT INTO animal (idPersonagem) VALUES (1);"))
-        con.execute(text("INSERT INTO bestante (idPersonagem, agilidade, nado, voo) VALUES (1, 10, 7, 0);"))
-        con.execute(text("INSERT INTO tributo (idPersonagem, idDistrito, statusT) VALUES (1, 1, TRUE);"))
-        con.execute(text("INSERT INTO item (nome) VALUES ('Espada');"))
-        con.execute(text("INSERT INTO item_inventario (idInventario, idItem) VALUES (1, 1);"))
-        con.execute(text("INSERT INTO vestimenta (idItem, descricao, adCalor) VALUES (1, 'Uma armadura resistente.', 15);"))
-        con.execute(text("INSERT INTO arma (idItem, descricao, adDano) VALUES (1, 'Uma espada afiada.', 20);"))
-        con.execute(text("INSERT INTO consumivel (idItem, adHid, adNut, adSta, adHp, adCalor) VALUES (1, 10, 5, 20, 15, 0);"))
-        con.execute(text("INSERT INTO legivel (idItem, conteudo) VALUES (1, 'Um antigo pergaminho com escrituras esquecidas.');"))
-        con.execute(text("INSERT INTO compartimento (idItem, adCapMax) VALUES (1, 10);"))
-        con.execute(text("INSERT INTO utilidade (idItem, nome, descricao, geraItem, capturaInimigo, geraCalor) VALUES (1, 'Kit de Sobrevivência', 'Um kit completo para sobrevivência.', TRUE, FALSE, TRUE);"))
-        con.execute(text("INSERT INTO construtor (idItem) VALUES (1);"))
-        con.commit()
-except Exception as e:
-    print(f"Erro ao inserir dados: {e}")
-
-# Funções do jogo
-class Game:
-    def __init__(self, personagemId):
-        self.personagemId = personagemId
-        self.personagem = session.query(Personagem).filter_by(idPersonagem=personagemId).first()
-
-        if not self.personagem:
-            raise ValueError("Personagem não encontrado!")
-        
-    def mostrar_localizacao_atual(self):
-        sala_atual = self.personagem.sala
-        if sala_atual:
-            print(f"Você está atualmente em: {sala_atual.nomeS} - {sala_atual.descricao}")
-        else:
-            print("Personagem não está em nenhuma sala.")
-
-    def mover_para_sala(self, nova_sala_id):
-        nova_sala = session.query(Sala).filter_by(idSala=nova_sala_id).first()
-        if nova_sala:
-            self.personagem.idSala = nova_sala_id
-            session.commit()
-            print(f"Você se moveu para: {nova_sala.nomeS} - {nova_sala.descricao}")
-        else:
-            print("Sala não encontrada.")
-
-    def listar_salas_disponiveis(self):
-        regiao_atual = self.personagem.sala.regiao if self.personagem.sala else None
-
-        if regiao_atual:
-            salas = session.query(Sala).filter_by(idRegiao=regiao_atual.idRegiao).all()
-            if salas:
-                print("Salas disponíveis para se mover:")
-                for sala in salas:
-                    print(f"{sala.idSala}: {sala.nomeS} - {sala.descricao}")
+        novo_mapa = verificar_transicao((pos_x, pos_y), mapa_atual)
+        if novo_mapa != mapa_atual:
+            estado_jogo['mapa_atual'] = novo_mapa
+            if novo_mapa == 'mapa1':
+                pos_x, pos_y = 120, 31  # Posição inicial no mapa 1
+            elif novo_mapa == 'mapa2':
+                if mapa_atual == 'mapa1':
+                    pos_x, pos_y = 35, 3  # Posição inicial no mapa 2 vindo do mapa 1
+                elif mapa_atual == 'mapa3':
+                    pos_x, pos_y = 51, 29  # Posição inicial no mapa 2 vindo do mapa 3
+            elif novo_mapa == 'mapa3':
+                pos_x, pos_y = 25, 4  # Posição inicial no mapa 3
             else:
-                print("Nenhuma sala disponível na região.")
+                pos_x, pos_y = (5, 5)  # Posição padrão se nenhum mapa específico for encontrado
+
+
+        estado_jogo['posicao_personagem'] = (pos_x, pos_y)
+
+def exibir_texto_centralizado(stdscr, texto):
+    altura, largura = stdscr.getmaxyx()
+    x_inicial = (largura // 2) - (len(texto) // 2)
+    y_inicial = altura // 2
+    stdscr.clear()
+    stdscr.addstr(y_inicial, x_inicial, texto)
+    stdscr.refresh()
+    time.sleep(2)
+
+def print_menu(stdscr, selected_row_idx):
+    stdscr.clear()
+    menu = ["Iniciar Jogo", "Controles", "Sair"]
+
+    # Adiciona a arte ASCII e o título
+    ascii_art1 = """               
+
+          #####  #  #   ####                 #  #   #  #   #  #    ##    ####   ###                   ##      #    #   #  ####    ##
+            #    #  #   #                    #  #   #  #   ## #   #  #   #      #  #                 #  #    # #   ## ##  #      #  #
+            #    ####   ###                  ####   #  #   # ##   #      ###    #  #                 #      #   #  # # #  ###     #
+            #    #  #   #                    #  #   #  #   #  #   # ##   #      ###                  # ##   #####  # # #  #        #
+            #    #  #   #                    #  #   #  #   #  #   #  #   #      #  #                 #  #   #   #  #   #  #      #  #
+            #    #  #   ####                 #  #    ##    #  #    ##    ####   #  #                  ##    #   #  #   #  ####    ##
+
+
+
+    """
+
+    # Adiciona a arte ASCII na tela
+    stdscr.addstr(0, 0, "===============================================================================================================================================")
+    stdscr.addstr(1, 0, ascii_art1, curses.A_BOLD)
+    stdscr.addstr(10, 0, "===============================================================================================================================================")
+
+    # Menu
+    for idx, row in enumerate(menu):
+        if idx == selected_row_idx:
+            stdscr.addstr(12 + idx, 50, f"> {row}", curses.A_REVERSE)
         else:
-            print("Personagem não está em nenhuma sala ou região.")
+            stdscr.addstr(12 + idx, 50, f"  {row}")
 
-# Interface de Linha de Comando
-def iniciar_jogo():
-    personagemId = int(input("Digite o ID do seu personagem: "))
-    try:
-        jogo = Game(personagemId)
-        
-        while True:
-            print("\nEscolha uma ação:")
-            print("1. Mostrar localização atual")
-            print("2. Listar salas disponíveis")
-            print("3. Mover para uma sala")
-            print("4. Sair")
-            
-            escolha = input("Digite o número da sua escolha: ")
-            
-            if escolha == "1":
-                jogo.mostrar_localizacao_atual()
-            elif escolha == "2":
-                jogo.listar_salas_disponiveis()
-            elif escolha == "3":
-                nova_sala_id = int(input("Digite o ID da sala para a qual deseja se mover: "))
-                jogo.mover_para_sala(nova_sala_id)
-            elif escolha == "4":
-                print("Saindo do jogo...")
-                break
-            else:
-                print("Escolha inválida. Tente novamente.")
-    except ValueError as e:
-        print(e)
+    stdscr.addstr(15, 0, "===============================================================================================================================================")
+    
+    stdscr.refresh()
 
-# Iniciar o jogo
+
+def menu_inicial(stdscr):
+    curses.curs_set(0)
+    current_row = 0
+
+    while True:
+        print_menu(stdscr, current_row)
+        key = stdscr.getch()
+
+        if key == curses.KEY_UP and current_row > 0:
+            current_row -= 1
+        elif key == curses.KEY_DOWN and current_row < 2:
+            current_row += 1
+        elif key == curses.KEY_ENTER or key in [10, 13]:
+            if current_row == 0:
+                stdscr.clear()
+                exibir_texto_centralizado(stdscr, "Iniciando o jogo...")
+                stdscr.refresh()
+                time.sleep(2)
+                main(stdscr) 
+                current_row = 0 
+
+            elif current_row == 1:
+                stdscr.clear()
+                stdscr.addstr(0, 0, "W - Move-se para cima\nA - Move-se para esquerda\nS - Move-se para baixo\nD - Move-se para direita\nQ - Retorna ao menu")
+                stdscr.refresh()
+                stdscr.getch()
+                current_row = 0  
+
+            elif current_row == 2:
+                stdscr.clear()
+                exibir_texto_centralizado(stdscr, "Saindo do jogo...")
+                stdscr.refresh()
+                time.sleep(2)
+                sys.exit()
+
 if __name__ == "__main__":
-    iniciar_jogo()
+    curses.wrapper(menu_inicial)

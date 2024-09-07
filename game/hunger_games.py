@@ -1,4 +1,5 @@
 import psycopg2
+from psycopg2 import sql, errors
 from colorama import Fore, init
 import curses
 import sys
@@ -61,6 +62,37 @@ class Game:
         else:
             print("Nenhuma sala disponível.")
 
+            
+
+# Criação de Conta
+
+def criar_conta():
+    while True:
+        nome = input("\nDigite o nome de usuário: ")
+        senha = input("Digite a senha: ")
+
+        try:
+            # Tenta inserir o usuário no banco de dados
+            cur.execute(
+                sql.SQL("INSERT INTO usuario (nome, senha) VALUES (%s, %s)"),
+                (nome, senha),
+            )
+            conn.commit()
+            print("\nUsuário criado com sucesso!")
+            break  # Sai do loop se a inserção for bem-sucedida
+        
+        except errors.UniqueViolation as e:  # Captura o erro específico de violação de unicidade
+            conn.rollback() 
+            mensagem_erro = str(e).splitlines()[0]
+            print(f"\nErro: O nome de usuário '{nome}' já existe no sistema. Escolha outro nome.")
+        
+        except errors.RaiseException as e:  # Captura outros erros
+            conn.rollback() 
+            mensagem_erro = str(e).splitlines()[0]
+            print("\nErro ao criar o usuário:", mensagem_erro)
+
+    input("\nPressione Enter para voltar ao menu.")
+
 # Interface de Linha de Comando
 def iniciar_jogo():
     personagemId = int(input("Digite o ID do seu personagem: \n"))
@@ -94,7 +126,7 @@ def iniciar_jogo():
 # Função para exibir o menu na tela com curses
 def print_menu(stdscr, selected_row_idx):
     stdscr.clear()
-    menu = ["Iniciar Jogo", "Controles", "Sair"]
+    menu = ["Novo jogo", "Iniciar Jogo", "Controles", "Sair"]
 
     # Adiciona a arte ASCII e o título
     ascii_art1 = """
@@ -118,7 +150,7 @@ def print_menu(stdscr, selected_row_idx):
         else:
             stdscr.addstr(12 + idx, 50, f"  {row}")
 
-    stdscr.addstr(15, 0, "=" * 150)
+    stdscr.addstr(17, 0, "=" * 150)
     stdscr.refresh()
 
 # Função para centralizar texto na tela
@@ -145,7 +177,16 @@ def menu_inicial(stdscr):
         elif key == curses.KEY_DOWN and current_row < 2:
             current_row += 1
         elif key == curses.KEY_ENTER or key in [10, 13]:
-            if current_row == 0:
+            if current_row == 0:  # Novo Jogo
+                stdscr.clear()
+                exibir_texto_centralizado(stdscr, "Indo para a tela de cadastro...")
+                stdscr.refresh()
+                time.sleep(2)
+                curses.endwin()  # Finaliza curses antes de criar a conta
+                criar_conta()  # Chama a função para criar uma nova conta
+                curses.wrapper(menu_inicial)  # Retorna ao menu após criar a conta
+
+            elif current_row == 1:  # Iniciar Jogo
                 stdscr.clear()
                 exibir_texto_centralizado(stdscr, "Iniciando o jogo...")
                 stdscr.refresh()
@@ -154,14 +195,14 @@ def menu_inicial(stdscr):
                 iniciar_jogo()  # Chamando a função de jogo
                 curses.wrapper(menu_inicial)  # Retorna ao menu após o jogo
 
-            elif current_row == 1:
+            elif current_row == 2:  # Controles
                 stdscr.clear()
                 stdscr.addstr(0, 0, "W - Move-se para cima\nA - Move-se para esquerda\nS - Move-se para baixo\nD - Move-se para direita\nQ - Retorna ao menu")
                 stdscr.refresh()
                 stdscr.getch()
                 current_row = 0
 
-            elif current_row == 2:
+            elif current_row == 3:  # Sair
                 stdscr.clear()
                 exibir_texto_centralizado(stdscr, "Saindo do jogo...")
                 stdscr.refresh()

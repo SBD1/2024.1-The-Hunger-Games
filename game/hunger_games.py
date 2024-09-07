@@ -20,20 +20,21 @@ conn = psycopg2.connect(
 # Criar um cursor
 cur = conn.cursor()
 
-# Dicionário de personagens (exemplo)
-personagens = {
-    1: {'idSala': 1, 'nome': 'Personagem 1'},
-    2: {'idSala': 2, 'nome': 'Personagem 2'}
-}
-
 # Funções do jogo
 class Game:
     def __init__(self, personagemId):
         self.personagemId = personagemId
-        self.personagem = personagens.get(personagemId)
+        self.personagem = self._obter_personagem()
 
         if not self.personagem:
             raise ValueError("Personagem não encontrado!")
+
+    def _obter_personagem(self):
+        cur.execute("SELECT idSala FROM personagem WHERE idPersonagem = %s", (self.personagemId,))
+        resultado = cur.fetchone()
+        if resultado:
+            return {'idSala': resultado[0]}
+        return None
 
     def mostrar_localizacao_atual(self):
         cur.execute("SELECT nomeS, descricao FROM sala WHERE idSala = %s", (self.personagem['idSala'],))
@@ -47,6 +48,9 @@ class Game:
         cur.execute("SELECT nomeS, descricao FROM sala WHERE idSala = %s", (nova_sala_id,))
         nova_sala = cur.fetchone()
         if nova_sala:
+            # Atualiza a localização do personagem no banco de dados
+            cur.execute("UPDATE personagem SET idSala = %s WHERE idPersonagem = %s", (nova_sala_id, self.personagemId))
+            conn.commit()  # Confirma a transação
             self.personagem['idSala'] = nova_sala_id
             print(Fore.BLUE + f"Você se moveu para: {nova_sala[0]} - {nova_sala[1]}")
         else:
@@ -80,8 +84,6 @@ def mostrar_personagens_opcoes():
     nomes_para_id = {}
     for idx, (idDistrito, idPersonagem, popularidade, agilidade, forca, nado, carisma, combate, perspicacia, furtividade, sobrevivencia, precisao, descricao, nomeP) in enumerate(personagens):
         print(f"\nPersonagem: {nomeP}")
-        print(f"  ID Distrito: {idDistrito}")
-        print(f"  ID Personagem: {idPersonagem}")
         print(f"  Popularidade: {popularidade}")
         print(f"  Agilidade: {agilidade}")
         print(f"  Força: {forca}")
@@ -162,12 +164,37 @@ def criar_conta():
     input("\nPressione Enter para voltar ao menu.")
 
 
+def login():
+    while True:
+        nome = input("\nDigite o nome de usuário: ")
+        senha = input("Digite a senha: ")
 
-# Interface de Linha de Comando
-def iniciar_jogo():
-    personagemId = int(input("Digite o ID do seu personagem: \n"))
+        try:
+            # Verifica se o usuário e a senha estão corretos
+            cur.execute(
+                sql.SQL("SELECT id FROM usuario WHERE nome = %s AND senha = %s"),
+                (nome, senha)
+            )
+            usuario = cur.fetchone()
+
+            if usuario:
+                usuario_id = usuario[0]
+                print("\nLogin bem-sucedido!")
+                iniciar_jogo(usuario_id)
+            else:
+                print("\nNome de usuário ou senha incorretos. Tente novamente.")
+        except Exception as e:
+            print("\nErro ao tentar fazer login:", str(e))
+
+def iniciar_jogo(usuario_id):
     try:
-        jogo = Game(personagemId)
+        cur.execute(
+            "SELECT idPersonagem FROM usuario WHERE id = %s",
+            (usuario_id,)
+        )
+        personagem_id = cur.fetchone()[0]
+
+        jogo = Game(personagem_id)
 
         while True:
             print("\nEscolha uma ação:")
@@ -192,11 +219,13 @@ def iniciar_jogo():
                 print("Escolha inválida. Tente novamente.")
     except ValueError as e:
         print(e)
+    except Exception as e:
+        print("\nErro ao iniciar o jogo:", str(e))
 
 # Função para exibir o menu na tela com curses
 def print_menu(stdscr, selected_row_idx):
     stdscr.clear()
-    menu = ["Novo jogo", "Iniciar Jogo", "Controles", "Sair"]
+    menu = ["Novo jogo", "Retomar Jogo", "Controles", "Sair"]
 
     # Adiciona a arte ASCII e o título
     ascii_art1 = """
@@ -258,11 +287,11 @@ def menu_inicial(stdscr):
 
             elif current_row == 1:  # Iniciar Jogo
                 stdscr.clear()
-                exibir_texto_centralizado(stdscr, "Iniciando o jogo...")
+                exibir_texto_centralizado(stdscr, "Carregando tela de Login...")
                 stdscr.refresh()
                 time.sleep(2)
                 curses.endwin()  # Finaliza curses antes de iniciar o jogo
-                iniciar_jogo()  # Chamando a função de jogo
+                login()  # Chamando a função de jogo
                 curses.wrapper(menu_inicial)  # Retorna ao menu após o jogo
 
             elif current_row == 2:  # Controles

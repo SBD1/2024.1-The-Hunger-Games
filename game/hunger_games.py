@@ -62,9 +62,72 @@ class Game:
         else:
             print("Nenhuma sala disponível.")
 
-            
+def mostrar_personagens_opcoes():
+    # Recupera os dados dos personagens com id 1, 7, 24 e 6
+    cur.execute(
+        """
+        SELECT d.idDistrito, d.idPersonagem, d.popularidade, d.agilidade, d.forca, d.nado,
+               d.carisma, d.combate, d.perspicacia, d.furtividade, d.sobrevivencia, d.precisao, d.descricao,
+               p.nomeP 
+        FROM distrito d
+        JOIN personagem p ON d.idPersonagem = p.idPersonagem
+        WHERE d.idPersonagem IN (1, 7, 24, 6)
+        """
+    )
+    personagens = cur.fetchall()
+    
+    print("\nEscolha um personagem:")
+    nomes_para_id = {}
+    for idx, (idDistrito, idPersonagem, popularidade, agilidade, forca, nado, carisma, combate, perspicacia, furtividade, sobrevivencia, precisao, descricao, nomeP) in enumerate(personagens):
+        print(f"\nPersonagem: {nomeP}")
+        print(f"  ID Distrito: {idDistrito}")
+        print(f"  ID Personagem: {idPersonagem}")
+        print(f"  Popularidade: {popularidade}")
+        print(f"  Agilidade: {agilidade}")
+        print(f"  Força: {forca}")
+        print(f"  Nado: {nado}")
+        print(f"  Carisma: {carisma}")
+        print(f"  Combate: {combate}")
+        print(f"  Perspicácia: {perspicacia}")
+        print(f"  Furtividade: {furtividade}")
+        print(f"  Sobrevivência: {sobrevivencia}")
+        print(f"  Precisão: {precisao}")
+        print(f"  Descrição: {descricao}")
 
-# Criação de Conta
+        # Adiciona o nome e o ID ao dicionário
+        nomes_para_id[nomeP] = idPersonagem
+
+    return nomes_para_id
+
+def escolher_personagem(usuario_id):
+    nomes_para_id = mostrar_personagens_opcoes()
+    
+    while True:
+        try:
+            nome_personagem = input("\nDigite o nome do personagem que deseja escolher: ").strip()
+            if nome_personagem in nomes_para_id:
+                idPersonagem = nomes_para_id[nome_personagem]
+                
+                # Atualiza o personagem selecionado na tabela personagem
+                cur.execute(
+                    "UPDATE personagem SET tipoP = 'pj' WHERE idPersonagem = %s",
+                    (idPersonagem,)
+                )
+                
+                # Atualiza a tabela usuario com o idPersonagem escolhido
+                cur.execute(
+                    "UPDATE usuario SET idPersonagem = %s WHERE id = %s",
+                    (idPersonagem, usuario_id)
+                )
+                
+                conn.commit()
+                print("\nPersonagem escolhido com sucesso!")
+                break
+            else:
+                print("\nNome do personagem inválido. Tente novamente.")
+        except Exception as e:
+            conn.rollback()
+            print("\nErro ao selecionar o personagem:", str(e))
 
 def criar_conta():
     while True:
@@ -72,13 +135,18 @@ def criar_conta():
         senha = input("Digite a senha: ")
 
         try:
-            # Tenta inserir o usuário no banco de dados
+            # Tenta inserir o usuário no banco de dados e retornar o ID do novo usuário
             cur.execute(
-                sql.SQL("INSERT INTO usuario (nome, senha) VALUES (%s, %s)"),
-                (nome, senha),
+                sql.SQL("INSERT INTO usuario (nome, senha) VALUES (%s, %s) RETURNING id"),
+                (nome, senha)
             )
+            usuario_id = cur.fetchone()[0]
             conn.commit()
             print("\nUsuário criado com sucesso!")
+            
+            # Após criar a conta, permita ao usuário escolher um personagem
+            escolher_personagem(usuario_id)
+            
             break  # Sai do loop se a inserção for bem-sucedida
         
         except errors.UniqueViolation as e:  # Captura o erro específico de violação de unicidade
@@ -93,7 +161,8 @@ def criar_conta():
 
     input("\nPressione Enter para voltar ao menu.")
 
-<<<<<<< HEAD
+
+
 # Interface de Linha de Comando
 def iniciar_jogo():
     personagemId = int(input("Digite o ID do seu personagem: \n"))
@@ -123,40 +192,6 @@ def iniciar_jogo():
                 print("Escolha inválida. Tente novamente.")
     except ValueError as e:
         print(e)
-=======
-    # Interface de Linha de Comando
-    def iniciar_jogo():
-        personagemId = int(input("Digite o ID do seu personagem: \n"))
-        try:
-            jogo = Game(personagemId)
-    
-            while True:
-                print("\nEscolha uma ação:")
-                print("1. Mostrar localização atual")
-                print("2. Listar todas as salas disponíveis")
-                print("3. Mover para uma sala")
-                print("4. Mudar de região")
-                print("5. Sair")
-    
-                escolha = input("\nDigite o número da sua escolha: ")
-    
-                if escolha == "1":
-                    jogo.mostrar_localizacao_atual()
-                elif escolha == "2":
-                    jogo.listar_salas_disponiveis()
-                elif escolha == "3":
-                    nova_sala_id = int(input("\nDigite o ID da sala para a qual deseja se mover: \n"))
-                    jogo.mover_para_sala(nova_sala_id)
-                elif escolha == "4":
-                    jogo.mudar_regiao()
-                elif escolha == "5":
-                    print("Saindo do jogo...")
-                    break
-                else:
-                    print("Escolha inválida. Tente novamente.")
-        except ValueError as e:
-            print(e)
->>>>>>> 306ac5a2f4883faf427960c3d37632cf24485e2d
 
 # Função para exibir o menu na tela com curses
 def print_menu(stdscr, selected_row_idx):

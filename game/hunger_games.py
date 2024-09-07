@@ -4,6 +4,7 @@ from colorama import Fore, init
 import curses
 import sys
 import time
+from capital import mostrarSimbolo
 
 # Inicializar Colorama
 init(autoreset=True)
@@ -14,7 +15,7 @@ conn = psycopg2.connect(
     user="postgres",
     password="20082003",
     host="localhost",
-    port="5432"
+    port="5433"
 )
 
 # Criar um cursor
@@ -48,9 +49,8 @@ class Game:
         cur.execute("SELECT nomeS, descricao FROM sala WHERE idSala = %s", (nova_sala_id,))
         nova_sala = cur.fetchone()
         if nova_sala:
-            # Atualiza a localização do personagem no banco de dados
             cur.execute("UPDATE personagem SET idSala = %s WHERE idPersonagem = %s", (nova_sala_id, self.personagemId))
-            conn.commit()  # Confirma a transação
+            conn.commit()
             self.personagem['idSala'] = nova_sala_id
             print(Fore.BLUE + f"Você se moveu para: {nova_sala[0]} - {nova_sala[1]}")
         else:
@@ -66,8 +66,102 @@ class Game:
         else:
             print("Nenhuma sala disponível.")
 
-def mostrar_personagens_opcoes():
-    # Recupera os dados dos personagens com id 1, 7, 24 e 6
+def mostrar_personagens_tabela(stdscr, personagens, selected_idx):
+    stdscr.clear()
+    height, width = stdscr.getmaxyx()
+    start_x = 5
+    start_y = 5
+
+    # Verifica se a posição inicial está dentro dos limites
+    if start_y >= height or start_x >= width:
+        stdscr.addstr(0, 0, "Erro: Posição de início fora dos limites da tela.", curses.A_BOLD)
+        stdscr.refresh()
+        return
+
+    # Título centralizado
+    stdscr.addstr(2, max((width // 2) - 10, 0), "Escolha seu Personagem", curses.A_BOLD)
+
+    # Cabeçalhos para os atributos dos personagens
+    headers = ["Atributos", "Dominic", "Gabrielle", "Leslie", "Icaro"]
+
+    col_width = max((width - start_x) // len(headers), 12)
+
+    # Exibe os cabeçalhos
+    for idx, header in enumerate(headers):
+        try:
+            stdscr.addstr(start_y, start_x + idx * col_width, header, curses.A_BOLD)
+        except curses.error:
+            break
+
+    # Atributos e valores correspondentes para cada personagem
+    atributos = [
+        ("Popularidade", [6, 3, 4, 4]),
+        ("Agilidade", [4, 4, 6, 8]),
+        ("Força", [5, 4, 4, 4]),
+        ("Nado", [4, 5, 6, 9]),
+        ("Carisma", [4, 4, 8, 5]),
+        ("Combate", [8, 4, 4, 5]),
+        ("Perspicácia", [5, 10, 5, 3]),
+        ("Furtividade", [3, 8, 5, 4]),
+        ("Sobrevivência", [4, 6, 8, 5]),
+        ("Precisão", [7, 4, 5, 6])
+    ]
+
+    # Exibe os atributos e seus valores para cada personagem
+    for i, (atributo, valores) in enumerate(atributos):
+        linha_y = start_y + i + 2
+        stdscr.addstr(linha_y, start_x, atributo, curses.A_BOLD)
+        
+        for j, valor in enumerate(valores):
+            try:
+                if j == selected_idx:  # Se o personagem está selecionado
+                    stdscr.attron(curses.A_REVERSE)
+                stdscr.addstr(linha_y, start_x + (j + 1) * col_width, str(valor))
+                stdscr.attroff(curses.A_REVERSE)
+            except curses.error:
+                break
+
+    # Espaço em branco para separar a tabela da descrição
+    stdscr.addstr(linha_y + 2, start_x, "-" * (width - start_x))
+
+    # Exibe as descrições dos personagens abaixo da tabela
+    descricao_y = linha_y + 4
+    descricoes = [
+        "Dominic é o tributo masculino do Distrito 1, um Carreirista conhecido por sua habilidade em combate e precisão.",
+        "Gabrielle é a tributo feminina do Distrito 3, famosa por sua inteligência e furtividade.",
+        "Leslie é a tributo feminina do Distrito 12, destacada pelo seu carisma e conhecimento da natureza.",
+        "Icaro é o tributo masculino do Distrito 4, com habilidades impressionantes de nado e agilidade."
+    ]
+
+    if selected_idx < len(descricoes):
+        descricao = descricoes[selected_idx]
+        try:
+            stdscr.addstr(descricao_y, start_x, "Descrição: ", curses.A_BOLD)
+            stdscr.addstr(descricao_y + 1, start_x, descricao[:width - start_x])
+        except curses.error:
+            pass
+
+    stdscr.refresh()
+
+
+def escolher_personagem_com_interface(stdscr, personagens):
+    curses.curs_set(0)
+    selected_idx = 0
+    
+    while True:
+        mostrar_personagens_tabela(stdscr, personagens, selected_idx)
+        key = stdscr.getch()
+
+        if key == curses.KEY_LEFT and selected_idx > 0:
+            selected_idx -= 1
+        elif key == curses.KEY_RIGHT and selected_idx < len(personagens) - 1:
+            selected_idx += 1
+        elif key == curses.KEY_ENTER or key in [10, 13]:
+            return personagens[selected_idx][1]
+        elif key == ord('q') or key == ord('Q'):
+            break
+
+def mostrar_personagens_opcoes_curses():
     cur.execute(
         """
         SELECT d.idDistrito, d.idPersonagem, d.popularidade, d.agilidade, d.forca, d.nado,
@@ -79,57 +173,28 @@ def mostrar_personagens_opcoes():
         """
     )
     personagens = cur.fetchall()
-    
-    print("\nEscolha um personagem:")
-    nomes_para_id = {}
-    for idx, (idDistrito, idPersonagem, popularidade, agilidade, forca, nado, carisma, combate, perspicacia, furtividade, sobrevivencia, precisao, descricao, nomeP) in enumerate(personagens):
-        print(f"\nPersonagem: {nomeP}")
-        print(f"  Popularidade: {popularidade}")
-        print(f"  Agilidade: {agilidade}")
-        print(f"  Força: {forca}")
-        print(f"  Nado: {nado}")
-        print(f"  Carisma: {carisma}")
-        print(f"  Combate: {combate}")
-        print(f"  Perspicácia: {perspicacia}")
-        print(f"  Furtividade: {furtividade}")
-        print(f"  Sobrevivência: {sobrevivencia}")
-        print(f"  Precisão: {precisao}")
-        print(f"  Descrição: {descricao}")
-
-        # Adiciona o nome e o ID ao dicionário
-        nomes_para_id[nomeP] = idPersonagem
-
-    return nomes_para_id
+    idPersonagem = curses.wrapper(escolher_personagem_com_interface, personagens)
+    return idPersonagem
 
 def escolher_personagem(usuario_id):
-    nomes_para_id = mostrar_personagens_opcoes()
-    
-    while True:
-        try:
-            nome_personagem = input("\nDigite o nome do personagem que deseja escolher: ").strip()
-            if nome_personagem in nomes_para_id:
-                idPersonagem = nomes_para_id[nome_personagem]
-                
-                # Atualiza o personagem selecionado na tabela personagem
-                cur.execute(
-                    "UPDATE personagem SET tipoP = 'pj' WHERE idPersonagem = %s",
-                    (idPersonagem,)
-                )
-                
-                # Atualiza a tabela usuario com o idPersonagem escolhido
-                cur.execute(
-                    "UPDATE usuario SET idPersonagem = %s WHERE id = %s",
-                    (idPersonagem, usuario_id)
-                )
-                
-                conn.commit()
-                print("\nPersonagem escolhido com sucesso!")
-                break
-            else:
-                print("\nNome do personagem inválido. Tente novamente.")
-        except Exception as e:
-            conn.rollback()
-            print("\nErro ao selecionar o personagem:", str(e))
+    try:
+        idPersonagem = mostrar_personagens_opcoes_curses()
+        if idPersonagem:
+            cur.execute(
+                "UPDATE personagem SET tipoP = 'pj' WHERE idPersonagem = %s",
+                (idPersonagem,)
+            )
+            cur.execute(
+                "UPDATE usuario SET idPersonagem = %s WHERE id = %s",
+                (idPersonagem, usuario_id)
+            )
+            conn.commit()
+            print("\nPersonagem escolhido com sucesso!")
+        else:
+            print("\nNenhum personagem foi selecionado.")
+    except Exception as e:
+        conn.rollback()
+        print("\nErro ao selecionar o personagem:", str(e))
 
 def criar_conta():
     while True:
@@ -137,7 +202,6 @@ def criar_conta():
         senha = input("Digite a senha: ")
 
         try:
-            # Tenta inserir o usuário no banco de dados e retornar o ID do novo usuário
             cur.execute(
                 sql.SQL("INSERT INTO usuario (nome, senha) VALUES (%s, %s) RETURNING id"),
                 (nome, senha)
@@ -145,24 +209,18 @@ def criar_conta():
             usuario_id = cur.fetchone()[0]
             conn.commit()
             print("\nUsuário criado com sucesso!")
-            
-            # Após criar a conta, permita ao usuário escolher um personagem
             escolher_personagem(usuario_id)
-            
-            break  # Sai do loop se a inserção for bem-sucedida
+            break
         
-        except errors.UniqueViolation as e:  # Captura o erro específico de violação de unicidade
+        except errors.UniqueViolation as e:
             conn.rollback() 
-            mensagem_erro = str(e).splitlines()[0]
             print(f"\nErro: O nome de usuário '{nome}' já existe no sistema. Escolha outro nome.")
         
-        except errors.RaiseException as e:  # Captura outros erros
+        except errors.RaiseException as e:
             conn.rollback() 
-            mensagem_erro = str(e).splitlines()[0]
-            print("\nErro ao criar o usuário:", mensagem_erro)
+            print("\nErro ao criar o usuário:", str(e))
 
     input("\nPressione Enter para voltar ao menu.")
-
 
 def login():
     while True:
@@ -170,7 +228,6 @@ def login():
         senha = input("Digite a senha: ")
 
         try:
-            # Verifica se o usuário e a senha estão corretos
             cur.execute(
                 sql.SQL("SELECT id FROM usuario WHERE nome = %s AND senha = %s"),
                 (nome, senha)
@@ -219,6 +276,7 @@ def iniciar_jogo(usuario_id):
                 print("Escolha inválida. Tente novamente.")
     except ValueError as e:
         print(e)
+   
     except Exception as e:
         print("\nErro ao iniciar o jogo:", str(e))
 
@@ -273,7 +331,7 @@ def menu_inicial(stdscr):
 
         if key == curses.KEY_UP and current_row > 0:
             current_row -= 1
-        elif key == curses.KEY_DOWN and current_row < 2:
+        elif key == curses.KEY_DOWN and current_row < 3:
             current_row += 1
         elif key == curses.KEY_ENTER or key in [10, 13]:
             if current_row == 0:  # Novo Jogo
@@ -307,47 +365,9 @@ def menu_inicial(stdscr):
                 stdscr.refresh()
                 time.sleep(2)
                 sair = True
-                print("""                                                                   
-                                                                ##MM                          ..                        
-                                                                ..MM                          @@####                    
-                                                        MM++--                            ::##mm::                    
-               #####  #  #   ####                       ######MM..                            mm                                              
-                 #    #  #   #                      ##########                                          --            
-                 #    ####   ###                    ##########            ##        ##                                  
-                 #    #  #   #                  ####@@####        @@######        ######MM                            
-                 #    #  #   #                      ++##        ####mm####        ##########        ..mm####..        
-                 #    #  #   ####                   ##          ######MM####        ##########MM        ####::          
-                                            ####            ##############        ##############              ##      
-                                            ##  ####      ################        ################        ######++    
- #  #   #  #   #  #    ##    ####   ###     ######          ###########@##        ##++##########            ####      
- #  #   #  #   ## #   #  #   #      #  #    ::            @@##::############        ############::####        --::MM    
- ####   #  #   # ##   #      ###    #  #    ######        ############mm..##        ##::MM####@@######        ##  ##..  
- #  #   #  #   #  #   # ##   #      ###     ##::##        ##################        ##################          ##mm    
- #  #   #  #   #  #   #  #   #      #  #    ##          ##..########mm####  ::##  ##############..##::        @@      
- #  #    ##    #  #    ##    ####   #  #    ##  ##      ##########@@mm######  MM##--######++MM########mm        ##  ##  
-                                            ######        ##################  ####  ##################          ##@@##  
-                                            ####          ######::    ####################    --@@####++          @@::  
-      ##      #    #   #  ####    ##        ##  ##        ############++###############@@############        --##--##  
-     #  #    # #   ## ##  #      #  #       ##++##                      #################                      ########  
-     #      #   #  # # #  ###     #         @@##                        ############                          ##++    
-     # ##   #####  # # #  #        #        ##    ##              ####      ########      mm##                MM..      
-     #  #   #   #  #   #  #      #  #       ++##  ##          ####  ..##    ########    --##MM####            ######    
-      ##    #   #  #   #  ####    ##        ##@@##            ++##  ##++::######@@  @@##mm##..              ##  ##    
-                                                    ##            ##::..################  ++##@@            mm##        
-                                                ##  ##            ####  --############++  ####            ++##..##      
-                                                ######MM                ##########++####                  mm####MM      
-                                                ####MM##              ################                ##    @@        
-                                                ##@@  ####                                        --####++##--        
-                                                    ####  ++##                                    ####@@####..          
-                                                        --mm######                            ##  ##..::--              
-                                                        ######  ######                    ######  ######                
-                                                            ####--######                ######  ####                    
-                                                            MM##  @@..                ..@@::++##                      
-                                                                MM####::mmmm    ##++::######                                                                                                                                                             
-""")
-
-                time.sleep(3)
+                mostrarSimbolo()
                 sys.exit()
+                
 
 # Iniciar o menu inicial com curses
 if __name__ == "__main__":

@@ -3,6 +3,10 @@ from colorama import Fore, init
 import curses
 import sys
 import time
+import locale
+
+# Define a localidade para português do Brasil
+locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
 
 # Inicializar Colorama
 init(autoreset=True)

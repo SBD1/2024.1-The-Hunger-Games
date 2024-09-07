@@ -1,14 +1,7 @@
-import os
-import sqlalchemy
-from sqlalchemy import create_engine, Table, Column, Integer, String, MetaData, ForeignKey, Text, Float, Boolean
-from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 import curses
 import sys
-import termios
-import tty
 import time
 from mapas import mapa1, mapa2, mapa3
-import banco
 
 
 def main(stdscr):

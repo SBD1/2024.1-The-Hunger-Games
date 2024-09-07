@@ -35,6 +35,7 @@ class Game:
     def __init__(self, personagemId):
         self.personagemId = personagemId
         self.personagem = personagens.get(personagemId)
+        self.regiao_atual = 1  # Define a região inicial como 1
 
         if not self.personagem:
             raise ValueError("Personagem não encontrado!")
@@ -48,16 +49,19 @@ class Game:
             print("Personagem não está em nenhuma sala.")
 
     def mover_para_sala(self, nova_sala_id):
-        cur.execute("SELECT nomeS, descricao FROM sala WHERE idSala = %s", (nova_sala_id,))
+        cur.execute("SELECT nomeS, descricao, regiao FROM sala WHERE idSala = %s", (nova_sala_id,))
         nova_sala = cur.fetchone()
         if nova_sala:
-            self.personagem['idSala'] = nova_sala_id
-            print(Fore.BLUE + f"Você se moveu para: {nova_sala[0]} - {nova_sala[1]}")
+            if nova_sala[2] == self.regiao_atual:
+                self.personagem['idSala'] = nova_sala_id
+                print(Fore.BLUE + f"Você se moveu para: {nova_sala[0]} - {nova_sala[1]}")
+            else:
+                print("Você não pode se mover para uma sala de outra região.")
         else:
             print("Sala não encontrada.")
 
     def listar_salas_disponiveis(self):
-        cur.execute("SELECT idSala, nomeS, descricao FROM sala")
+        cur.execute("SELECT idSala, nomeS, descricao FROM sala WHERE idregiao = %s", (self.regiao_atual,))
         salas_disponiveis = cur.fetchall()
         if salas_disponiveis:
             print("Salas disponíveis para se mover:")
@@ -65,6 +69,15 @@ class Game:
                 print(f"{sala[0]}: {sala[1]} - {sala[2]}")
         else:
             print("Nenhuma sala disponível.")
+
+
+    def mudar_regiao(self):
+        nova_regiao = int(input("Digite o número da nova região (1 ou 2): "))
+        if nova_regiao in [1, 2]:
+            self.regiao_atual = nova_regiao
+            print(Fore.GREEN + f"Você mudou para a região {self.regiao_atual}.")
+        else:
+            print("Região inválida. Escolha 1 ou 2.")
 
 # Interface de Linha de Comando
 def iniciar_jogo():
@@ -77,7 +90,8 @@ def iniciar_jogo():
             print("1. Mostrar localização atual")
             print("2. Listar todas as salas disponíveis")
             print("3. Mover para uma sala")
-            print("4. Sair")
+            print("4. Mudar de região")
+            print("5. Sair")
 
             escolha = input("\nDigite o número da sua escolha: ")
 
@@ -89,6 +103,8 @@ def iniciar_jogo():
                 nova_sala_id = int(input("\nDigite o ID da sala para a qual deseja se mover: \n"))
                 jogo.mover_para_sala(nova_sala_id)
             elif escolha == "4":
+                jogo.mudar_regiao()
+            elif escolha == "5":
                 print("Saindo do jogo...")
                 break
             else:
@@ -173,6 +189,7 @@ def menu_inicial(stdscr):
                 time.sleep(2)
                 sair = True
                 mostrarSimbolo()
+                sys.exit()
 
 # Iniciar o menu inicial com curses
 if __name__ == "__main__":

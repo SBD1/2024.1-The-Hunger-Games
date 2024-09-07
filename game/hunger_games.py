@@ -209,7 +209,8 @@ def criar_conta():
             usuario_id = cur.fetchone()[0]
             conn.commit()
             print("\nUsuário criado com sucesso!")
-            escolher_personagem(usuario_id)
+            escolher_personagem(usuario_id)  # Selecionar o personagem
+            iniciar_jogo(usuario_id)  # Entrar diretamente no jogo com o novo usuário logado
             break
         
         except errors.UniqueViolation as e:
@@ -220,7 +221,6 @@ def criar_conta():
             conn.rollback() 
             print("\nErro ao criar o usuário:", str(e))
 
-    input("\nPressione Enter para voltar ao menu.")
 
 def login():
     while True:

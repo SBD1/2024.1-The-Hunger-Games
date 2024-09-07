@@ -79,38 +79,38 @@ class Game:
         else:
             print("Região inválida. Escolha 1 ou 2.")
 
-# Interface de Linha de Comando
-def iniciar_jogo():
-    personagemId = int(input("Digite o ID do seu personagem: \n"))
-    try:
-        jogo = Game(personagemId)
-
-        while True:
-            print("\nEscolha uma ação:")
-            print("1. Mostrar localização atual")
-            print("2. Listar todas as salas disponíveis")
-            print("3. Mover para uma sala")
-            print("4. Mudar de região")
-            print("5. Sair")
-
-            escolha = input("\nDigite o número da sua escolha: ")
-
-            if escolha == "1":
-                jogo.mostrar_localizacao_atual()
-            elif escolha == "2":
-                jogo.listar_salas_disponiveis()
-            elif escolha == "3":
-                nova_sala_id = int(input("\nDigite o ID da sala para a qual deseja se mover: \n"))
-                jogo.mover_para_sala(nova_sala_id)
-            elif escolha == "4":
-                jogo.mudar_regiao()
-            elif escolha == "5":
-                print("Saindo do jogo...")
-                break
-            else:
-                print("Escolha inválida. Tente novamente.")
-    except ValueError as e:
-        print(e)
+    # Interface de Linha de Comando
+    def iniciar_jogo():
+        personagemId = int(input("Digite o ID do seu personagem: \n"))
+        try:
+            jogo = Game(personagemId)
+    
+            while True:
+                print("\nEscolha uma ação:")
+                print("1. Mostrar localização atual")
+                print("2. Listar todas as salas disponíveis")
+                print("3. Mover para uma sala")
+                print("4. Mudar de região")
+                print("5. Sair")
+    
+                escolha = input("\nDigite o número da sua escolha: ")
+    
+                if escolha == "1":
+                    jogo.mostrar_localizacao_atual()
+                elif escolha == "2":
+                    jogo.listar_salas_disponiveis()
+                elif escolha == "3":
+                    nova_sala_id = int(input("\nDigite o ID da sala para a qual deseja se mover: \n"))
+                    jogo.mover_para_sala(nova_sala_id)
+                elif escolha == "4":
+                    jogo.mudar_regiao()
+                elif escolha == "5":
+                    print("Saindo do jogo...")
+                    break
+                else:
+                    print("Escolha inválida. Tente novamente.")
+        except ValueError as e:
+            print(e)
 
 # Função para exibir o menu na tela com curses
 def print_menu(stdscr, selected_row_idx):

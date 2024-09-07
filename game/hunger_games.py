@@ -17,7 +17,7 @@ conn = psycopg2.connect(
     user="postgres",
     password="20082003",
     host="localhost",
-    port="5433"
+    port="5432"
 )
 
 # Criar um cursor

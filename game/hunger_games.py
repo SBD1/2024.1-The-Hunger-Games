@@ -147,6 +147,9 @@ def mostrar_personagens_tabela(stdscr, personagens, selected_idx):
 def escolher_personagem_com_interface(stdscr, personagens):
     curses.curs_set(0)
     selected_idx = 0
+
+    # Mapeamento dos IDs dos personagens
+    personagens_ids = [1, 6, 24, 7]  # Dominic = 1, Gabrielle = 6, Leslie = 24, Icaro = 7
     
     while True:
         mostrar_personagens_tabela(stdscr, personagens, selected_idx)
@@ -157,9 +160,10 @@ def escolher_personagem_com_interface(stdscr, personagens):
         elif key == curses.KEY_RIGHT and selected_idx < len(personagens) - 1:
             selected_idx += 1
         elif key == curses.KEY_ENTER or key in [10, 13]:
-            return personagens[selected_idx][1]
+            return personagens_ids[selected_idx]
         elif key == ord('q') or key == ord('Q'):
             break
+
 
 def mostrar_personagens_opcoes_curses():
     cur.execute(
@@ -175,6 +179,7 @@ def mostrar_personagens_opcoes_curses():
     personagens = cur.fetchall()
     idPersonagem = curses.wrapper(escolher_personagem_com_interface, personagens)
     return idPersonagem
+
 
 def escolher_personagem(usuario_id):
     try:

@@ -300,10 +300,6 @@ def processar_opcao(usuario_id, opcao_id):
                 (proximo_capitulo, usuario_id)
             )
 
-            conn.commit()  # Commit para salvar as mudanças
-
-            print(f"Movimento registrado: Capítulo {proximo_capitulo}, Sala {sala_id}, Usuário {usuario_id}")
-
         else:
             # Subtrair o efeito_atributo do atributo correspondente
             cur.execute(
@@ -317,13 +313,27 @@ def processar_opcao(usuario_id, opcao_id):
                 (proximo_capitulo, usuario_id)
             )
 
-            conn.commit()  # Commit para salvar as mudanças
+        # Verificar a consequência para a opção escolhida
+        cur.execute(
+            "SELECT texto, atributo, recompensa FROM consequencia WHERE idopcao = %s",
+            (opcao_id,)
+        )
+        consequencia = cur.fetchone()
+        if consequencia:
+            texto_consequencia, atributo_consequencia, recompensa = consequencia
+            print(f"\n{texto_consequencia}\n")  # Linha em branco após o texto da consequência
 
-            print(f"Opção processada: Atributo {atributo} ajustado. Novo valor: {atributo} - {efeito_atributo}")
+            # Atualizar a tabela vitalidade com base na consequência
+            if atributo_consequencia in ['carisma', 'perspicacia', 'popularidade']:
+                cur.execute(
+                    f"UPDATE vitalidade SET {atributo_consequencia} = {atributo_consequencia} + %s WHERE idusuario = %s",
+                    (recompensa, usuario_id)
+                )
+
+        conn.commit()  # Commit para salvar as mudanças
 
     except Exception as e:
         print(f"Erro ao processar a opção: {e}")
-
 
 
 def iniciar_jogo(usuario_id):
@@ -360,7 +370,112 @@ def iniciar_jogo(usuario_id):
 
             # Passo 3: Mostrar o texto e o objetivo
             print(texto)
-            print(f"\nObjetivo: {objetivo}")
+            print("\nObjetivo: " + objetivo)  # Linha em branco antes do objetivo
+            input("\nPressione Enter para continuar...")
+
+            # Passo 4: Buscar todas as opções disponíveis para o capítulo atual
+            cur.execute(
+                "SELECT idopcao, descricao, efeito_atributo, atributo, peso FROM opcao WHERE iddecisao = %s",
+                (capitulo_atual,)
+            )
+            opcoes = cur.fetchall()
+
+            if not opcoes:
+                print("Nenhuma opção encontrada para o capítulo atual.")
+                break  # Sai do loop se não houver opções
+
+            # Passo 4a: Obter os atributos do usuário da tabela vitalidade
+            cur.execute(
+                "SELECT popularidade, agilidade, forca, nado, carisma, combate, perspicacia, furtividade, sobrevivencia, precisao FROM vitalidade WHERE idusuario = %s",
+                (usuario_id,)
+            )
+            atributos = cur.fetchone()
+            if atributos is None:
+                print("Atributos não encontrados.")
+                break  # Sai do loop se os atributos não forem encontrados
+
+            atributos_dict = dict(zip(
+                ['popularidade', 'agilidade', 'forca', 'nado', 'carisma', 'combate', 'perspicacia', 'furtividade', 'sobrevivencia', 'precisao'],
+                atributos
+            ))
+
+            # Filtrar opções com base no atributo e peso
+            opcoes_filtradas = []
+            for opcao in opcoes:
+                idopcao, descricao, efeito_atributo, atributo, peso = opcao
+                if atributos_dict.get(atributo, 0) >= peso:
+                    opcoes_filtradas.append((idopcao, descricao))
+
+            if not opcoes_filtradas:
+                print("Nenhuma opção disponível com base em seus atributos.")
+                continue  # Retorna ao início do loop se não houver opções filtradas
+
+            # Passo 4b: Mostrar as opções filtradas
+            print("\nEscolha uma das opções:")
+            for opcao in opcoes_filtradas:
+                idopcao, descricao = opcao
+                print(f"{idopcao}. {descricao}")
+
+            # Passo 5: Capturar a escolha do jogador
+            escolha = input("\nDigite o número da opção escolhida (ou 'sair' para encerrar): ")
+
+            if escolha.lower() == 'sair':
+                print("Você saiu do jogo.")
+                break  # Sai do loop se o jogador escolher sair
+
+            # Tenta converter a escolha para um número inteiro
+            try:
+                escolha = int(escolha)
+            except ValueError:
+                print("Escolha inválida. Por favor, digite um número ou 'sair'.")
+                continue  # Retorna ao início do loop se a escolha não for um número
+
+            # Verificar se a escolha está entre as opções disponíveis
+            if escolha not in [opcao[0] for opcao in opcoes_filtradas]:
+                print("Escolha inválida.")
+                continue  # Retorna ao início do loop se a escolha for inválida
+
+            # Passo 6: Processar a opção escolhida
+            processar_opcao(usuario_id, escolha)
+
+    except Exception as e:
+        print(f"Erro ao iniciar o jogo: {e}")
+
+
+def iniciar_jogo(usuario_id):
+    try:
+        while True:  # Inicia o loop do jogo
+            # Passo 1: Buscar o id do personagem e o id do capítulo a partir do id do usuário
+            cur.execute(
+                "SELECT idpersonagem, idcapitulo FROM usuario WHERE id = %s",
+                (usuario_id,)
+            )
+            result = cur.fetchone()
+            if result is None:
+                print("Usuário não encontrado.")
+                break  # Sai do loop se o usuário não for encontrado
+
+            personagem_id = result[0]
+            capitulo_atual = result[1]
+
+            if capitulo_atual is None:
+                print("O personagem ainda não foi vinculado a um capítulo.")
+                break  # Sai do loop se o personagem não estiver vinculado a um capítulo
+
+            # Passo 2: Buscar o texto e o objetivo do capítulo atual
+            cur.execute(
+                "SELECT texto, objetivo FROM capitulo WHERE idcapitulo = %s",
+                (capitulo_atual,)
+            )
+            capitulo = cur.fetchone()
+            if capitulo is None:
+                print("Capítulo não encontrado.")
+                break  # Sai do loop se o capítulo não for encontrado
+
+            texto, objetivo = capitulo
+
+            # Passo 3: Mostrar o texto e o objetivo
+            print(texto)
             input("\nPressione Enter para continuar...")
 
             # Passo 4: Buscar todas as opções disponíveis para o capítulo atual

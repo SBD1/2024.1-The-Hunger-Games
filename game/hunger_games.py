@@ -8,6 +8,7 @@ import time
 import threading
 import traceback
 from capital import mostrarSimbolo
+import pygame
 
 # Inicializar Colorama
 init(autoreset=True)
@@ -24,14 +25,26 @@ conn = psycopg2.connect(
 # Criar um cursor
 cur = conn.cursor()
 
+def TocarSom():
+    try:
+        pygame.mixer.init()
+        pygame.mixer.music.load("game\The Hunger Games - Deep in the Meadow.mp3")
+        pygame.mixer.music.set_volume(0.2)  # Volume ajustável entre 0.0 e 1.0
+        # Reproduz a música indefinidamente
+        pygame.mixer.music.play()
+    except pygame.error as e:
+        print(f"Erro ao tocar a música: {e}")
+    except Exception as e:
+        print(f"Erro inesperado: {e}")
+
+
 def display_stats_curses(stdscr, stats):
-    # Inicializa cores e configura o display de estatísticas
     curses.curs_set(0)
     height, width = stdscr.getmaxyx()
 
     # Calcula a posição inicial da janela no canto inferior direito
-    altura_max = len(stats) + 4  # Adiciona espaço para bordas
-    largura_max = max(len(stat) for stat in stats) + 4  # Adiciona espaço para bordas
+    altura_max = len(stats) + 4
+    largura_max = max(len(stat) for stat in stats) + 4
     pos_y = max(0, height - altura_max)
     pos_x = max(0, width - largura_max)
 
@@ -44,17 +57,18 @@ def display_stats_curses(stdscr, stats):
         for idx, stat in enumerate(stats):
             stat_win.addstr(idx + 1, 2, stat)
         stat_win.refresh()
-        time.sleep(1)
+        time.sleep(1)  # Atualiza a cada 1 segundo
 
-def iniciar_display_curses(stats):
-    curses.wrapper(display_stats_curses, stats)
-
-# Função para iniciar o display de estatísticas em paralelo
+# Função para iniciar o display de estatísticas em uma nova thread
 def iniciar_display(stats):
-    display_thread = threading.Thread(target=iniciar_display_curses, args=(stats,))
-    display_thread.daemon = True
-    display_thread.start()
-    return display_thread  # Retorne a thread para controle
+    # Função alvo para rodar curses na thread principal
+    def curses_thread(stdscr):
+        display_stats_curses(stdscr, stats)
+
+    # Cria uma thread para rodar a interface curses
+    display_thread = threading.Thread(target=curses.wrapper, args=(curses_thread,))
+    display_thread.daemon = True  # Permite que a thread seja encerrada com o programa principal
+    display_thread.start()  # Inicia a thread
 
 # Funções do jogo
 class Game:
@@ -73,7 +87,7 @@ class Game:
                 if stats:
                     return [f"Popularidade: {stats[0]}",
                             f"Agilidade: {stats[1]}",
-                            f"Forca: {stats[2]}",
+                            f"Força: {stats[2]}",
                             f"Nado: {stats[3]}",
                             f"Carisma: {stats[4]}",
                             f"Combate: {stats[5]}",
@@ -97,7 +111,7 @@ class Game:
         # Após garantir que o personagem existe, busque as estatísticas
         self.stats = Game.fetch_stats_from_db(self.personagemId)
 
-        # Iniciar o display com as estatísticas
+        # Iniciar o display com as estatísticas em uma thread
         iniciar_display(self.stats)
 
     def _obter_personagem(self):
@@ -519,112 +533,6 @@ def iniciar_jogo(usuario_id):
     except Exception as e:
         print(f"Erro ao iniciar o jogo: {e}")
 
-
-def iniciar_jogo(usuario_id):
-    try:
-        while True:  # Inicia o loop do jogo
-            # Passo 1: Buscar o id do personagem e o id do capítulo a partir do id do usuário
-            cur.execute(
-                "SELECT idpersonagem, idcapitulo FROM usuario WHERE id = %s",
-                (usuario_id,)
-            )
-            result = cur.fetchone()
-            if result is None:
-                print("Usuário não encontrado.")
-                break  # Sai do loop se o usuário não for encontrado
-
-            personagem_id = result[0]
-            capitulo_atual = result[1]
-
-            if capitulo_atual is None:
-                print("O personagem ainda não foi vinculado a um capítulo.")
-                break  # Sai do loop se o personagem não estiver vinculado a um capítulo
-
-            # Passo 2: Buscar o texto e o objetivo do capítulo atual
-            cur.execute(
-                "SELECT texto, objetivo FROM capitulo WHERE idcapitulo = %s",
-                (capitulo_atual,)
-            )
-            capitulo = cur.fetchone()
-            if capitulo is None:
-                print("Capítulo não encontrado.")
-                break  # Sai do loop se o capítulo não for encontrado
-
-            texto, objetivo = capitulo
-
-            # Passo 3: Mostrar o texto e o objetivo
-            print(texto)
-            input("\nPressione Enter para continuar...")
-
-            # Passo 4: Buscar todas as opções disponíveis para o capítulo atual
-            cur.execute(
-                "SELECT idopcao, descricao, efeito_atributo, atributo, peso FROM opcao WHERE iddecisao = %s",
-                (capitulo_atual,)
-            )
-            opcoes = cur.fetchall()
-
-            if not opcoes:
-                print("Nenhuma opção encontrada para o capítulo atual.")
-                break  # Sai do loop se não houver opções
-
-            # Passo 4a: Obter os atributos do usuário da tabela vitalidade
-            cur.execute(
-                "SELECT popularidade, agilidade, forca, nado, carisma, combate, perspicacia, furtividade, sobrevivencia, precisao FROM vitalidade WHERE idusuario = %s",
-                (usuario_id,)
-            )
-            atributos = cur.fetchone()
-            if atributos is None:
-                print("Atributos não encontrados.")
-                break  # Sai do loop se os atributos não forem encontrados
-
-            atributos_dict = dict(zip(
-                ['popularidade', 'agilidade', 'forca', 'nado', 'carisma', 'combate', 'perspicacia', 'furtividade', 'sobrevivencia', 'precisao'],
-                atributos
-            ))
-
-            # Filtrar opções com base no atributo e peso
-            opcoes_filtradas = []
-            for opcao in opcoes:
-                idopcao, descricao, efeito_atributo, atributo, peso = opcao
-                if atributos_dict.get(atributo, 0) >= peso:
-                    opcoes_filtradas.append((idopcao, descricao))
-
-            if not opcoes_filtradas:
-                print("Nenhuma opção disponível com base em seus atributos.")
-                continue  # Retorna ao início do loop se não houver opções filtradas
-
-            # Passo 4b: Mostrar as opções filtradas
-            print("\nEscolha uma das opções:")
-            for opcao in opcoes_filtradas:
-                idopcao, descricao = opcao
-                print(f"{idopcao}. {descricao}")
-
-            # Passo 5: Capturar a escolha do jogador
-            escolha = input("\nDigite o número da opção escolhida (ou 'sair' para encerrar): ")
-
-            if escolha.lower() == 'sair':
-                print("Você saiu do jogo.")
-                break  # Sai do loop se o jogador escolher sair
-
-            # Tenta converter a escolha para um número inteiro
-            try:
-                escolha = int(escolha)
-            except ValueError:
-                print("Escolha inválida. Por favor, digite um número ou 'sair'.")
-                continue  # Retorna ao início do loop se a escolha não for um número
-
-            # Verificar se a escolha está entre as opções disponíveis
-            if escolha not in [opcao[0] for opcao in opcoes_filtradas]:
-                print("Escolha inválida.")
-                continue  # Retorna ao início do loop se a escolha for inválida
-
-            # Passo 6: Processar a opção escolhida
-            processar_opcao(usuario_id, escolha)
-
-    except Exception as e:
-        print(f"Erro ao iniciar o jogo: {e}")
-
-
 # Função para exibir o menu na tela com curses
 def print_menu(stdscr, selected_row_idx):
     stdscr.clear()
@@ -669,6 +577,7 @@ def menu_inicial(stdscr):
     curses.curs_set(0)
     current_row = 0
     sair = False
+    TocarSom()
 
     while not sair:
         print_menu(stdscr, current_row)

@@ -5,6 +5,8 @@ import curses
 import sys
 import os
 import time
+import threading
+import traceback
 from capital import mostrarSimbolo
 
 # Inicializar Colorama
@@ -16,20 +18,87 @@ conn = psycopg2.connect(
     user="postgres",
     password="20082003",
     host="localhost",
-    port="5432"
+    port="5433"
 )
 
 # Criar um cursor
 cur = conn.cursor()
 
+def display_stats_curses(stdscr, stats):
+    # Inicializa cores e configura o display de estatísticas
+    curses.curs_set(0)
+    height, width = stdscr.getmaxyx()
+
+    # Calcula a posição inicial da janela no canto inferior direito
+    altura_max = len(stats) + 4  # Adiciona espaço para bordas
+    largura_max = max(len(stat) for stat in stats) + 4  # Adiciona espaço para bordas
+    pos_y = max(0, height - altura_max)
+    pos_x = max(0, width - largura_max)
+
+    # Cria a janela para exibição das estatísticas
+    stat_win = curses.newwin(altura_max, largura_max, pos_y, pos_x)
+
+    while True:
+        stat_win.clear()
+        stat_win.border()
+        for idx, stat in enumerate(stats):
+            stat_win.addstr(idx + 1, 2, stat)
+        stat_win.refresh()
+        time.sleep(1)
+
+def iniciar_display_curses(stats):
+    curses.wrapper(display_stats_curses, stats)
+
+# Função para iniciar o display de estatísticas em paralelo
+def iniciar_display(stats):
+    display_thread = threading.Thread(target=iniciar_display_curses, args=(stats,))
+    display_thread.daemon = True
+    display_thread.start()
+    return display_thread  # Retorne a thread para controle
+
 # Funções do jogo
 class Game:
+
+    @staticmethod
+    def fetch_stats_from_db(personagemId):
+        try:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT popularidade, agilidade, forca, nado, carisma, combate, 
+                        perspicacia, furtividade, sobrevivencia, precisao 
+                    FROM distrito 
+                    WHERE idPersonagem = %s
+                """, (personagemId,))
+                stats = cur.fetchone()
+                if stats:
+                    return [f"Popularidade: {stats[0]}",
+                            f"Agilidade: {stats[1]}",
+                            f"Forca: {stats[2]}",
+                            f"Nado: {stats[3]}",
+                            f"Carisma: {stats[4]}",
+                            f"Combate: {stats[5]}",
+                            f"Perspicácia: {stats[6]}",
+                            f"Furtividade: {stats[7]}",
+                            f"Sobrevivência: {stats[8]}",
+                            f"Precisão: {stats[9]}"]
+                return ["Sem estatísticas"]
+        except Exception as e:
+            print(f"Erro ao buscar estatísticas: {e}")
+            return ["Erro ao carregar estatísticas"]
+        
     def __init__(self, personagemId):
         self.personagemId = personagemId
         self.personagem = self._obter_personagem()
 
+        # Verificar se o personagem foi encontrado antes de prosseguir
         if not self.personagem:
             raise ValueError("Personagem não encontrado!")
+
+        # Após garantir que o personagem existe, busque as estatísticas
+        self.stats = Game.fetch_stats_from_db(self.personagemId)
+
+        # Iniciar o display com as estatísticas
+        iniciar_display(self.stats)
 
     def _obter_personagem(self):
         cur.execute("SELECT idSala FROM personagem WHERE idPersonagem = %s", (self.personagemId,))
@@ -148,17 +217,19 @@ def mostrar_personagens_tabela(stdscr, personagens, selected_idx):
 def escolher_personagem_com_interface(stdscr, personagens):
     curses.curs_set(0)
     selected_idx = 0
-    
+
+    # Mapeamento dos IDs dos personagens
+    personagens_ids = [1, 6, 24, 7]  # Dominic = 1, Gabrielle = 6, Leslie = 24, Icaro = 7
+
     while True:
         mostrar_personagens_tabela(stdscr, personagens, selected_idx)
         key = stdscr.getch()
-
         if key == curses.KEY_LEFT and selected_idx > 0:
             selected_idx -= 1
         elif key == curses.KEY_RIGHT and selected_idx < len(personagens) - 1:
             selected_idx += 1
         elif key == curses.KEY_ENTER or key in [10, 13]:
-            return personagens[selected_idx][1]
+            return personagens_ids[selected_idx]
         elif key == ord('q') or key == ord('Q'):
             break
 
@@ -203,6 +274,7 @@ def criar_conta():
         senha = input("Digite a senha: ")
 
         try:
+            # Executa a inserção no banco de dados
             cur.execute(
                 sql.SQL("INSERT INTO usuario (nome, senha) VALUES (%s, %s) RETURNING id"),
                 (nome, senha)
@@ -210,17 +282,23 @@ def criar_conta():
             usuario_id = cur.fetchone()[0]
             conn.commit()
             print("\nUsuário criado com sucesso!")
-            escolher_personagem(usuario_id)  # Selecionar o personagem
-            iniciar_jogo(usuario_id)  # Entrar diretamente no jogo com o novo usuário logado
+            escolher_personagem(usuario_id)
+            iniciar_jogo(usuario_id)
+            limpar_tela()
             break
-        
+
         except errors.UniqueViolation as e:
-            conn.rollback() 
+            conn.rollback()  # Garante que o rollback é feito após a violação
             print(f"\nErro: O nome de usuário '{nome}' já existe no sistema. Escolha outro nome.")
-        
+
         except errors.RaiseException as e:
-            conn.rollback() 
+            conn.rollback()  # Garante que o rollback é feito após qualquer outra exceção específica
             print("\nErro ao criar o usuário:", str(e))
+        
+        except Exception as e:
+            conn.rollback()  # Rollback em caso de outros erros não esperados
+            print("\nErro inesperado ao criar o usuário:", str(e))
+            traceback.print_exc()
 
 
 def login():
@@ -435,7 +513,7 @@ def iniciar_jogo(usuario_id):
 # Função para exibir o menu na tela com curses
 def print_menu(stdscr, selected_row_idx):
     stdscr.clear()
-    menu = ["Novo jogo", "Retomar Jogo", "Controles", "Sair"]
+    menu = ["Novo jogo", "Retomar Jogo", "Sobre o Jogo", "Sair"]
 
     # Adiciona a arte ASCII e o título
     ascii_art1 = """
@@ -504,9 +582,21 @@ def menu_inicial(stdscr):
                 login()  # Chamando a função de jogo
                 curses.wrapper(menu_inicial)  # Retorna ao menu após o jogo
 
-            elif current_row == 2:  # Controles
+            elif current_row == 2:  # Sobre
                 stdscr.clear()
-                stdscr.addstr(0, 0, "W - Move-se para cima\nA - Move-se para esquerda\nS - Move-se para baixo\nD - Move-se para direita\nQ - Retorna ao menu")
+                curses.start_color()
+                curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)  # Define o par de cores para verde
+
+                # Exibe o texto formatado em verde
+                stdscr.addstr(0, 0, (
+                    "The Hunger Games é um RPG imersivo ambientado em um universo distópico.\n\n"
+                    "Neste jogo, você entra em um mundo de competição feroz e sobrevivência, onde cada decisão pode "
+                    "ser a diferença entre a vida e a morte.\nVocê assume o papel de um tributo, competindo em desafios "
+                    "e batalhas enquanto explora um ambiente rico e perigoso.\n Forme alianças com companheiros, enfrente "
+                    "bestantes e lute contra tributos rivais. Com habilidades únicas baseadas em seu distrito e a capacidade "
+                    "de adaptar suas estratégias, você deve usar todos os recursos disponíveis para sair vitorioso."
+                ), curses.color_pair(1))  # Aplica o par de cores
+
                 stdscr.refresh()
                 stdscr.getch()
                 current_row = 0

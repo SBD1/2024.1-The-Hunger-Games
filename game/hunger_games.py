@@ -3,6 +3,7 @@ from psycopg2 import sql, errors
 from colorama import Fore, init
 import curses
 import sys
+import os
 import time
 from capital import mostrarSimbolo
 
@@ -15,7 +16,7 @@ conn = psycopg2.connect(
     user="postgres",
     password="20082003",
     host="localhost",
-    port="5433"
+    port="5432"
 )
 
 # Criar um cursor
@@ -147,9 +148,6 @@ def mostrar_personagens_tabela(stdscr, personagens, selected_idx):
 def escolher_personagem_com_interface(stdscr, personagens):
     curses.curs_set(0)
     selected_idx = 0
-
-    # Mapeamento dos IDs dos personagens
-    personagens_ids = [1, 6, 24, 7]  # Dominic = 1, Gabrielle = 6, Leslie = 24, Icaro = 7
     
     while True:
         mostrar_personagens_tabela(stdscr, personagens, selected_idx)
@@ -160,10 +158,9 @@ def escolher_personagem_com_interface(stdscr, personagens):
         elif key == curses.KEY_RIGHT and selected_idx < len(personagens) - 1:
             selected_idx += 1
         elif key == curses.KEY_ENTER or key in [10, 13]:
-            return personagens_ids[selected_idx]
+            return personagens[selected_idx][1]
         elif key == ord('q') or key == ord('Q'):
             break
-
 
 def mostrar_personagens_opcoes_curses():
     cur.execute(
@@ -179,7 +176,6 @@ def mostrar_personagens_opcoes_curses():
     personagens = cur.fetchall()
     idPersonagem = curses.wrapper(escolher_personagem_com_interface, personagens)
     return idPersonagem
-
 
 def escolher_personagem(usuario_id):
     try:
@@ -248,42 +244,139 @@ def login():
         except Exception as e:
             print("\nErro ao tentar fazer login:", str(e))
 
-def iniciar_jogo(usuario_id):
+def limpar_tela():
+    # Verifica o sistema operacional e executa o comando apropriado
+    if os.name == 'nt':  # Windows
+        os.system('cls')
+    else:  # Linux/macOS
+        os.system('clear')
+
+
+def processar_opcao(usuario_id, opcao_id):
     try:
+        # Passo 1: Obter o id do personagem e o id do capítulo atual
         cur.execute(
-            "SELECT idPersonagem FROM usuario WHERE id = %s",
+            "SELECT idpersonagem, idcapitulo FROM usuario WHERE id = %s",
             (usuario_id,)
         )
-        personagem_id = cur.fetchone()[0]
+        result = cur.fetchone()
+        if result is None:
+            print("Usuário não encontrado.")
+            return
 
-        jogo = Game(personagem_id)
+        personagem_id = result[0]
+        capitulo_atual = result[1]
 
-        while True:
-            print("\nEscolha uma ação:")
-            print("1. Mostrar localização atual")
-            print("2. Listar todas as salas disponíveis")
-            print("3. Mover para uma sala")
-            print("4. Sair")
+        # Passo 2: Obter a opção escolhida
+        cur.execute(
+            "SELECT efeito_atributo, proximo_capitulo, atributo FROM opcao WHERE idopcao = %s",
+            (opcao_id,)
+        )
+        opcao = cur.fetchone()
+        if opcao is None:
+            print("Opção não encontrada.")
+            return
 
-            escolha = input("\nDigite o número da sua escolha: ")
+        efeito_atributo, proximo_capitulo, atributo = opcao
 
-            if escolha == "1":
-                jogo.mostrar_localizacao_atual()
-            elif escolha == "2":
-                jogo.listar_salas_disponiveis()
-            elif escolha == "3":
-                nova_sala_id = int(input("\nDigite o ID da sala para a qual deseja se mover: \n"))
-                jogo.mover_para_sala(nova_sala_id)
-            elif escolha == "4":
-                print("Saindo do jogo...")
-                break
-            else:
-                print("Escolha inválida. Tente novamente.")
-    except ValueError as e:
-        print(e)
-   
+        # Passo 3: Verificar o atributo e realizar a movimentação
+        if atributo == 'idsala':
+            # Obter o id da sala associado à opção escolhida
+            cur.execute(
+                "SELECT efeito_atributo FROM opcao WHERE idopcao = %s",
+                (opcao_id,)
+            )
+            sala_id = cur.fetchone()[0]
+
+            # Inserir a nova localização na tabela 'localizacao'
+            cur.execute(
+                "INSERT INTO localizacao (idcapitulo, idpersonagem, idsala, idusuario) VALUES (%s, %s, %s, %s)",
+                (proximo_capitulo, personagem_id, sala_id, usuario_id)
+            )
+
+            # Atualizar o idcapitulo do usuário na tabela 'usuario'
+            cur.execute(
+                "UPDATE usuario SET idcapitulo = %s WHERE id = %s",
+                (proximo_capitulo, usuario_id)
+            )
+
+            conn.commit()  # Commit para salvar as mudanças
+
+            print(f"Movimento registrado: Capítulo {proximo_capitulo}, Sala {sala_id}, Usuário {usuario_id}")
+
+        # Outras ações baseadas na opção podem ser adicionadas aqui
+
     except Exception as e:
-        print("\nErro ao iniciar o jogo:", str(e))
+        print(f"Erro ao processar a opção: {e}")
+
+
+def iniciar_jogo(usuario_id):
+    try:
+        # Passo 1: Buscar o id do personagem e o id do capítulo a partir do id do usuário
+        cur.execute(
+            "SELECT idpersonagem, idcapitulo FROM usuario WHERE id = %s",
+            (usuario_id,)
+        )
+        result = cur.fetchone()
+        if result is None:
+            print("Usuário não encontrado.")
+            return
+
+        personagem_id = result[0]
+        capitulo_atual = result[1]
+
+        if capitulo_atual is None:
+            print("O personagem ainda não foi vinculado a um capítulo.")
+            return
+
+        # Passo 2: Buscar o texto e o objetivo do capítulo atual
+        cur.execute(
+            "SELECT texto, objetivo FROM capitulo WHERE idcapitulo = %s",
+            (capitulo_atual,)
+        )
+        capitulo = cur.fetchone()
+        if capitulo is None:
+            print("Capítulo não encontrado.")
+            return
+
+        texto, objetivo = capitulo
+
+        # Passo 3: Mostrar o texto e o objetivo
+        print(texto)
+        print(f"\nObjetivo: {objetivo}")
+        input("\nPressione Enter para continuar...")
+
+        # Passo 4: Buscar e mostrar todas as opções disponíveis para o capítulo atual
+        cur.execute(
+            "SELECT idopcao, descricao FROM opcao WHERE iddecisao = %s",
+            (capitulo_atual,)
+        )
+        opcoes = cur.fetchall()  # Use fetchall() para obter todas as opções
+
+        if not opcoes:
+            print("Nenhuma opção encontrada para o capítulo atual.")
+            return
+
+        print("\nEscolha uma das opções:")
+        for opcao in opcoes:
+            idopcao, descricao = opcao
+            print(f"{idopcao}. {descricao}")
+
+        # Passo 5: Capturar a escolha do jogador
+        escolha = int(input("\nDigite o número da opção escolhida: "))
+
+        # Verificar se a escolha está entre as opções disponíveis
+        if escolha not in [opcao[0] for opcao in opcoes]:
+            print("Escolha inválida.")
+            return
+
+        # Passo 6: Processar a opção escolhida
+        processar_opcao(usuario_id, escolha)
+
+    except Exception as e:
+        print(f"Erro ao iniciar o jogo: {e}")
+
+
 
 # Função para exibir o menu na tela com curses
 def print_menu(stdscr, selected_row_idx):

@@ -5,7 +5,7 @@
 -- Dumped from database version 15.8
 -- Dumped by pg_dump version 16.4
 
--- Started on 2024-09-07 14:51:49
+-- Started on 2024-09-07 23:59:31
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -19,7 +19,7 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- TOC entry 278 (class 1255 OID 16612)
+-- TOC entry 283 (class 1255 OID 16612)
 -- Name: adicionar_item_ao_inventario(integer, integer); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -68,7 +68,53 @@ $$;
 ALTER FUNCTION public.adicionar_item_ao_inventario(p_idpersonagem integer, p_iditem integer) OWNER TO postgres;
 
 --
--- TOC entry 266 (class 1255 OID 16611)
+-- TOC entry 284 (class 1255 OID 17033)
+-- Name: atualizar_capitulo_usuario(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.atualizar_capitulo_usuario() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    -- Atualiza o idcapitulo na tabela usuario
+    UPDATE usuario
+    SET idcapitulo = NEW.idcapitulo
+    WHERE id = NEW.idusuario;
+
+    RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION public.atualizar_capitulo_usuario() OWNER TO postgres;
+
+--
+-- TOC entry 267 (class 1255 OID 16998)
+-- Name: atualizar_idcapitulo(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.atualizar_idcapitulo() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    -- Atualizar o idcapitulo do usu rio com base no idpersonagem
+    UPDATE usuario
+    SET idcapitulo = (
+        SELECT idcapitulo_inicial
+        FROM historia
+        WHERE idpersonagem = NEW.idpersonagem
+    )
+    WHERE id = NEW.id;
+
+    RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION public.atualizar_idcapitulo() OWNER TO postgres;
+
+--
+-- TOC entry 268 (class 1255 OID 16611)
 -- Name: criar_inventario(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -88,7 +134,74 @@ $$;
 ALTER FUNCTION public.criar_inventario() OWNER TO postgres;
 
 --
--- TOC entry 265 (class 1255 OID 16895)
+-- TOC entry 269 (class 1255 OID 17025)
+-- Name: excluir_localizacao_anterior(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.excluir_localizacao_anterior() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    -- Exclui a linha da tabela localizacao para o mesmo idusuario, mas com idcapitulo diferente do novo
+    DELETE FROM localizacao
+    WHERE idusuario = NEW.idusuario
+      AND idcapitulo <> NEW.idcapitulo;
+
+    RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION public.excluir_localizacao_anterior() OWNER TO postgres;
+
+--
+-- TOC entry 270 (class 1255 OID 17043)
+-- Name: inserir_localizacao(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.inserir_localizacao() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    -- Verifica se os valores necess rios estÆo presentes
+    IF NEW.idcapitulo IS NOT NULL AND NEW.idpersonagem IS NOT NULL THEN
+        -- Insere uma nova linha na tabela localizacao com a sala 1
+        INSERT INTO localizacao (idcapitulo, idpersonagem, idsala, idusuario)
+        VALUES (NEW.idcapitulo, NEW.idpersonagem, 1, NEW.id);
+    END IF;
+
+    RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION public.inserir_localizacao() OWNER TO postgres;
+
+--
+-- TOC entry 271 (class 1255 OID 17045)
+-- Name: inserir_localizacao_sala_1(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.inserir_localizacao_sala_1() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    -- Verifica se o idpersonagem foi alterado (isto ‚, nÆo ‚ NULL)
+    IF NEW.idpersonagem IS NOT NULL AND OLD.idpersonagem IS DISTINCT FROM NEW.idpersonagem THEN
+        -- Insere uma nova linha na tabela localizacao
+        INSERT INTO localizacao (idcapitulo, idpersonagem, idsala, idusuario)
+        VALUES (NEW.idcapitulo, NEW.idpersonagem, 1, NEW.id);
+    END IF;
+
+    RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION public.inserir_localizacao_sala_1() OWNER TO postgres;
+
+--
+-- TOC entry 266 (class 1255 OID 16895)
 -- Name: verificar_nome_unico(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -140,7 +253,7 @@ CREATE SEQUENCE public.animal_idanimal_seq
 ALTER SEQUENCE public.animal_idanimal_seq OWNER TO postgres;
 
 --
--- TOC entry 3627 (class 0 OID 0)
+-- TOC entry 3638 (class 0 OID 0)
 -- Dependencies: 245
 -- Name: animal_idanimal_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -180,7 +293,7 @@ CREATE SEQUENCE public.arma_idarma_seq
 ALTER SEQUENCE public.arma_idarma_seq OWNER TO postgres;
 
 --
--- TOC entry 3628 (class 0 OID 0)
+-- TOC entry 3639 (class 0 OID 0)
 -- Dependencies: 224
 -- Name: arma_idarma_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -221,7 +334,7 @@ CREATE SEQUENCE public.bestante_idbestante_seq
 ALTER SEQUENCE public.bestante_idbestante_seq OWNER TO postgres;
 
 --
--- TOC entry 3629 (class 0 OID 0)
+-- TOC entry 3640 (class 0 OID 0)
 -- Dependencies: 247
 -- Name: bestante_idbestante_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -237,8 +350,7 @@ ALTER SEQUENCE public.bestante_idbestante_seq OWNED BY public.bestante.idbestant
 CREATE TABLE public.capitulo (
     idcapitulo integer NOT NULL,
     texto text NOT NULL,
-    objetivo text,
-    iddecisao integer
+    objetivo text
 );
 
 
@@ -261,7 +373,7 @@ CREATE SEQUENCE public.capitulo_idcapitulo_seq
 ALTER SEQUENCE public.capitulo_idcapitulo_seq OWNER TO postgres;
 
 --
--- TOC entry 3630 (class 0 OID 0)
+-- TOC entry 3641 (class 0 OID 0)
 -- Dependencies: 255
 -- Name: capitulo_idcapitulo_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -300,7 +412,7 @@ CREATE SEQUENCE public.compartimento_idcompartimento_seq
 ALTER SEQUENCE public.compartimento_idcompartimento_seq OWNER TO postgres;
 
 --
--- TOC entry 3631 (class 0 OID 0)
+-- TOC entry 3642 (class 0 OID 0)
 -- Dependencies: 230
 -- Name: compartimento_idcompartimento_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -338,7 +450,7 @@ CREATE SEQUENCE public.construtor_idconstrutor_seq
 ALTER SEQUENCE public.construtor_idconstrutor_seq OWNER TO postgres;
 
 --
--- TOC entry 3632 (class 0 OID 0)
+-- TOC entry 3643 (class 0 OID 0)
 -- Dependencies: 234
 -- Name: construtor_idconstrutor_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -381,7 +493,7 @@ CREATE SEQUENCE public.consumivel_idconsumivel_seq
 ALTER SEQUENCE public.consumivel_idconsumivel_seq OWNER TO postgres;
 
 --
--- TOC entry 3633 (class 0 OID 0)
+-- TOC entry 3644 (class 0 OID 0)
 -- Dependencies: 226
 -- Name: consumivel_idconsumivel_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -419,7 +531,7 @@ CREATE SEQUENCE public.decisao_iddecisao_seq
 ALTER SEQUENCE public.decisao_iddecisao_seq OWNER TO postgres;
 
 --
--- TOC entry 3634 (class 0 OID 0)
+-- TOC entry 3645 (class 0 OID 0)
 -- Dependencies: 259
 -- Name: decisao_iddecisao_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -468,7 +580,7 @@ CREATE SEQUENCE public.distrito_iddistrito_seq
 ALTER SEQUENCE public.distrito_iddistrito_seq OWNER TO postgres;
 
 --
--- TOC entry 3635 (class 0 OID 0)
+-- TOC entry 3646 (class 0 OID 0)
 -- Dependencies: 240
 -- Name: distrito_iddistrito_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -507,7 +619,7 @@ CREATE SEQUENCE public.historia_idhistoria_seq
 ALTER SEQUENCE public.historia_idhistoria_seq OWNER TO postgres;
 
 --
--- TOC entry 3636 (class 0 OID 0)
+-- TOC entry 3647 (class 0 OID 0)
 -- Dependencies: 257
 -- Name: historia_idhistoria_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -547,7 +659,7 @@ CREATE SEQUENCE public.inventario_idinventario_seq
 ALTER SEQUENCE public.inventario_idinventario_seq OWNER TO postgres;
 
 --
--- TOC entry 3637 (class 0 OID 0)
+-- TOC entry 3648 (class 0 OID 0)
 -- Dependencies: 242
 -- Name: inventario_idinventario_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -585,7 +697,7 @@ CREATE SEQUENCE public.item_iditem_seq
 ALTER SEQUENCE public.item_iditem_seq OWNER TO postgres;
 
 --
--- TOC entry 3638 (class 0 OID 0)
+-- TOC entry 3649 (class 0 OID 0)
 -- Dependencies: 220
 -- Name: item_iditem_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -624,7 +736,7 @@ CREATE SEQUENCE public.item_inventario_iditeminventario_seq
 ALTER SEQUENCE public.item_inventario_iditeminventario_seq OWNER TO postgres;
 
 --
--- TOC entry 3639 (class 0 OID 0)
+-- TOC entry 3650 (class 0 OID 0)
 -- Dependencies: 251
 -- Name: item_inventario_iditeminventario_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -663,13 +775,28 @@ CREATE SEQUENCE public.legivel_idlegivel_seq
 ALTER SEQUENCE public.legivel_idlegivel_seq OWNER TO postgres;
 
 --
--- TOC entry 3640 (class 0 OID 0)
+-- TOC entry 3651 (class 0 OID 0)
 -- Dependencies: 228
 -- Name: legivel_idlegivel_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.legivel_idlegivel_seq OWNED BY public.legivel.idlegivel;
 
+
+--
+-- TOC entry 265 (class 1259 OID 17000)
+-- Name: localizacao; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.localizacao (
+    idcapitulo integer NOT NULL,
+    idpersonagem integer NOT NULL,
+    idsala integer,
+    idusuario integer
+);
+
+
+ALTER TABLE public.localizacao OWNER TO postgres;
 
 --
 -- TOC entry 215 (class 1259 OID 16400)
@@ -702,7 +829,7 @@ CREATE SEQUENCE public.mapa_idmapa_seq
 ALTER SEQUENCE public.mapa_idmapa_seq OWNER TO postgres;
 
 --
--- TOC entry 3641 (class 0 OID 0)
+-- TOC entry 3652 (class 0 OID 0)
 -- Dependencies: 214
 -- Name: mapa_idmapa_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -745,7 +872,7 @@ CREATE SEQUENCE public.opcao_idopcao_seq
 ALTER SEQUENCE public.opcao_idopcao_seq OWNER TO postgres;
 
 --
--- TOC entry 3642 (class 0 OID 0)
+-- TOC entry 3653 (class 0 OID 0)
 -- Dependencies: 261
 -- Name: opcao_idopcao_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -760,7 +887,6 @@ ALTER SEQUENCE public.opcao_idopcao_seq OWNED BY public.opcao.idopcao;
 
 CREATE TABLE public.personagem (
     idpersonagem integer NOT NULL,
-    idsala integer DEFAULT 1,
     tipop character varying(25),
     nomep character varying(50) NOT NULL,
     hpmax integer DEFAULT 100,
@@ -802,7 +928,7 @@ CREATE SEQUENCE public.personagem_capitulo_id_seq
 ALTER SEQUENCE public.personagem_capitulo_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3643 (class 0 OID 0)
+-- TOC entry 3654 (class 0 OID 0)
 -- Dependencies: 263
 -- Name: personagem_capitulo_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -827,7 +953,7 @@ CREATE SEQUENCE public.personagem_idpersonagem_seq
 ALTER SEQUENCE public.personagem_idpersonagem_seq OWNER TO postgres;
 
 --
--- TOC entry 3644 (class 0 OID 0)
+-- TOC entry 3655 (class 0 OID 0)
 -- Dependencies: 236
 -- Name: personagem_idpersonagem_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -881,7 +1007,7 @@ CREATE SEQUENCE public.regiao_idregiao_seq
 ALTER SEQUENCE public.regiao_idregiao_seq OWNER TO postgres;
 
 --
--- TOC entry 3645 (class 0 OID 0)
+-- TOC entry 3656 (class 0 OID 0)
 -- Dependencies: 216
 -- Name: regiao_idregiao_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -921,7 +1047,7 @@ CREATE SEQUENCE public.sala_idsala_seq
 ALTER SEQUENCE public.sala_idsala_seq OWNER TO postgres;
 
 --
--- TOC entry 3646 (class 0 OID 0)
+-- TOC entry 3657 (class 0 OID 0)
 -- Dependencies: 218
 -- Name: sala_idsala_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -961,7 +1087,7 @@ CREATE SEQUENCE public.tributo_idtributo_seq
 ALTER SEQUENCE public.tributo_idtributo_seq OWNER TO postgres;
 
 --
--- TOC entry 3647 (class 0 OID 0)
+-- TOC entry 3658 (class 0 OID 0)
 -- Dependencies: 249
 -- Name: tributo_idtributo_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -1002,7 +1128,7 @@ CREATE SEQUENCE public.usuario_id_seq
 ALTER SEQUENCE public.usuario_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3648 (class 0 OID 0)
+-- TOC entry 3659 (class 0 OID 0)
 -- Dependencies: 253
 -- Name: usuario_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -1045,7 +1171,7 @@ CREATE SEQUENCE public.utilidade_idutilidade_seq
 ALTER SEQUENCE public.utilidade_idutilidade_seq OWNER TO postgres;
 
 --
--- TOC entry 3649 (class 0 OID 0)
+-- TOC entry 3660 (class 0 OID 0)
 -- Dependencies: 232
 -- Name: utilidade_idutilidade_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -1085,7 +1211,7 @@ CREATE SEQUENCE public.vestimenta_idvestimenta_seq
 ALTER SEQUENCE public.vestimenta_idvestimenta_seq OWNER TO postgres;
 
 --
--- TOC entry 3650 (class 0 OID 0)
+-- TOC entry 3661 (class 0 OID 0)
 -- Dependencies: 222
 -- Name: vestimenta_idvestimenta_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -1128,7 +1254,7 @@ CREATE SEQUENCE public.vitalidade_idvitalidade_seq
 ALTER SEQUENCE public.vitalidade_idvitalidade_seq OWNER TO postgres;
 
 --
--- TOC entry 3651 (class 0 OID 0)
+-- TOC entry 3662 (class 0 OID 0)
 -- Dependencies: 238
 -- Name: vitalidade_idvitalidade_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -1137,7 +1263,7 @@ ALTER SEQUENCE public.vitalidade_idvitalidade_seq OWNED BY public.vitalidade.idv
 
 
 --
--- TOC entry 3336 (class 2604 OID 16700)
+-- TOC entry 3344 (class 2604 OID 16700)
 -- Name: animal idanimal; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1145,7 +1271,7 @@ ALTER TABLE ONLY public.animal ALTER COLUMN idanimal SET DEFAULT nextval('public
 
 
 --
--- TOC entry 3309 (class 2604 OID 16531)
+-- TOC entry 3318 (class 2604 OID 16531)
 -- Name: arma idarma; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1153,7 +1279,7 @@ ALTER TABLE ONLY public.arma ALTER COLUMN idarma SET DEFAULT nextval('public.arm
 
 
 --
--- TOC entry 3337 (class 2604 OID 16712)
+-- TOC entry 3345 (class 2604 OID 16712)
 -- Name: bestante idbestante; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1161,7 +1287,7 @@ ALTER TABLE ONLY public.bestante ALTER COLUMN idbestante SET DEFAULT nextval('pu
 
 
 --
--- TOC entry 3342 (class 2604 OID 16913)
+-- TOC entry 3350 (class 2604 OID 16913)
 -- Name: capitulo idcapitulo; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1169,7 +1295,7 @@ ALTER TABLE ONLY public.capitulo ALTER COLUMN idcapitulo SET DEFAULT nextval('pu
 
 
 --
--- TOC entry 3314 (class 2604 OID 16573)
+-- TOC entry 3323 (class 2604 OID 16573)
 -- Name: compartimento idcompartimento; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1177,7 +1303,7 @@ ALTER TABLE ONLY public.compartimento ALTER COLUMN idcompartimento SET DEFAULT n
 
 
 --
--- TOC entry 3320 (class 2604 OID 16603)
+-- TOC entry 3329 (class 2604 OID 16603)
 -- Name: construtor idconstrutor; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1185,7 +1311,7 @@ ALTER TABLE ONLY public.construtor ALTER COLUMN idconstrutor SET DEFAULT nextval
 
 
 --
--- TOC entry 3311 (class 2604 OID 16546)
+-- TOC entry 3320 (class 2604 OID 16546)
 -- Name: consumivel idconsumivel; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1193,7 +1319,7 @@ ALTER TABLE ONLY public.consumivel ALTER COLUMN idconsumivel SET DEFAULT nextval
 
 
 --
--- TOC entry 3344 (class 2604 OID 16944)
+-- TOC entry 3352 (class 2604 OID 16944)
 -- Name: decisao iddecisao; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1201,7 +1327,7 @@ ALTER TABLE ONLY public.decisao ALTER COLUMN iddecisao SET DEFAULT nextval('publ
 
 
 --
--- TOC entry 3343 (class 2604 OID 16922)
+-- TOC entry 3351 (class 2604 OID 16922)
 -- Name: historia idhistoria; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1209,7 +1335,7 @@ ALTER TABLE ONLY public.historia ALTER COLUMN idhistoria SET DEFAULT nextval('pu
 
 
 --
--- TOC entry 3333 (class 2604 OID 16668)
+-- TOC entry 3341 (class 2604 OID 16668)
 -- Name: inventario idinventario; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1217,7 +1343,7 @@ ALTER TABLE ONLY public.inventario ALTER COLUMN idinventario SET DEFAULT nextval
 
 
 --
--- TOC entry 3306 (class 2604 OID 16502)
+-- TOC entry 3315 (class 2604 OID 16502)
 -- Name: item iditem; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1225,7 +1351,7 @@ ALTER TABLE ONLY public.item ALTER COLUMN iditem SET DEFAULT nextval('public.ite
 
 
 --
--- TOC entry 3340 (class 2604 OID 16743)
+-- TOC entry 3348 (class 2604 OID 16743)
 -- Name: item_inventario iditeminventario; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1233,7 +1359,7 @@ ALTER TABLE ONLY public.item_inventario ALTER COLUMN iditeminventario SET DEFAUL
 
 
 --
--- TOC entry 3312 (class 2604 OID 16558)
+-- TOC entry 3321 (class 2604 OID 16558)
 -- Name: legivel idlegivel; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1241,7 +1367,7 @@ ALTER TABLE ONLY public.legivel ALTER COLUMN idlegivel SET DEFAULT nextval('publ
 
 
 --
--- TOC entry 3300 (class 2604 OID 16403)
+-- TOC entry 3309 (class 2604 OID 16403)
 -- Name: mapa idmapa; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1249,7 +1375,7 @@ ALTER TABLE ONLY public.mapa ALTER COLUMN idmapa SET DEFAULT nextval('public.map
 
 
 --
--- TOC entry 3345 (class 2604 OID 16958)
+-- TOC entry 3353 (class 2604 OID 16958)
 -- Name: opcao idopcao; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1257,7 +1383,7 @@ ALTER TABLE ONLY public.opcao ALTER COLUMN idopcao SET DEFAULT nextval('public.o
 
 
 --
--- TOC entry 3321 (class 2604 OID 16620)
+-- TOC entry 3330 (class 2604 OID 16620)
 -- Name: personagem idpersonagem; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1265,7 +1391,7 @@ ALTER TABLE ONLY public.personagem ALTER COLUMN idpersonagem SET DEFAULT nextval
 
 
 --
--- TOC entry 3346 (class 2604 OID 16977)
+-- TOC entry 3354 (class 2604 OID 16977)
 -- Name: personagem_capitulo id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1273,7 +1399,7 @@ ALTER TABLE ONLY public.personagem_capitulo ALTER COLUMN id SET DEFAULT nextval(
 
 
 --
--- TOC entry 3302 (class 2604 OID 16413)
+-- TOC entry 3311 (class 2604 OID 16413)
 -- Name: regiao idregiao; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1281,7 +1407,7 @@ ALTER TABLE ONLY public.regiao ALTER COLUMN idregiao SET DEFAULT nextval('public
 
 
 --
--- TOC entry 3304 (class 2604 OID 16428)
+-- TOC entry 3313 (class 2604 OID 16428)
 -- Name: sala idsala; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1289,7 +1415,7 @@ ALTER TABLE ONLY public.sala ALTER COLUMN idsala SET DEFAULT nextval('public.sal
 
 
 --
--- TOC entry 3338 (class 2604 OID 16724)
+-- TOC entry 3346 (class 2604 OID 16724)
 -- Name: tributo idtributo; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1297,7 +1423,7 @@ ALTER TABLE ONLY public.tributo ALTER COLUMN idtributo SET DEFAULT nextval('publ
 
 
 --
--- TOC entry 3341 (class 2604 OID 16887)
+-- TOC entry 3349 (class 2604 OID 16887)
 -- Name: usuario id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1305,7 +1431,7 @@ ALTER TABLE ONLY public.usuario ALTER COLUMN id SET DEFAULT nextval('public.usua
 
 
 --
--- TOC entry 3315 (class 2604 OID 16585)
+-- TOC entry 3324 (class 2604 OID 16585)
 -- Name: utilidade idutilidade; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1313,7 +1439,7 @@ ALTER TABLE ONLY public.utilidade ALTER COLUMN idutilidade SET DEFAULT nextval('
 
 
 --
--- TOC entry 3307 (class 2604 OID 16516)
+-- TOC entry 3316 (class 2604 OID 16516)
 -- Name: vestimenta idvestimenta; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1321,7 +1447,7 @@ ALTER TABLE ONLY public.vestimenta ALTER COLUMN idvestimenta SET DEFAULT nextval
 
 
 --
--- TOC entry 3325 (class 2604 OID 16635)
+-- TOC entry 3333 (class 2604 OID 16635)
 -- Name: vitalidade idvitalidade; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1329,7 +1455,7 @@ ALTER TABLE ONLY public.vitalidade ALTER COLUMN idvitalidade SET DEFAULT nextval
 
 
 --
--- TOC entry 3603 (class 0 OID 16697)
+-- TOC entry 3613 (class 0 OID 16697)
 -- Dependencies: 246
 -- Data for Name: animal; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1339,7 +1465,7 @@ COPY public.animal (idanimal, idpersonagem) FROM stdin;
 
 
 --
--- TOC entry 3582 (class 0 OID 16528)
+-- TOC entry 3592 (class 0 OID 16528)
 -- Dependencies: 225
 -- Data for Name: arma; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1358,7 +1484,7 @@ COPY public.arma (idarma, iditem, descricao, addano) FROM stdin;
 
 
 --
--- TOC entry 3605 (class 0 OID 16709)
+-- TOC entry 3615 (class 0 OID 16709)
 -- Dependencies: 248
 -- Data for Name: bestante; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1368,17 +1494,19 @@ COPY public.bestante (idbestante, idpersonagem, agilidade, nado, voo) FROM stdin
 
 
 --
--- TOC entry 3613 (class 0 OID 16910)
+-- TOC entry 3623 (class 0 OID 16910)
 -- Dependencies: 256
 -- Data for Name: capitulo; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.capitulo (idcapitulo, texto, objetivo, iddecisao) FROM stdin;
+COPY public.capitulo (idcapitulo, texto, objetivo) FROM stdin;
+1	Depois de um longo dia de viagem de trem, vocˆ finalmente chegou … Capital. Agora, vocˆ se encontra no Centro de Treinamento, onde passar  os pr¢ximos dois dias com os outros tributos.	Faca duas aulas
+2	Texto do segundo cap¡tulo	Objetivo do segundo cap¡tulo
 \.
 
 
 --
--- TOC entry 3588 (class 0 OID 16570)
+-- TOC entry 3598 (class 0 OID 16570)
 -- Dependencies: 231
 -- Data for Name: compartimento; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1390,7 +1518,7 @@ COPY public.compartimento (idcompartimento, iditem, adcapmax) FROM stdin;
 
 
 --
--- TOC entry 3592 (class 0 OID 16600)
+-- TOC entry 3602 (class 0 OID 16600)
 -- Dependencies: 235
 -- Data for Name: construtor; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1400,7 +1528,7 @@ COPY public.construtor (idconstrutor, iditem) FROM stdin;
 
 
 --
--- TOC entry 3584 (class 0 OID 16543)
+-- TOC entry 3594 (class 0 OID 16543)
 -- Dependencies: 227
 -- Data for Name: consumivel; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1418,17 +1546,19 @@ COPY public.consumivel (idconsumivel, iditem, adhid, adnut, adsta, adhp, adcalor
 
 
 --
--- TOC entry 3617 (class 0 OID 16941)
+-- TOC entry 3627 (class 0 OID 16941)
 -- Dependencies: 260
 -- Data for Name: decisao; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.decisao (iddecisao, descricao) FROM stdin;
+1	Escolha uma aula para fazer hoje e evoluir suas habilidades
+2	Escolha uma das aulas: 
 \.
 
 
 --
--- TOC entry 3598 (class 0 OID 16649)
+-- TOC entry 3608 (class 0 OID 16649)
 -- Dependencies: 241
 -- Data for Name: distrito; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1442,17 +1572,18 @@ COPY public.distrito (iddistrito, idpersonagem, popularidade, agilidade, forca, 
 
 
 --
--- TOC entry 3615 (class 0 OID 16919)
+-- TOC entry 3625 (class 0 OID 16919)
 -- Dependencies: 258
 -- Data for Name: historia; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.historia (idhistoria, idpersonagem, idcapitulo_inicial) FROM stdin;
+1	1	1
 \.
 
 
 --
--- TOC entry 3600 (class 0 OID 16665)
+-- TOC entry 3610 (class 0 OID 16665)
 -- Dependencies: 243
 -- Data for Name: inventario; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1462,7 +1593,7 @@ COPY public.inventario (idinventario, idpersonagem, capmax, capatual) FROM stdin
 
 
 --
--- TOC entry 3578 (class 0 OID 16499)
+-- TOC entry 3588 (class 0 OID 16499)
 -- Dependencies: 221
 -- Data for Name: item; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1503,7 +1634,7 @@ COPY public.item (iditem, nome) FROM stdin;
 
 
 --
--- TOC entry 3609 (class 0 OID 16740)
+-- TOC entry 3619 (class 0 OID 16740)
 -- Dependencies: 252
 -- Data for Name: item_inventario; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1513,7 +1644,7 @@ COPY public.item_inventario (iditeminventario, idinventario, iditem) FROM stdin;
 
 
 --
--- TOC entry 3586 (class 0 OID 16555)
+-- TOC entry 3596 (class 0 OID 16555)
 -- Dependencies: 229
 -- Data for Name: legivel; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1524,7 +1655,17 @@ COPY public.legivel (idlegivel, iditem, conteudo) FROM stdin;
 
 
 --
--- TOC entry 3572 (class 0 OID 16400)
+-- TOC entry 3632 (class 0 OID 17000)
+-- Dependencies: 265
+-- Data for Name: localizacao; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.localizacao (idcapitulo, idpersonagem, idsala, idusuario) FROM stdin;
+\.
+
+
+--
+-- TOC entry 3582 (class 0 OID 16400)
 -- Dependencies: 215
 -- Data for Name: mapa; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1536,69 +1677,74 @@ COPY public.mapa (idmapa, nomem, descricao) FROM stdin;
 
 
 --
--- TOC entry 3619 (class 0 OID 16955)
+-- TOC entry 3629 (class 0 OID 16955)
 -- Dependencies: 262
 -- Data for Name: opcao; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.opcao (idopcao, iddecisao, descricao, efeito_atributo, proximo_capitulo, peso, atributo) FROM stdin;
+2	1	Aula de Combate	2	2	0	idsala
+3	1	Aula de T‚cnicas de Sobrevivˆncia	3	2	0	idsala
+4	1	Aula de Mira	4	2	0	idsala
+5	1	Aula de Nata‡Æo	5	2	0	idsala
+6	1	Aula de Camuflagem	6	2	0	idsala
 \.
 
 
 --
--- TOC entry 3594 (class 0 OID 16617)
+-- TOC entry 3604 (class 0 OID 16617)
 -- Dependencies: 237
 -- Data for Name: personagem; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.personagem (idpersonagem, idsala, tipop, nomep, hpmax, hpatual) FROM stdin;
-2	1	nj	Pandora	100	100
-3	1	nj	Octavio	100	100
-4	1	nj	June	100	100
-5	1	nj	Pierre	100	100
-6	1	nj	Gabrielle	100	100
-8	1	nj	Zoe	100	100
-10	1	nj	Marta	100	100
-11	1	nj	Daniel	100	100
-12	1	nj	Lucian	100	100
-13	1	nj	Charlotte	100	100
-14	1	nj	Benedict	100	100
-15	1	nj	Daphine	100	100
-16	1	nj	Maximilian	100	100
-17	1	nj	Stefani	100	100
-18	1	nj	Damon	100	100
-19	1	nj	Selene	100	100
-20	1	nj	Walter	100	100
-21	1	nj	Skyler	100	100
-22	1	nj	Nico	100	100
-23	1	nj	Agnes	100	100
-25	1	nj	Jesse	100	100
-26	1	nj	Ceasar Flickerman	100	100
-27	1	nj	Cashmere	100	100
-28	1	nj	Brutus	100	100
-29	1	nj	Beetee	100	100
-30	1	nj	Finnick	100	100
-31	1	nj	Columbae	100	100
-32	1	nj	Hardie	100	100
-33	1	nj	Johanna	100	100
-34	1	nj	Woof	100	100
-35	1	nj	Driff	100	100
-36	1	nj	Magnus	100	100
-37	1	nj	Seeder	100	100
-38	1	nj	Haymitch	100	100
-39	1	nj	Jennifer	100	100
-40	1	nj	Josh	100	100
-41	1	nj	Liam	100	100
-42	1	nj	Sam	100	100
-43	1	nj	Willow	100	100
-24	1	pj	Leslie	100	100
-7	1	pj	Icaro	100	100
-1	1	pj	Dominic	100	100
+COPY public.personagem (idpersonagem, tipop, nomep, hpmax, hpatual) FROM stdin;
+2	nj	Pandora	100	100
+3	nj	Octavio	100	100
+4	nj	June	100	100
+5	nj	Pierre	100	100
+8	nj	Zoe	100	100
+10	nj	Marta	100	100
+11	nj	Daniel	100	100
+12	nj	Lucian	100	100
+13	nj	Charlotte	100	100
+14	nj	Benedict	100	100
+15	nj	Daphine	100	100
+16	nj	Maximilian	100	100
+17	nj	Stefani	100	100
+18	nj	Damon	100	100
+19	nj	Selene	100	100
+20	nj	Walter	100	100
+21	nj	Skyler	100	100
+22	nj	Nico	100	100
+23	nj	Agnes	100	100
+25	nj	Jesse	100	100
+26	nj	Ceasar Flickerman	100	100
+27	nj	Cashmere	100	100
+28	nj	Brutus	100	100
+29	nj	Beetee	100	100
+30	nj	Finnick	100	100
+31	nj	Columbae	100	100
+32	nj	Hardie	100	100
+33	nj	Johanna	100	100
+34	nj	Woof	100	100
+35	nj	Driff	100	100
+36	nj	Magnus	100	100
+37	nj	Seeder	100	100
+38	nj	Haymitch	100	100
+39	nj	Jennifer	100	100
+40	nj	Josh	100	100
+41	nj	Liam	100	100
+42	nj	Sam	100	100
+43	nj	Willow	100	100
+7	pj	Icaro	100	100
+24	pj	Leslie	100	100
+6	pj	Gabrielle	100	100
+1	pj	Dominic	100	100
 \.
 
 
 --
--- TOC entry 3621 (class 0 OID 16974)
+-- TOC entry 3631 (class 0 OID 16974)
 -- Dependencies: 264
 -- Data for Name: personagem_capitulo; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1608,7 +1754,7 @@ COPY public.personagem_capitulo (id, idpersonagem, idcapitulo, acao) FROM stdin;
 
 
 --
--- TOC entry 3601 (class 0 OID 16678)
+-- TOC entry 3611 (class 0 OID 16678)
 -- Dependencies: 244
 -- Data for Name: personagem_jogavel; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1618,7 +1764,7 @@ COPY public.personagem_jogavel (idpersonagem, iddistrito) FROM stdin;
 
 
 --
--- TOC entry 3574 (class 0 OID 16410)
+-- TOC entry 3584 (class 0 OID 16410)
 -- Dependencies: 217
 -- Data for Name: regiao; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1631,7 +1777,7 @@ COPY public.regiao (idregiao, idmapa, nomer, tempr, descricao) FROM stdin;
 
 
 --
--- TOC entry 3576 (class 0 OID 16425)
+-- TOC entry 3586 (class 0 OID 16425)
 -- Dependencies: 219
 -- Data for Name: sala; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1651,7 +1797,7 @@ COPY public.sala (idsala, idregiao, nomes, descricao) FROM stdin;
 
 
 --
--- TOC entry 3607 (class 0 OID 16721)
+-- TOC entry 3617 (class 0 OID 16721)
 -- Dependencies: 250
 -- Data for Name: tributo; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1661,19 +1807,17 @@ COPY public.tributo (idtributo, idpersonagem, iddistrito, statust) FROM stdin;
 
 
 --
--- TOC entry 3611 (class 0 OID 16884)
+-- TOC entry 3621 (class 0 OID 16884)
 -- Dependencies: 254
 -- Data for Name: usuario; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.usuario (id, nome, senha, idpersonagem, idcapitulo) FROM stdin;
-35	Master	20082003	7	\N
-36	teste1	123	1	\N
 \.
 
 
 --
--- TOC entry 3590 (class 0 OID 16582)
+-- TOC entry 3600 (class 0 OID 16582)
 -- Dependencies: 233
 -- Data for Name: utilidade; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1683,7 +1827,7 @@ COPY public.utilidade (idutilidade, iditem, nome, descricao, geraitem, capturain
 
 
 --
--- TOC entry 3580 (class 0 OID 16513)
+-- TOC entry 3590 (class 0 OID 16513)
 -- Dependencies: 223
 -- Data for Name: vestimenta; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1695,7 +1839,7 @@ COPY public.vestimenta (idvestimenta, iditem, descricao, adcalor) FROM stdin;
 
 
 --
--- TOC entry 3596 (class 0 OID 16632)
+-- TOC entry 3606 (class 0 OID 16632)
 -- Dependencies: 239
 -- Data for Name: vitalidade; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1705,7 +1849,7 @@ COPY public.vitalidade (idvitalidade, idpersonagem, nutricao, hidratacao, stamin
 
 
 --
--- TOC entry 3652 (class 0 OID 0)
+-- TOC entry 3663 (class 0 OID 0)
 -- Dependencies: 245
 -- Name: animal_idanimal_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -1714,7 +1858,7 @@ SELECT pg_catalog.setval('public.animal_idanimal_seq', 1, false);
 
 
 --
--- TOC entry 3653 (class 0 OID 0)
+-- TOC entry 3664 (class 0 OID 0)
 -- Dependencies: 224
 -- Name: arma_idarma_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -1723,7 +1867,7 @@ SELECT pg_catalog.setval('public.arma_idarma_seq', 9, true);
 
 
 --
--- TOC entry 3654 (class 0 OID 0)
+-- TOC entry 3665 (class 0 OID 0)
 -- Dependencies: 247
 -- Name: bestante_idbestante_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -1732,16 +1876,16 @@ SELECT pg_catalog.setval('public.bestante_idbestante_seq', 1, false);
 
 
 --
--- TOC entry 3655 (class 0 OID 0)
+-- TOC entry 3666 (class 0 OID 0)
 -- Dependencies: 255
 -- Name: capitulo_idcapitulo_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.capitulo_idcapitulo_seq', 1, false);
+SELECT pg_catalog.setval('public.capitulo_idcapitulo_seq', 2, true);
 
 
 --
--- TOC entry 3656 (class 0 OID 0)
+-- TOC entry 3667 (class 0 OID 0)
 -- Dependencies: 230
 -- Name: compartimento_idcompartimento_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -1750,7 +1894,7 @@ SELECT pg_catalog.setval('public.compartimento_idcompartimento_seq', 2, true);
 
 
 --
--- TOC entry 3657 (class 0 OID 0)
+-- TOC entry 3668 (class 0 OID 0)
 -- Dependencies: 234
 -- Name: construtor_idconstrutor_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -1759,7 +1903,7 @@ SELECT pg_catalog.setval('public.construtor_idconstrutor_seq', 1, false);
 
 
 --
--- TOC entry 3658 (class 0 OID 0)
+-- TOC entry 3669 (class 0 OID 0)
 -- Dependencies: 226
 -- Name: consumivel_idconsumivel_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -1768,16 +1912,16 @@ SELECT pg_catalog.setval('public.consumivel_idconsumivel_seq', 8, true);
 
 
 --
--- TOC entry 3659 (class 0 OID 0)
+-- TOC entry 3670 (class 0 OID 0)
 -- Dependencies: 259
 -- Name: decisao_iddecisao_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.decisao_iddecisao_seq', 1, false);
+SELECT pg_catalog.setval('public.decisao_iddecisao_seq', 2, true);
 
 
 --
--- TOC entry 3660 (class 0 OID 0)
+-- TOC entry 3671 (class 0 OID 0)
 -- Dependencies: 240
 -- Name: distrito_iddistrito_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -1786,16 +1930,16 @@ SELECT pg_catalog.setval('public.distrito_iddistrito_seq', 1, true);
 
 
 --
--- TOC entry 3661 (class 0 OID 0)
+-- TOC entry 3672 (class 0 OID 0)
 -- Dependencies: 257
 -- Name: historia_idhistoria_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.historia_idhistoria_seq', 1, false);
+SELECT pg_catalog.setval('public.historia_idhistoria_seq', 1, true);
 
 
 --
--- TOC entry 3662 (class 0 OID 0)
+-- TOC entry 3673 (class 0 OID 0)
 -- Dependencies: 242
 -- Name: inventario_idinventario_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -1804,7 +1948,7 @@ SELECT pg_catalog.setval('public.inventario_idinventario_seq', 1, false);
 
 
 --
--- TOC entry 3663 (class 0 OID 0)
+-- TOC entry 3674 (class 0 OID 0)
 -- Dependencies: 220
 -- Name: item_iditem_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -1813,7 +1957,7 @@ SELECT pg_catalog.setval('public.item_iditem_seq', 31, true);
 
 
 --
--- TOC entry 3664 (class 0 OID 0)
+-- TOC entry 3675 (class 0 OID 0)
 -- Dependencies: 251
 -- Name: item_inventario_iditeminventario_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -1822,7 +1966,7 @@ SELECT pg_catalog.setval('public.item_inventario_iditeminventario_seq', 1, false
 
 
 --
--- TOC entry 3665 (class 0 OID 0)
+-- TOC entry 3676 (class 0 OID 0)
 -- Dependencies: 228
 -- Name: legivel_idlegivel_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -1831,7 +1975,7 @@ SELECT pg_catalog.setval('public.legivel_idlegivel_seq', 1, true);
 
 
 --
--- TOC entry 3666 (class 0 OID 0)
+-- TOC entry 3677 (class 0 OID 0)
 -- Dependencies: 214
 -- Name: mapa_idmapa_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -1840,16 +1984,16 @@ SELECT pg_catalog.setval('public.mapa_idmapa_seq', 2, true);
 
 
 --
--- TOC entry 3667 (class 0 OID 0)
+-- TOC entry 3678 (class 0 OID 0)
 -- Dependencies: 261
 -- Name: opcao_idopcao_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.opcao_idopcao_seq', 1, false);
+SELECT pg_catalog.setval('public.opcao_idopcao_seq', 6, true);
 
 
 --
--- TOC entry 3668 (class 0 OID 0)
+-- TOC entry 3679 (class 0 OID 0)
 -- Dependencies: 263
 -- Name: personagem_capitulo_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -1858,7 +2002,7 @@ SELECT pg_catalog.setval('public.personagem_capitulo_id_seq', 1, false);
 
 
 --
--- TOC entry 3669 (class 0 OID 0)
+-- TOC entry 3680 (class 0 OID 0)
 -- Dependencies: 236
 -- Name: personagem_idpersonagem_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -1867,7 +2011,7 @@ SELECT pg_catalog.setval('public.personagem_idpersonagem_seq', 43, true);
 
 
 --
--- TOC entry 3670 (class 0 OID 0)
+-- TOC entry 3681 (class 0 OID 0)
 -- Dependencies: 216
 -- Name: regiao_idregiao_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -1876,7 +2020,7 @@ SELECT pg_catalog.setval('public.regiao_idregiao_seq', 3, true);
 
 
 --
--- TOC entry 3671 (class 0 OID 0)
+-- TOC entry 3682 (class 0 OID 0)
 -- Dependencies: 218
 -- Name: sala_idsala_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -1885,7 +2029,7 @@ SELECT pg_catalog.setval('public.sala_idsala_seq', 10, true);
 
 
 --
--- TOC entry 3672 (class 0 OID 0)
+-- TOC entry 3683 (class 0 OID 0)
 -- Dependencies: 249
 -- Name: tributo_idtributo_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -1894,16 +2038,16 @@ SELECT pg_catalog.setval('public.tributo_idtributo_seq', 1, false);
 
 
 --
--- TOC entry 3673 (class 0 OID 0)
+-- TOC entry 3684 (class 0 OID 0)
 -- Dependencies: 253
 -- Name: usuario_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.usuario_id_seq', 36, true);
+SELECT pg_catalog.setval('public.usuario_id_seq', 78, true);
 
 
 --
--- TOC entry 3674 (class 0 OID 0)
+-- TOC entry 3685 (class 0 OID 0)
 -- Dependencies: 232
 -- Name: utilidade_idutilidade_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -1912,7 +2056,7 @@ SELECT pg_catalog.setval('public.utilidade_idutilidade_seq', 1, false);
 
 
 --
--- TOC entry 3675 (class 0 OID 0)
+-- TOC entry 3686 (class 0 OID 0)
 -- Dependencies: 222
 -- Name: vestimenta_idvestimenta_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -1921,7 +2065,7 @@ SELECT pg_catalog.setval('public.vestimenta_idvestimenta_seq', 2, true);
 
 
 --
--- TOC entry 3676 (class 0 OID 0)
+-- TOC entry 3687 (class 0 OID 0)
 -- Dependencies: 238
 -- Name: vitalidade_idvitalidade_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -1930,7 +2074,7 @@ SELECT pg_catalog.setval('public.vitalidade_idvitalidade_seq', 1, false);
 
 
 --
--- TOC entry 3380 (class 2606 OID 16702)
+-- TOC entry 3388 (class 2606 OID 16702)
 -- Name: animal animal_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1939,7 +2083,7 @@ ALTER TABLE ONLY public.animal
 
 
 --
--- TOC entry 3358 (class 2606 OID 16536)
+-- TOC entry 3366 (class 2606 OID 16536)
 -- Name: arma arma_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1948,7 +2092,7 @@ ALTER TABLE ONLY public.arma
 
 
 --
--- TOC entry 3382 (class 2606 OID 16714)
+-- TOC entry 3390 (class 2606 OID 16714)
 -- Name: bestante bestante_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1957,7 +2101,7 @@ ALTER TABLE ONLY public.bestante
 
 
 --
--- TOC entry 3390 (class 2606 OID 16917)
+-- TOC entry 3398 (class 2606 OID 16917)
 -- Name: capitulo capitulo_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1966,7 +2110,7 @@ ALTER TABLE ONLY public.capitulo
 
 
 --
--- TOC entry 3364 (class 2606 OID 16575)
+-- TOC entry 3372 (class 2606 OID 16575)
 -- Name: compartimento compartimento_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1975,7 +2119,7 @@ ALTER TABLE ONLY public.compartimento
 
 
 --
--- TOC entry 3368 (class 2606 OID 16605)
+-- TOC entry 3376 (class 2606 OID 16605)
 -- Name: construtor construtor_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1984,7 +2128,7 @@ ALTER TABLE ONLY public.construtor
 
 
 --
--- TOC entry 3360 (class 2606 OID 16548)
+-- TOC entry 3368 (class 2606 OID 16548)
 -- Name: consumivel consumivel_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1993,7 +2137,7 @@ ALTER TABLE ONLY public.consumivel
 
 
 --
--- TOC entry 3394 (class 2606 OID 16948)
+-- TOC entry 3402 (class 2606 OID 16948)
 -- Name: decisao decisao_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2002,7 +2146,7 @@ ALTER TABLE ONLY public.decisao
 
 
 --
--- TOC entry 3374 (class 2606 OID 16658)
+-- TOC entry 3382 (class 2606 OID 16658)
 -- Name: distrito distrito_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2011,7 +2155,7 @@ ALTER TABLE ONLY public.distrito
 
 
 --
--- TOC entry 3392 (class 2606 OID 16924)
+-- TOC entry 3400 (class 2606 OID 16924)
 -- Name: historia historia_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2020,7 +2164,7 @@ ALTER TABLE ONLY public.historia
 
 
 --
--- TOC entry 3376 (class 2606 OID 16672)
+-- TOC entry 3384 (class 2606 OID 16672)
 -- Name: inventario inventario_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2029,7 +2173,7 @@ ALTER TABLE ONLY public.inventario
 
 
 --
--- TOC entry 3386 (class 2606 OID 16745)
+-- TOC entry 3394 (class 2606 OID 16745)
 -- Name: item_inventario item_inventario_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2038,7 +2182,7 @@ ALTER TABLE ONLY public.item_inventario
 
 
 --
--- TOC entry 3354 (class 2606 OID 16504)
+-- TOC entry 3362 (class 2606 OID 16504)
 -- Name: item item_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2047,7 +2191,7 @@ ALTER TABLE ONLY public.item
 
 
 --
--- TOC entry 3362 (class 2606 OID 16563)
+-- TOC entry 3370 (class 2606 OID 16563)
 -- Name: legivel legivel_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2056,7 +2200,7 @@ ALTER TABLE ONLY public.legivel
 
 
 --
--- TOC entry 3348 (class 2606 OID 16408)
+-- TOC entry 3356 (class 2606 OID 16408)
 -- Name: mapa mapa_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2065,7 +2209,7 @@ ALTER TABLE ONLY public.mapa
 
 
 --
--- TOC entry 3396 (class 2606 OID 16962)
+-- TOC entry 3404 (class 2606 OID 16962)
 -- Name: opcao opcao_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2074,7 +2218,7 @@ ALTER TABLE ONLY public.opcao
 
 
 --
--- TOC entry 3398 (class 2606 OID 16981)
+-- TOC entry 3406 (class 2606 OID 16981)
 -- Name: personagem_capitulo personagem_capitulo_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2083,7 +2227,7 @@ ALTER TABLE ONLY public.personagem_capitulo
 
 
 --
--- TOC entry 3378 (class 2606 OID 16682)
+-- TOC entry 3386 (class 2606 OID 16682)
 -- Name: personagem_jogavel personagem_jogavel_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2092,7 +2236,7 @@ ALTER TABLE ONLY public.personagem_jogavel
 
 
 --
--- TOC entry 3370 (class 2606 OID 16625)
+-- TOC entry 3378 (class 2606 OID 16625)
 -- Name: personagem personagem_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2101,7 +2245,7 @@ ALTER TABLE ONLY public.personagem
 
 
 --
--- TOC entry 3350 (class 2606 OID 16418)
+-- TOC entry 3358 (class 2606 OID 16418)
 -- Name: regiao regiao_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2110,7 +2254,7 @@ ALTER TABLE ONLY public.regiao
 
 
 --
--- TOC entry 3352 (class 2606 OID 16433)
+-- TOC entry 3360 (class 2606 OID 16433)
 -- Name: sala sala_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2119,7 +2263,7 @@ ALTER TABLE ONLY public.sala
 
 
 --
--- TOC entry 3384 (class 2606 OID 16727)
+-- TOC entry 3392 (class 2606 OID 16727)
 -- Name: tributo tributo_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2128,7 +2272,7 @@ ALTER TABLE ONLY public.tributo
 
 
 --
--- TOC entry 3388 (class 2606 OID 16889)
+-- TOC entry 3396 (class 2606 OID 16889)
 -- Name: usuario usuario_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2137,7 +2281,7 @@ ALTER TABLE ONLY public.usuario
 
 
 --
--- TOC entry 3366 (class 2606 OID 16593)
+-- TOC entry 3374 (class 2606 OID 16593)
 -- Name: utilidade utilidade_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2146,7 +2290,7 @@ ALTER TABLE ONLY public.utilidade
 
 
 --
--- TOC entry 3356 (class 2606 OID 16521)
+-- TOC entry 3364 (class 2606 OID 16521)
 -- Name: vestimenta vestimenta_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2155,7 +2299,7 @@ ALTER TABLE ONLY public.vestimenta
 
 
 --
--- TOC entry 3372 (class 2606 OID 16642)
+-- TOC entry 3380 (class 2606 OID 16642)
 -- Name: vitalidade vitalidade_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2164,7 +2308,23 @@ ALTER TABLE ONLY public.vitalidade
 
 
 --
--- TOC entry 3427 (class 2620 OID 16763)
+-- TOC entry 3437 (class 2620 OID 17034)
+-- Name: localizacao trigger_atualizar_capitulo; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER trigger_atualizar_capitulo AFTER INSERT ON public.localizacao FOR EACH ROW EXECUTE FUNCTION public.atualizar_capitulo_usuario();
+
+
+--
+-- TOC entry 3435 (class 2620 OID 17037)
+-- Name: usuario trigger_atualizar_idcapitulo; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER trigger_atualizar_idcapitulo AFTER INSERT OR UPDATE OF idpersonagem ON public.usuario FOR EACH ROW EXECUTE FUNCTION public.atualizar_idcapitulo();
+
+
+--
+-- TOC entry 3434 (class 2620 OID 16763)
 -- Name: personagem_jogavel trigger_criar_inventario; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -2172,7 +2332,15 @@ CREATE TRIGGER trigger_criar_inventario AFTER INSERT ON public.personagem_jogave
 
 
 --
--- TOC entry 3428 (class 2620 OID 16896)
+-- TOC entry 3438 (class 2620 OID 17026)
+-- Name: localizacao trigger_excluir_localizacao_anterior; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER trigger_excluir_localizacao_anterior AFTER INSERT ON public.localizacao FOR EACH ROW EXECUTE FUNCTION public.excluir_localizacao_anterior();
+
+
+--
+-- TOC entry 3436 (class 2620 OID 16896)
 -- Name: usuario trigger_verificar_nome_unico; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -2180,7 +2348,7 @@ CREATE TRIGGER trigger_verificar_nome_unico BEFORE INSERT ON public.usuario FOR 
 
 
 --
--- TOC entry 3413 (class 2606 OID 16703)
+-- TOC entry 3420 (class 2606 OID 16703)
 -- Name: animal animal_idpersonagem_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2189,7 +2357,7 @@ ALTER TABLE ONLY public.animal
 
 
 --
--- TOC entry 3402 (class 2606 OID 16537)
+-- TOC entry 3410 (class 2606 OID 16537)
 -- Name: arma arma_iditem_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2198,7 +2366,7 @@ ALTER TABLE ONLY public.arma
 
 
 --
--- TOC entry 3414 (class 2606 OID 16715)
+-- TOC entry 3421 (class 2606 OID 16715)
 -- Name: bestante bestante_idpersonagem_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2207,16 +2375,7 @@ ALTER TABLE ONLY public.bestante
 
 
 --
--- TOC entry 3420 (class 2606 OID 16949)
--- Name: capitulo capitulo_iddecisao_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.capitulo
-    ADD CONSTRAINT capitulo_iddecisao_fkey FOREIGN KEY (iddecisao) REFERENCES public.decisao(iddecisao);
-
-
---
--- TOC entry 3405 (class 2606 OID 16576)
+-- TOC entry 3413 (class 2606 OID 16576)
 -- Name: compartimento compartimento_iditem_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2225,7 +2384,7 @@ ALTER TABLE ONLY public.compartimento
 
 
 --
--- TOC entry 3407 (class 2606 OID 16606)
+-- TOC entry 3415 (class 2606 OID 16606)
 -- Name: construtor construtor_iditem_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2234,7 +2393,7 @@ ALTER TABLE ONLY public.construtor
 
 
 --
--- TOC entry 3403 (class 2606 OID 16549)
+-- TOC entry 3411 (class 2606 OID 16549)
 -- Name: consumivel consumivel_iditem_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2243,7 +2402,7 @@ ALTER TABLE ONLY public.consumivel
 
 
 --
--- TOC entry 3410 (class 2606 OID 16659)
+-- TOC entry 3417 (class 2606 OID 16659)
 -- Name: distrito distrito_idpersonagem_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2252,7 +2411,7 @@ ALTER TABLE ONLY public.distrito
 
 
 --
--- TOC entry 3419 (class 2606 OID 16890)
+-- TOC entry 3426 (class 2606 OID 16890)
 -- Name: usuario fk_personagem; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2261,7 +2420,16 @@ ALTER TABLE ONLY public.usuario
 
 
 --
--- TOC entry 3421 (class 2606 OID 16930)
+-- TOC entry 3433 (class 2606 OID 17020)
+-- Name: localizacao fk_usuario; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.localizacao
+    ADD CONSTRAINT fk_usuario FOREIGN KEY (idusuario) REFERENCES public.usuario(id);
+
+
+--
+-- TOC entry 3427 (class 2606 OID 16930)
 -- Name: historia historia_idcapitulo_inicial_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2270,7 +2438,7 @@ ALTER TABLE ONLY public.historia
 
 
 --
--- TOC entry 3422 (class 2606 OID 16925)
+-- TOC entry 3428 (class 2606 OID 16925)
 -- Name: historia historia_idpersonagem_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2279,7 +2447,7 @@ ALTER TABLE ONLY public.historia
 
 
 --
--- TOC entry 3411 (class 2606 OID 16673)
+-- TOC entry 3418 (class 2606 OID 16673)
 -- Name: inventario inventario_idpersonagem_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2288,7 +2456,7 @@ ALTER TABLE ONLY public.inventario
 
 
 --
--- TOC entry 3417 (class 2606 OID 16746)
+-- TOC entry 3424 (class 2606 OID 16746)
 -- Name: item_inventario item_inventario_idinventario_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2297,7 +2465,7 @@ ALTER TABLE ONLY public.item_inventario
 
 
 --
--- TOC entry 3418 (class 2606 OID 16751)
+-- TOC entry 3425 (class 2606 OID 16751)
 -- Name: item_inventario item_inventario_iditem_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2306,7 +2474,7 @@ ALTER TABLE ONLY public.item_inventario
 
 
 --
--- TOC entry 3404 (class 2606 OID 16564)
+-- TOC entry 3412 (class 2606 OID 16564)
 -- Name: legivel legivel_iditem_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2315,7 +2483,7 @@ ALTER TABLE ONLY public.legivel
 
 
 --
--- TOC entry 3423 (class 2606 OID 16963)
+-- TOC entry 3429 (class 2606 OID 16963)
 -- Name: opcao opcao_iddecisao_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2324,7 +2492,7 @@ ALTER TABLE ONLY public.opcao
 
 
 --
--- TOC entry 3424 (class 2606 OID 16968)
+-- TOC entry 3430 (class 2606 OID 16968)
 -- Name: opcao opcao_proximo_capitulo_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2333,7 +2501,7 @@ ALTER TABLE ONLY public.opcao
 
 
 --
--- TOC entry 3425 (class 2606 OID 16987)
+-- TOC entry 3431 (class 2606 OID 16987)
 -- Name: personagem_capitulo personagem_capitulo_idcapitulo_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2342,7 +2510,7 @@ ALTER TABLE ONLY public.personagem_capitulo
 
 
 --
--- TOC entry 3426 (class 2606 OID 16982)
+-- TOC entry 3432 (class 2606 OID 16982)
 -- Name: personagem_capitulo personagem_capitulo_idpersonagem_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2351,16 +2519,7 @@ ALTER TABLE ONLY public.personagem_capitulo
 
 
 --
--- TOC entry 3408 (class 2606 OID 16626)
--- Name: personagem personagem_idsala_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.personagem
-    ADD CONSTRAINT personagem_idsala_fkey FOREIGN KEY (idsala) REFERENCES public.sala(idsala);
-
-
---
--- TOC entry 3412 (class 2606 OID 16683)
+-- TOC entry 3419 (class 2606 OID 16683)
 -- Name: personagem_jogavel personagem_jogavel_iddistrito_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2369,7 +2528,7 @@ ALTER TABLE ONLY public.personagem_jogavel
 
 
 --
--- TOC entry 3399 (class 2606 OID 16419)
+-- TOC entry 3407 (class 2606 OID 16419)
 -- Name: regiao regiao_idmapa_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2378,7 +2537,7 @@ ALTER TABLE ONLY public.regiao
 
 
 --
--- TOC entry 3400 (class 2606 OID 16434)
+-- TOC entry 3408 (class 2606 OID 16434)
 -- Name: sala sala_idregiao_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2387,7 +2546,7 @@ ALTER TABLE ONLY public.sala
 
 
 --
--- TOC entry 3415 (class 2606 OID 16733)
+-- TOC entry 3422 (class 2606 OID 16733)
 -- Name: tributo tributo_iddistrito_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2396,7 +2555,7 @@ ALTER TABLE ONLY public.tributo
 
 
 --
--- TOC entry 3416 (class 2606 OID 16728)
+-- TOC entry 3423 (class 2606 OID 16728)
 -- Name: tributo tributo_idpersonagem_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2405,7 +2564,7 @@ ALTER TABLE ONLY public.tributo
 
 
 --
--- TOC entry 3406 (class 2606 OID 16594)
+-- TOC entry 3414 (class 2606 OID 16594)
 -- Name: utilidade utilidade_iditem_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2414,7 +2573,7 @@ ALTER TABLE ONLY public.utilidade
 
 
 --
--- TOC entry 3401 (class 2606 OID 16522)
+-- TOC entry 3409 (class 2606 OID 16522)
 -- Name: vestimenta vestimenta_iditem_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2423,7 +2582,7 @@ ALTER TABLE ONLY public.vestimenta
 
 
 --
--- TOC entry 3409 (class 2606 OID 16643)
+-- TOC entry 3416 (class 2606 OID 16643)
 -- Name: vitalidade vitalidade_idpersonagem_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2431,7 +2590,7 @@ ALTER TABLE ONLY public.vitalidade
     ADD CONSTRAINT vitalidade_idpersonagem_fkey FOREIGN KEY (idpersonagem) REFERENCES public.personagem(idpersonagem) ON DELETE CASCADE;
 
 
--- Completed on 2024-09-07 14:51:49
+-- Completed on 2024-09-07 23:59:32
 
 --
 -- PostgreSQL database dump complete

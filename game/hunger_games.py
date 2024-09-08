@@ -269,7 +269,7 @@ def processar_opcao(usuario_id, opcao_id):
 
         # Passo 2: Obter a opção escolhida
         cur.execute(
-            "SELECT efeito_atributo, proximo_capitulo, atributo FROM opcao WHERE idopcao = %s",
+            "SELECT efeito_atributo, atributo, proximo_capitulo FROM opcao WHERE idopcao = %s",
             (opcao_id,)
         )
         opcao = cur.fetchone()
@@ -277,7 +277,7 @@ def processar_opcao(usuario_id, opcao_id):
             print("Opção não encontrada.")
             return
 
-        efeito_atributo, proximo_capitulo, atributo = opcao
+        efeito_atributo, atributo, proximo_capitulo = opcao
 
         # Passo 3: Verificar o atributo e realizar a movimentação
         if atributo == 'idsala':
@@ -304,10 +304,26 @@ def processar_opcao(usuario_id, opcao_id):
 
             print(f"Movimento registrado: Capítulo {proximo_capitulo}, Sala {sala_id}, Usuário {usuario_id}")
 
-        # Outras ações baseadas na opção podem ser adicionadas aqui
+        else:
+            # Subtrair o efeito_atributo do atributo correspondente
+            cur.execute(
+                f"UPDATE vitalidade SET {atributo} = {atributo} - %s WHERE idusuario = %s",
+                (efeito_atributo, usuario_id)
+            )
+
+            # Atualizar o idcapitulo do usuário na tabela 'usuario' se necessário
+            cur.execute(
+                "UPDATE usuario SET idcapitulo = %s WHERE id = %s",
+                (proximo_capitulo, usuario_id)
+            )
+
+            conn.commit()  # Commit para salvar as mudanças
+
+            print(f"Opção processada: Atributo {atributo} ajustado. Novo valor: {atributo} - {efeito_atributo}")
 
     except Exception as e:
         print(f"Erro ao processar a opção: {e}")
+
 
 
 def iniciar_jogo(usuario_id):
@@ -347,19 +363,46 @@ def iniciar_jogo(usuario_id):
             print(f"\nObjetivo: {objetivo}")
             input("\nPressione Enter para continuar...")
 
-            # Passo 4: Buscar e mostrar todas as opções disponíveis para o capítulo atual
+            # Passo 4: Buscar todas as opções disponíveis para o capítulo atual
             cur.execute(
-                "SELECT idopcao, descricao FROM opcao WHERE iddecisao = %s",
+                "SELECT idopcao, descricao, efeito_atributo, atributo, peso FROM opcao WHERE iddecisao = %s",
                 (capitulo_atual,)
             )
-            opcoes = cur.fetchall()  # Use fetchall() para obter todas as opções
+            opcoes = cur.fetchall()
 
             if not opcoes:
                 print("Nenhuma opção encontrada para o capítulo atual.")
                 break  # Sai do loop se não houver opções
 
-            print("\nEscolha uma das opções:")
+            # Passo 4a: Obter os atributos do usuário da tabela vitalidade
+            cur.execute(
+                "SELECT popularidade, agilidade, forca, nado, carisma, combate, perspicacia, furtividade, sobrevivencia, precisao FROM vitalidade WHERE idusuario = %s",
+                (usuario_id,)
+            )
+            atributos = cur.fetchone()
+            if atributos is None:
+                print("Atributos não encontrados.")
+                break  # Sai do loop se os atributos não forem encontrados
+
+            atributos_dict = dict(zip(
+                ['popularidade', 'agilidade', 'forca', 'nado', 'carisma', 'combate', 'perspicacia', 'furtividade', 'sobrevivencia', 'precisao'],
+                atributos
+            ))
+
+            # Filtrar opções com base no atributo e peso
+            opcoes_filtradas = []
             for opcao in opcoes:
+                idopcao, descricao, efeito_atributo, atributo, peso = opcao
+                if atributos_dict.get(atributo, 0) >= peso:
+                    opcoes_filtradas.append((idopcao, descricao))
+
+            if not opcoes_filtradas:
+                print("Nenhuma opção disponível com base em seus atributos.")
+                continue  # Retorna ao início do loop se não houver opções filtradas
+
+            # Passo 4b: Mostrar as opções filtradas
+            print("\nEscolha uma das opções:")
+            for opcao in opcoes_filtradas:
                 idopcao, descricao = opcao
                 print(f"{idopcao}. {descricao}")
 
@@ -378,7 +421,7 @@ def iniciar_jogo(usuario_id):
                 continue  # Retorna ao início do loop se a escolha não for um número
 
             # Verificar se a escolha está entre as opções disponíveis
-            if escolha not in [opcao[0] for opcao in opcoes]:
+            if escolha not in [opcao[0] for opcao in opcoes_filtradas]:
                 print("Escolha inválida.")
                 continue  # Retorna ao início do loop se a escolha for inválida
 
@@ -387,8 +430,6 @@ def iniciar_jogo(usuario_id):
 
     except Exception as e:
         print(f"Erro ao iniciar o jogo: {e}")
-
-
 
 
 # Função para exibir o menu na tela com curses

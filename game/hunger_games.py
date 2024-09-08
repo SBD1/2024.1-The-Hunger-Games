@@ -312,69 +312,82 @@ def processar_opcao(usuario_id, opcao_id):
 
 def iniciar_jogo(usuario_id):
     try:
-        # Passo 1: Buscar o id do personagem e o id do capítulo a partir do id do usuário
-        cur.execute(
-            "SELECT idpersonagem, idcapitulo FROM usuario WHERE id = %s",
-            (usuario_id,)
-        )
-        result = cur.fetchone()
-        if result is None:
-            print("Usuário não encontrado.")
-            return
+        while True:  # Inicia o loop do jogo
+            # Passo 1: Buscar o id do personagem e o id do capítulo a partir do id do usuário
+            cur.execute(
+                "SELECT idpersonagem, idcapitulo FROM usuario WHERE id = %s",
+                (usuario_id,)
+            )
+            result = cur.fetchone()
+            if result is None:
+                print("Usuário não encontrado.")
+                break  # Sai do loop se o usuário não for encontrado
 
-        personagem_id = result[0]
-        capitulo_atual = result[1]
+            personagem_id = result[0]
+            capitulo_atual = result[1]
 
-        if capitulo_atual is None:
-            print("O personagem ainda não foi vinculado a um capítulo.")
-            return
+            if capitulo_atual is None:
+                print("O personagem ainda não foi vinculado a um capítulo.")
+                break  # Sai do loop se o personagem não estiver vinculado a um capítulo
 
-        # Passo 2: Buscar o texto e o objetivo do capítulo atual
-        cur.execute(
-            "SELECT texto, objetivo FROM capitulo WHERE idcapitulo = %s",
-            (capitulo_atual,)
-        )
-        capitulo = cur.fetchone()
-        if capitulo is None:
-            print("Capítulo não encontrado.")
-            return
+            # Passo 2: Buscar o texto e o objetivo do capítulo atual
+            cur.execute(
+                "SELECT texto, objetivo FROM capitulo WHERE idcapitulo = %s",
+                (capitulo_atual,)
+            )
+            capitulo = cur.fetchone()
+            if capitulo is None:
+                print("Capítulo não encontrado.")
+                break  # Sai do loop se o capítulo não for encontrado
 
-        texto, objetivo = capitulo
+            texto, objetivo = capitulo
 
-        # Passo 3: Mostrar o texto e o objetivo
-        print(texto)
-        print(f"\nObjetivo: {objetivo}")
-        input("\nPressione Enter para continuar...")
+            # Passo 3: Mostrar o texto e o objetivo
+            print(texto)
+            print(f"\nObjetivo: {objetivo}")
+            input("\nPressione Enter para continuar...")
 
-        # Passo 4: Buscar e mostrar todas as opções disponíveis para o capítulo atual
-        cur.execute(
-            "SELECT idopcao, descricao FROM opcao WHERE iddecisao = %s",
-            (capitulo_atual,)
-        )
-        opcoes = cur.fetchall()  # Use fetchall() para obter todas as opções
+            # Passo 4: Buscar e mostrar todas as opções disponíveis para o capítulo atual
+            cur.execute(
+                "SELECT idopcao, descricao FROM opcao WHERE iddecisao = %s",
+                (capitulo_atual,)
+            )
+            opcoes = cur.fetchall()  # Use fetchall() para obter todas as opções
 
-        if not opcoes:
-            print("Nenhuma opção encontrada para o capítulo atual.")
-            return
+            if not opcoes:
+                print("Nenhuma opção encontrada para o capítulo atual.")
+                break  # Sai do loop se não houver opções
 
-        print("\nEscolha uma das opções:")
-        for opcao in opcoes:
-            idopcao, descricao = opcao
-            print(f"{idopcao}. {descricao}")
+            print("\nEscolha uma das opções:")
+            for opcao in opcoes:
+                idopcao, descricao = opcao
+                print(f"{idopcao}. {descricao}")
 
-        # Passo 5: Capturar a escolha do jogador
-        escolha = int(input("\nDigite o número da opção escolhida: "))
+            # Passo 5: Capturar a escolha do jogador
+            escolha = input("\nDigite o número da opção escolhida (ou 'sair' para encerrar): ")
 
-        # Verificar se a escolha está entre as opções disponíveis
-        if escolha not in [opcao[0] for opcao in opcoes]:
-            print("Escolha inválida.")
-            return
+            if escolha.lower() == 'sair':
+                print("Você saiu do jogo.")
+                break  # Sai do loop se o jogador escolher sair
 
-        # Passo 6: Processar a opção escolhida
-        processar_opcao(usuario_id, escolha)
+            # Tenta converter a escolha para um número inteiro
+            try:
+                escolha = int(escolha)
+            except ValueError:
+                print("Escolha inválida. Por favor, digite um número ou 'sair'.")
+                continue  # Retorna ao início do loop se a escolha não for um número
+
+            # Verificar se a escolha está entre as opções disponíveis
+            if escolha not in [opcao[0] for opcao in opcoes]:
+                print("Escolha inválida.")
+                continue  # Retorna ao início do loop se a escolha for inválida
+
+            # Passo 6: Processar a opção escolhida
+            processar_opcao(usuario_id, escolha)
 
     except Exception as e:
         print(f"Erro ao iniciar o jogo: {e}")
+
 
 
 

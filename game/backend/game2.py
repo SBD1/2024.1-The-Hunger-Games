@@ -6,7 +6,7 @@ import sys
 import os
 import time
 import threading
-from capital import mostrarSimbolo
+# from capital import mostrarSimbolo
 
 # Inicializar Colorama
 init(autoreset=True)
@@ -676,7 +676,7 @@ def menu_inicial(stdscr):
 
             elif current_row == 3:  # Sair
                 exibir_texto_centralizado(stdscr, "Saindo do jogo...")
-                mostrarSimbolo()
+                # mostrarSimbolo()
                 sys.exit()
                 
 

@@ -428,6 +428,48 @@ def processar_opcao(usuario_id, opcao_id):
         print(f"Erro ao processar a opção: {e}")
 
 
+import curses
+
+# Função para exibir as opções e capturar a escolha usando curses
+def exibir_opcoes_com_curses(stdscr, opcoes):
+    curses.curs_set(0)  # Oculta o cursor
+    stdscr.clear()
+    stdscr.refresh()
+
+    current_selection = 0  # Índice da opção selecionada atualmente
+
+    while True:
+        stdscr.clear()
+        stdscr.border()
+        height, width = stdscr.getmaxyx()
+
+        # Exibir as opções na tela
+        for idx, opcao in enumerate(opcoes):
+            idopcao, descricao = opcao
+            x = width // 2 - len(descricao) // 2
+            y = height // 2 - len(opcoes) // 2 + idx
+
+            # Destaque para a opção selecionada
+            if idx == current_selection:
+                stdscr.addstr(y, x, f"> {descricao}", curses.A_REVERSE)
+            else:
+                stdscr.addstr(y, x, f"  {descricao}")
+
+        stdscr.refresh()
+
+        # Captura a tecla pressionada
+        key = stdscr.getch()
+
+        # Navegação com as setas
+        if key == curses.KEY_UP and current_selection > 0:
+            current_selection -= 1
+        elif key == curses.KEY_DOWN and current_selection < len(opcoes) - 1:
+            current_selection += 1
+        elif key == ord('\n'):  # Tecla Enter para selecionar
+            return opcoes[current_selection][0]  # Retorna o id da opção selecionada
+        elif key == ord('q'):  # Tecla 'q' para sair
+            return 'sair'
+
 def iniciar_jogo(usuario_id):
     try:
         while True:  # Inicia o loop do jogo
@@ -502,25 +544,12 @@ def iniciar_jogo(usuario_id):
                 print("Nenhuma opção disponível com base em seus atributos.")
                 continue  # Retorna ao início do loop se não houver opções filtradas
 
-            # Passo 4b: Mostrar as opções filtradas
-            print("\nEscolha uma das opções:")
-            for opcao in opcoes_filtradas:
-                idopcao, descricao = opcao
-                print(f"{idopcao}. {descricao}")
+            # Passo 4b: Usar curses para exibir as opções filtradas e capturar a escolha do jogador
+            escolha = curses.wrapper(exibir_opcoes_com_curses, opcoes_filtradas)
 
-            # Passo 5: Capturar a escolha do jogador
-            escolha = input("\nDigite o número da opção escolhida (ou 'sair' para encerrar): ")
-
-            if escolha.lower() == 'sair':
+            if escolha == 'sair':
                 print("Você saiu do jogo.")
                 break  # Sai do loop se o jogador escolher sair
-
-            # Tenta converter a escolha para um número inteiro
-            try:
-                escolha = int(escolha)
-            except ValueError:
-                print("Escolha inválida. Por favor, digite um número ou 'sair'.")
-                continue  # Retorna ao início do loop se a escolha não for um número
 
             # Verificar se a escolha está entre as opções disponíveis
             if escolha not in [opcao[0] for opcao in opcoes_filtradas]:
@@ -532,6 +561,7 @@ def iniciar_jogo(usuario_id):
 
     except Exception as e:
         print(f"Erro ao iniciar o jogo: {e}")
+
 
 # Função para exibir o menu na tela com curses
 def print_menu(stdscr, selected_row_idx):

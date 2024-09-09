@@ -28,15 +28,36 @@ cur = conn.cursor()
 def TocarSom():
     try:
         pygame.mixer.init()
-        pygame.mixer.music.load("game\The Hunger Games - Deep in the Meadow.mp3")
-        pygame.mixer.music.set_volume(0.2)  # Volume ajustável entre 0.0 e 1.0
-        # Reproduz a música indefinidamente
+        if not pygame.mixer.music.get_busy():
+            pygame.mixer.music.load("game\The Hunger Games - Deep in the Meadow.mp3")
+            pygame.mixer.music.set_volume(0.2)
+            pygame.mixer.music.play(-1)  # Loop infinito
+    except pygame.error as e:
+        print(f"Erro ao tocar a música: {e}")
+    except Exception as e:
+        print(f"Erro inesperado: {e}")
+
+def MusicaAbertura():
+    try:
+        pygame.mixer.music.stop()  # Para qualquer música que esteja tocando
+        pygame.mixer.music.load("game\Abertura.mp3")
+        pygame.mixer.music.set_volume(0.2)
         pygame.mixer.music.play()
     except pygame.error as e:
         print(f"Erro ao tocar a música: {e}")
     except Exception as e:
         print(f"Erro inesperado: {e}")
 
+def MusicaEntrevista():
+    try:
+        pygame.mixer.music.stop()  # Para qualquer música que esteja tocando
+        pygame.mixer.music.load("game\EntrevistaSong.mp3")
+        pygame.mixer.music.set_volume(0.2)
+        pygame.mixer.music.play()
+    except pygame.error as e:
+        print(f"Erro ao tocar a música: {e}")
+    except Exception as e:
+        print(f"Erro inesperado: {e}")
 
 def display_stats_curses(stdscr, stats):
     curses.curs_set(0)
@@ -498,6 +519,7 @@ def exibir_texto_com_cores(stdscr, texto, objetivo, texto_consequencia):
 
 def iniciar_jogo(usuario_id):
     try:
+        TocarSom()  # Tocar a música de fundo no início
         while True:
             # Busca o personagem e capítulo atual do usuário
             cur.execute(
@@ -515,6 +537,16 @@ def iniciar_jogo(usuario_id):
             if capitulo_atual is None:
                 print("O personagem ainda não foi vinculado a um capítulo.")
                 break
+
+            # Condições para tocar músicas específicas nos capítulos
+            if capitulo_atual == 6:
+                MusicaAbertura()
+            elif capitulo_atual in [7, 8, 9]:
+                MusicaEntrevista()
+            else:
+                # Retorna à música de fundo se nenhuma outra estiver tocando
+                if not pygame.mixer.music.get_busy():
+                    TocarSom()
 
             # Busca o texto e objetivo do capítulo atual
             cur.execute(

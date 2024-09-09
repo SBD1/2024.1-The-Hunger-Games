@@ -19,7 +19,7 @@ conn = psycopg2.connect(
     user="postgres",
     password="20082003",
     host="localhost",
-    port="5433"
+    port="5432"
 )
 
 # Criar um cursor
@@ -28,36 +28,15 @@ cur = conn.cursor()
 def TocarSom():
     try:
         pygame.mixer.init()
-        if not pygame.mixer.music.get_busy():
-            pygame.mixer.music.load("game\The Hunger Games - Deep in the Meadow.mp3")
-            pygame.mixer.music.set_volume(0.2)
-            pygame.mixer.music.play(-1)  # Loop infinito
-    except pygame.error as e:
-        print(f"Erro ao tocar a música: {e}")
-    except Exception as e:
-        print(f"Erro inesperado: {e}")
-
-def MusicaAbertura():
-    try:
-        pygame.mixer.music.stop()  # Para qualquer música que esteja tocando
-        pygame.mixer.music.load("game\Abertura.mp3")
-        pygame.mixer.music.set_volume(0.2)
+        pygame.mixer.music.load("game\The Hunger Games - Deep in the Meadow.mp3")
+        pygame.mixer.music.set_volume(0.2)  # Volume ajustável entre 0.0 e 1.0
+        # Reproduz a música indefinidamente
         pygame.mixer.music.play()
     except pygame.error as e:
         print(f"Erro ao tocar a música: {e}")
     except Exception as e:
         print(f"Erro inesperado: {e}")
 
-def MusicaEntrevista():
-    try:
-        pygame.mixer.music.stop()  # Para qualquer música que esteja tocando
-        pygame.mixer.music.load("game\EntrevistaSong.mp3")
-        pygame.mixer.music.set_volume(0.2)
-        pygame.mixer.music.play()
-    except pygame.error as e:
-        print(f"Erro ao tocar a música: {e}")
-    except Exception as e:
-        print(f"Erro inesperado: {e}")
 
 def display_stats_curses(stdscr, stats):
     curses.curs_set(0)
@@ -409,7 +388,7 @@ def processar_opcao(usuario_id, opcao_id):
             )
         else:
             cur.execute(
-                f"UPDATE vitalidade SET {atributo} = {atributo} - %s WHERE idusuario = %s",
+                f"UPDATE vitalidade SET {atributo} = {atributo} + %s WHERE idusuario = %s",
                 (efeito_atributo, usuario_id)
             )
             cur.execute(
@@ -417,7 +396,7 @@ def processar_opcao(usuario_id, opcao_id):
                 (proximo_capitulo, usuario_id)
             )
 
-        # Verificar a consequência para a opção escolhida
+        # Passo 4: Verificar a consequência para a opção escolhida
         cur.execute(
             "SELECT texto, atributo, recompensa FROM consequencia WHERE idopcao = %s",
             (opcao_id,)
@@ -426,7 +405,7 @@ def processar_opcao(usuario_id, opcao_id):
         texto_consequencia = None
         if consequencia:
             texto_consequencia, atributo_consequencia, recompensa = consequencia
-            if atributo_consequencia in ['carisma', 'perspicacia', 'popularidade']:
+            if atributo_consequencia in ['carisma', 'perspicacia', 'popularidade', 'nado','hidratacao', 'stamina', 'calor','dano','agilidade', 'forca', 'nado', 'combate','furtividade','sobrevivencia','precisao','amigo','hp']:
                 cur.execute(
                     f"UPDATE vitalidade SET {atributo_consequencia} = {atributo_consequencia} + %s WHERE idusuario = %s",
                     (recompensa, usuario_id)
@@ -477,7 +456,8 @@ def exibir_opcoes_com_curses(stdscr, opcoes):
             return opcoes[current_selection][0]  # Retorna o id da opção selecionada
         elif key == ord('q'):  # Tecla 'q' para sair
             return 'sair'
-        
+
+# Função para exibir texto com cores específicas usando curses
 def exibir_texto_com_cores(stdscr, texto, objetivo, texto_consequencia):
     curses.start_color()
     curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLACK)
@@ -487,36 +467,29 @@ def exibir_texto_com_cores(stdscr, texto, objetivo, texto_consequencia):
     stdscr.clear()
     height, width = stdscr.getmaxyx()
 
-    def add_centered_text(y, text, color_pair):
-        """ Helper function to add centered text, clipping if too long. """
-        if y < 0 or y >= height:
-            return  # Avoid adding text outside the screen bounds
-        clipped_text = text[:width]  # Clip text to the screen width
-        x_pos = (width - len(clipped_text)) // 2
-        try:
-            stdscr.attron(curses.color_pair(color_pair))
-            stdscr.addstr(y, x_pos, clipped_text)
-            stdscr.attroff(curses.color_pair(color_pair))
-        except curses.error:
-            pass  # Ignore errors related to drawing outside screen bounds
+    # Exibe o texto da história
+    stdscr.attron(curses.color_pair(2))
+    stdscr.addstr(0, 0, texto)
+    stdscr.attroff(curses.color_pair(2))
 
-    # Centraliza o texto da história
-    add_centered_text(height // 2 - 3, texto, 2)
+    # Exibe o objetivo
+    stdscr.attron(curses.color_pair(1))
+    stdscr.addstr(2, 0, objetivo)
+    stdscr.attroff(curses.color_pair(1))
 
-    # Centraliza o objetivo
-    add_centered_text(height // 2 - 1, objetivo, 1)
-
-    # Centraliza o texto da consequência, se existir
+    # Exibe o texto da consequência
     if texto_consequencia:
-        add_centered_text(height // 2 + 1, texto_consequencia, 3)
+        stdscr.attron(curses.color_pair(3))
+        stdscr.addstr(4, 0, texto_consequencia)
+        stdscr.attroff(curses.color_pair(3))
 
-    # Centraliza a mensagem de continuação
     mensagem = "Aperte Enter para continuar..."
-    add_centered_text(height // 2 + 5, mensagem, 3)
-
+    x_pos = (width - len(mensagem)) // 2
+    stdscr.addstr(8, x_pos, mensagem)
     stdscr.refresh()
     stdscr.getch()
 
+# Função principal do jogo
 def iniciar_jogo(usuario_id):
     try:
         while True:
@@ -536,15 +509,6 @@ def iniciar_jogo(usuario_id):
             if capitulo_atual is None:
                 print("O personagem ainda não foi vinculado a um capítulo.")
                 break
-
-            if capitulo_atual == 6:
-                MusicaAbertura()
-            elif capitulo_atual in [7, 8, 9]:
-                MusicaEntrevista()
-            else:
-                # Retorna à música de fundo se nenhuma outra estiver tocando
-                if not pygame.mixer.music.get_busy():
-                    TocarSom()
 
             # Busca o texto e objetivo do capítulo atual
             cur.execute(
@@ -609,13 +573,14 @@ def iniciar_jogo(usuario_id):
             # Processa a opção selecionada para obter o texto da consequência
             texto_consequencia = processar_opcao(usuario_id, escolha)
             if texto_consequencia is None:
-                texto_consequencia = ""
+                texto_consequencia = ""  # Exibe vazio se não houver consequência
 
-            # Exibe o texto da consequência
+            # Exibe o texto do capítulo com a nova consequência
             curses.wrapper(exibir_texto_com_cores, " ", " ", texto_consequencia)
 
     except Exception as e:
         print(f"Erro ao iniciar o jogo: {e}")
+
 
 # Função para exibir o menu na tela com curses
 def print_menu(stdscr, selected_row_idx):

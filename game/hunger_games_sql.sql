@@ -5,7 +5,7 @@
 -- Dumped from database version 15.8
 -- Dumped by pg_dump version 16.4
 
--- Started on 2024-09-08 16:08:26
+-- Started on 2024-09-09 06:05:52
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -19,7 +19,7 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- TOC entry 286 (class 1255 OID 16612)
+-- TOC entry 290 (class 1255 OID 16612)
 -- Name: adicionar_item_ao_inventario(integer, integer); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -68,7 +68,7 @@ $$;
 ALTER FUNCTION public.adicionar_item_ao_inventario(p_idpersonagem integer, p_iditem integer) OWNER TO postgres;
 
 --
--- TOC entry 287 (class 1255 OID 17033)
+-- TOC entry 291 (class 1255 OID 17033)
 -- Name: atualizar_capitulo_usuario(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -89,7 +89,7 @@ $$;
 ALTER FUNCTION public.atualizar_capitulo_usuario() OWNER TO postgres;
 
 --
--- TOC entry 269 (class 1255 OID 16998)
+-- TOC entry 273 (class 1255 OID 16998)
 -- Name: atualizar_idcapitulo(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -114,7 +114,7 @@ $$;
 ALTER FUNCTION public.atualizar_idcapitulo() OWNER TO postgres;
 
 --
--- TOC entry 288 (class 1255 OID 17055)
+-- TOC entry 293 (class 1255 OID 17055)
 -- Name: atualizar_vitalidade(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -146,7 +146,7 @@ $$;
 ALTER FUNCTION public.atualizar_vitalidade() OWNER TO postgres;
 
 --
--- TOC entry 270 (class 1255 OID 16611)
+-- TOC entry 274 (class 1255 OID 16611)
 -- Name: criar_inventario(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -166,7 +166,7 @@ $$;
 ALTER FUNCTION public.criar_inventario() OWNER TO postgres;
 
 --
--- TOC entry 284 (class 1255 OID 17053)
+-- TOC entry 288 (class 1255 OID 17053)
 -- Name: criar_vitalidade(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -186,7 +186,7 @@ $$;
 ALTER FUNCTION public.criar_vitalidade() OWNER TO postgres;
 
 --
--- TOC entry 271 (class 1255 OID 17025)
+-- TOC entry 275 (class 1255 OID 17025)
 -- Name: excluir_localizacao_anterior(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -207,7 +207,7 @@ $$;
 ALTER FUNCTION public.excluir_localizacao_anterior() OWNER TO postgres;
 
 --
--- TOC entry 272 (class 1255 OID 17043)
+-- TOC entry 276 (class 1255 OID 17043)
 -- Name: inserir_localizacao(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -230,7 +230,7 @@ $$;
 ALTER FUNCTION public.inserir_localizacao() OWNER TO postgres;
 
 --
--- TOC entry 273 (class 1255 OID 17045)
+-- TOC entry 277 (class 1255 OID 17045)
 -- Name: inserir_localizacao_sala_1(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -253,7 +253,36 @@ $$;
 ALTER FUNCTION public.inserir_localizacao_sala_1() OWNER TO postgres;
 
 --
--- TOC entry 268 (class 1255 OID 16895)
+-- TOC entry 292 (class 1255 OID 17119)
+-- Name: reduzir_vitalidade(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.reduzir_vitalidade() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$BEGIN
+    -- Verifica se a coluna vitalidade não é NULL antes de atualizar
+    IF EXISTS (
+        SELECT 1
+        FROM vitalidade
+        WHERE idusuario = NEW.id
+          AND vitalidade IS NOT NULL
+    ) THEN
+        -- Atualiza a vitalidade do usuário, subtraindo 25
+        UPDATE vitalidade
+        SET vitalidade = vitalidade - 25
+        WHERE idusuario = NEW.id;
+    END IF;
+
+    RETURN NEW;
+END;
+
+$$;
+
+
+ALTER FUNCTION public.reduzir_vitalidade() OWNER TO postgres;
+
+--
+-- TOC entry 272 (class 1255 OID 16895)
 -- Name: verificar_nome_unico(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -305,7 +334,7 @@ CREATE SEQUENCE public.animal_idanimal_seq
 ALTER SEQUENCE public.animal_idanimal_seq OWNER TO postgres;
 
 --
--- TOC entry 3654 (class 0 OID 0)
+-- TOC entry 3681 (class 0 OID 0)
 -- Dependencies: 245
 -- Name: animal_idanimal_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -345,7 +374,7 @@ CREATE SEQUENCE public.arma_idarma_seq
 ALTER SEQUENCE public.arma_idarma_seq OWNER TO postgres;
 
 --
--- TOC entry 3655 (class 0 OID 0)
+-- TOC entry 3682 (class 0 OID 0)
 -- Dependencies: 224
 -- Name: arma_idarma_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -386,7 +415,7 @@ CREATE SEQUENCE public.bestante_idbestante_seq
 ALTER SEQUENCE public.bestante_idbestante_seq OWNER TO postgres;
 
 --
--- TOC entry 3656 (class 0 OID 0)
+-- TOC entry 3683 (class 0 OID 0)
 -- Dependencies: 247
 -- Name: bestante_idbestante_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -425,7 +454,7 @@ CREATE SEQUENCE public.capitulo_idcapitulo_seq
 ALTER SEQUENCE public.capitulo_idcapitulo_seq OWNER TO postgres;
 
 --
--- TOC entry 3657 (class 0 OID 0)
+-- TOC entry 3684 (class 0 OID 0)
 -- Dependencies: 255
 -- Name: capitulo_idcapitulo_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -464,7 +493,7 @@ CREATE SEQUENCE public.compartimento_idcompartimento_seq
 ALTER SEQUENCE public.compartimento_idcompartimento_seq OWNER TO postgres;
 
 --
--- TOC entry 3658 (class 0 OID 0)
+-- TOC entry 3685 (class 0 OID 0)
 -- Dependencies: 230
 -- Name: compartimento_idcompartimento_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -506,7 +535,7 @@ CREATE SEQUENCE public.consequencia_idconsequencia_seq
 ALTER SEQUENCE public.consequencia_idconsequencia_seq OWNER TO postgres;
 
 --
--- TOC entry 3659 (class 0 OID 0)
+-- TOC entry 3686 (class 0 OID 0)
 -- Dependencies: 266
 -- Name: consequencia_idconsequencia_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -544,7 +573,7 @@ CREATE SEQUENCE public.construtor_idconstrutor_seq
 ALTER SEQUENCE public.construtor_idconstrutor_seq OWNER TO postgres;
 
 --
--- TOC entry 3660 (class 0 OID 0)
+-- TOC entry 3687 (class 0 OID 0)
 -- Dependencies: 234
 -- Name: construtor_idconstrutor_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -587,7 +616,7 @@ CREATE SEQUENCE public.consumivel_idconsumivel_seq
 ALTER SEQUENCE public.consumivel_idconsumivel_seq OWNER TO postgres;
 
 --
--- TOC entry 3661 (class 0 OID 0)
+-- TOC entry 3688 (class 0 OID 0)
 -- Dependencies: 226
 -- Name: consumivel_idconsumivel_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -625,7 +654,7 @@ CREATE SEQUENCE public.decisao_iddecisao_seq
 ALTER SEQUENCE public.decisao_iddecisao_seq OWNER TO postgres;
 
 --
--- TOC entry 3662 (class 0 OID 0)
+-- TOC entry 3689 (class 0 OID 0)
 -- Dependencies: 259
 -- Name: decisao_iddecisao_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -674,7 +703,7 @@ CREATE SEQUENCE public.distrito_iddistrito_seq
 ALTER SEQUENCE public.distrito_iddistrito_seq OWNER TO postgres;
 
 --
--- TOC entry 3663 (class 0 OID 0)
+-- TOC entry 3690 (class 0 OID 0)
 -- Dependencies: 240
 -- Name: distrito_iddistrito_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -713,12 +742,54 @@ CREATE SEQUENCE public.historia_idhistoria_seq
 ALTER SEQUENCE public.historia_idhistoria_seq OWNER TO postgres;
 
 --
--- TOC entry 3664 (class 0 OID 0)
+-- TOC entry 3691 (class 0 OID 0)
 -- Dependencies: 257
 -- Name: historia_idhistoria_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.historia_idhistoria_seq OWNED BY public.historia.idhistoria;
+
+
+--
+-- TOC entry 271 (class 1259 OID 17098)
+-- Name: ingrediente; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.ingrediente (
+    idingrediente integer NOT NULL,
+    idreceita integer,
+    iditem_necessario1 integer,
+    quantidade1 integer NOT NULL,
+    iditem_necessario2 integer,
+    quantidade2 integer NOT NULL
+);
+
+
+ALTER TABLE public.ingrediente OWNER TO postgres;
+
+--
+-- TOC entry 270 (class 1259 OID 17097)
+-- Name: ingrediente_idingrediente_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.ingrediente_idingrediente_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.ingrediente_idingrediente_seq OWNER TO postgres;
+
+--
+-- TOC entry 3692 (class 0 OID 0)
+-- Dependencies: 270
+-- Name: ingrediente_idingrediente_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.ingrediente_idingrediente_seq OWNED BY public.ingrediente.idingrediente;
 
 
 --
@@ -728,7 +799,7 @@ ALTER SEQUENCE public.historia_idhistoria_seq OWNED BY public.historia.idhistori
 
 CREATE TABLE public.inventario (
     idinventario integer NOT NULL,
-    idpersonagem integer NOT NULL,
+    idusuario integer NOT NULL,
     capmax integer DEFAULT 2,
     capatual integer DEFAULT 0
 );
@@ -753,7 +824,7 @@ CREATE SEQUENCE public.inventario_idinventario_seq
 ALTER SEQUENCE public.inventario_idinventario_seq OWNER TO postgres;
 
 --
--- TOC entry 3665 (class 0 OID 0)
+-- TOC entry 3693 (class 0 OID 0)
 -- Dependencies: 242
 -- Name: inventario_idinventario_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -791,7 +862,7 @@ CREATE SEQUENCE public.item_iditem_seq
 ALTER SEQUENCE public.item_iditem_seq OWNER TO postgres;
 
 --
--- TOC entry 3666 (class 0 OID 0)
+-- TOC entry 3694 (class 0 OID 0)
 -- Dependencies: 220
 -- Name: item_iditem_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -807,7 +878,8 @@ ALTER SEQUENCE public.item_iditem_seq OWNED BY public.item.iditem;
 CREATE TABLE public.item_inventario (
     iditeminventario integer NOT NULL,
     idinventario integer NOT NULL,
-    iditem integer NOT NULL
+    iditem integer NOT NULL,
+    quantidade integer
 );
 
 
@@ -830,7 +902,7 @@ CREATE SEQUENCE public.item_inventario_iditeminventario_seq
 ALTER SEQUENCE public.item_inventario_iditeminventario_seq OWNER TO postgres;
 
 --
--- TOC entry 3667 (class 0 OID 0)
+-- TOC entry 3695 (class 0 OID 0)
 -- Dependencies: 251
 -- Name: item_inventario_iditeminventario_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -869,7 +941,7 @@ CREATE SEQUENCE public.legivel_idlegivel_seq
 ALTER SEQUENCE public.legivel_idlegivel_seq OWNER TO postgres;
 
 --
--- TOC entry 3668 (class 0 OID 0)
+-- TOC entry 3696 (class 0 OID 0)
 -- Dependencies: 228
 -- Name: legivel_idlegivel_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -923,7 +995,7 @@ CREATE SEQUENCE public.mapa_idmapa_seq
 ALTER SEQUENCE public.mapa_idmapa_seq OWNER TO postgres;
 
 --
--- TOC entry 3669 (class 0 OID 0)
+-- TOC entry 3697 (class 0 OID 0)
 -- Dependencies: 214
 -- Name: mapa_idmapa_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -966,7 +1038,7 @@ CREATE SEQUENCE public.opcao_idopcao_seq
 ALTER SEQUENCE public.opcao_idopcao_seq OWNER TO postgres;
 
 --
--- TOC entry 3670 (class 0 OID 0)
+-- TOC entry 3698 (class 0 OID 0)
 -- Dependencies: 261
 -- Name: opcao_idopcao_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -1022,7 +1094,7 @@ CREATE SEQUENCE public.personagem_capitulo_id_seq
 ALTER SEQUENCE public.personagem_capitulo_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3671 (class 0 OID 0)
+-- TOC entry 3699 (class 0 OID 0)
 -- Dependencies: 263
 -- Name: personagem_capitulo_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -1047,7 +1119,7 @@ CREATE SEQUENCE public.personagem_idpersonagem_seq
 ALTER SEQUENCE public.personagem_idpersonagem_seq OWNER TO postgres;
 
 --
--- TOC entry 3672 (class 0 OID 0)
+-- TOC entry 3700 (class 0 OID 0)
 -- Dependencies: 236
 -- Name: personagem_idpersonagem_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -1067,6 +1139,45 @@ CREATE TABLE public.personagem_jogavel (
 
 
 ALTER TABLE public.personagem_jogavel OWNER TO postgres;
+
+--
+-- TOC entry 269 (class 1259 OID 17083)
+-- Name: receita; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.receita (
+    idreceita integer NOT NULL,
+    iditem_resultado integer,
+    nome text NOT NULL
+);
+
+
+ALTER TABLE public.receita OWNER TO postgres;
+
+--
+-- TOC entry 268 (class 1259 OID 17082)
+-- Name: receita_idreceita_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.receita_idreceita_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.receita_idreceita_seq OWNER TO postgres;
+
+--
+-- TOC entry 3701 (class 0 OID 0)
+-- Dependencies: 268
+-- Name: receita_idreceita_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.receita_idreceita_seq OWNED BY public.receita.idreceita;
+
 
 --
 -- TOC entry 217 (class 1259 OID 16410)
@@ -1101,7 +1212,7 @@ CREATE SEQUENCE public.regiao_idregiao_seq
 ALTER SEQUENCE public.regiao_idregiao_seq OWNER TO postgres;
 
 --
--- TOC entry 3673 (class 0 OID 0)
+-- TOC entry 3702 (class 0 OID 0)
 -- Dependencies: 216
 -- Name: regiao_idregiao_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -1141,7 +1252,7 @@ CREATE SEQUENCE public.sala_idsala_seq
 ALTER SEQUENCE public.sala_idsala_seq OWNER TO postgres;
 
 --
--- TOC entry 3674 (class 0 OID 0)
+-- TOC entry 3703 (class 0 OID 0)
 -- Dependencies: 218
 -- Name: sala_idsala_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -1181,7 +1292,7 @@ CREATE SEQUENCE public.tributo_idtributo_seq
 ALTER SEQUENCE public.tributo_idtributo_seq OWNER TO postgres;
 
 --
--- TOC entry 3675 (class 0 OID 0)
+-- TOC entry 3704 (class 0 OID 0)
 -- Dependencies: 249
 -- Name: tributo_idtributo_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -1222,7 +1333,7 @@ CREATE SEQUENCE public.usuario_id_seq
 ALTER SEQUENCE public.usuario_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3676 (class 0 OID 0)
+-- TOC entry 3705 (class 0 OID 0)
 -- Dependencies: 253
 -- Name: usuario_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -1265,7 +1376,7 @@ CREATE SEQUENCE public.utilidade_idutilidade_seq
 ALTER SEQUENCE public.utilidade_idutilidade_seq OWNER TO postgres;
 
 --
--- TOC entry 3677 (class 0 OID 0)
+-- TOC entry 3706 (class 0 OID 0)
 -- Dependencies: 232
 -- Name: utilidade_idutilidade_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -1305,7 +1416,7 @@ CREATE SEQUENCE public.vestimenta_idvestimenta_seq
 ALTER SEQUENCE public.vestimenta_idvestimenta_seq OWNER TO postgres;
 
 --
--- TOC entry 3678 (class 0 OID 0)
+-- TOC entry 3707 (class 0 OID 0)
 -- Dependencies: 222
 -- Name: vestimenta_idvestimenta_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -1336,7 +1447,8 @@ CREATE TABLE public.vitalidade (
     furtividade integer,
     sobrevivencia integer,
     precisao integer,
-    amigo integer
+    amigo integer,
+    hp integer DEFAULT 100
 );
 
 
@@ -1359,7 +1471,7 @@ CREATE SEQUENCE public.vitalidade_idvitalidade_seq
 ALTER SEQUENCE public.vitalidade_idvitalidade_seq OWNER TO postgres;
 
 --
--- TOC entry 3679 (class 0 OID 0)
+-- TOC entry 3708 (class 0 OID 0)
 -- Dependencies: 238
 -- Name: vitalidade_idvitalidade_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -1368,7 +1480,7 @@ ALTER SEQUENCE public.vitalidade_idvitalidade_seq OWNED BY public.vitalidade.idv
 
 
 --
--- TOC entry 3351 (class 2604 OID 16700)
+-- TOC entry 3363 (class 2604 OID 16700)
 -- Name: animal idanimal; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1376,7 +1488,7 @@ ALTER TABLE ONLY public.animal ALTER COLUMN idanimal SET DEFAULT nextval('public
 
 
 --
--- TOC entry 3325 (class 2604 OID 16531)
+-- TOC entry 3336 (class 2604 OID 16531)
 -- Name: arma idarma; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1384,7 +1496,7 @@ ALTER TABLE ONLY public.arma ALTER COLUMN idarma SET DEFAULT nextval('public.arm
 
 
 --
--- TOC entry 3352 (class 2604 OID 16712)
+-- TOC entry 3364 (class 2604 OID 16712)
 -- Name: bestante idbestante; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1392,7 +1504,7 @@ ALTER TABLE ONLY public.bestante ALTER COLUMN idbestante SET DEFAULT nextval('pu
 
 
 --
--- TOC entry 3357 (class 2604 OID 16913)
+-- TOC entry 3369 (class 2604 OID 16913)
 -- Name: capitulo idcapitulo; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1400,7 +1512,7 @@ ALTER TABLE ONLY public.capitulo ALTER COLUMN idcapitulo SET DEFAULT nextval('pu
 
 
 --
--- TOC entry 3330 (class 2604 OID 16573)
+-- TOC entry 3341 (class 2604 OID 16573)
 -- Name: compartimento idcompartimento; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1408,7 +1520,7 @@ ALTER TABLE ONLY public.compartimento ALTER COLUMN idcompartimento SET DEFAULT n
 
 
 --
--- TOC entry 3362 (class 2604 OID 17061)
+-- TOC entry 3374 (class 2604 OID 17061)
 -- Name: consequencia idconsequencia; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1416,7 +1528,7 @@ ALTER TABLE ONLY public.consequencia ALTER COLUMN idconsequencia SET DEFAULT nex
 
 
 --
--- TOC entry 3336 (class 2604 OID 16603)
+-- TOC entry 3347 (class 2604 OID 16603)
 -- Name: construtor idconstrutor; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1424,7 +1536,7 @@ ALTER TABLE ONLY public.construtor ALTER COLUMN idconstrutor SET DEFAULT nextval
 
 
 --
--- TOC entry 3327 (class 2604 OID 16546)
+-- TOC entry 3338 (class 2604 OID 16546)
 -- Name: consumivel idconsumivel; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1432,7 +1544,7 @@ ALTER TABLE ONLY public.consumivel ALTER COLUMN idconsumivel SET DEFAULT nextval
 
 
 --
--- TOC entry 3359 (class 2604 OID 16944)
+-- TOC entry 3371 (class 2604 OID 16944)
 -- Name: decisao iddecisao; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1440,7 +1552,7 @@ ALTER TABLE ONLY public.decisao ALTER COLUMN iddecisao SET DEFAULT nextval('publ
 
 
 --
--- TOC entry 3358 (class 2604 OID 16922)
+-- TOC entry 3370 (class 2604 OID 16922)
 -- Name: historia idhistoria; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1448,7 +1560,15 @@ ALTER TABLE ONLY public.historia ALTER COLUMN idhistoria SET DEFAULT nextval('pu
 
 
 --
--- TOC entry 3348 (class 2604 OID 16668)
+-- TOC entry 3376 (class 2604 OID 17101)
+-- Name: ingrediente idingrediente; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.ingrediente ALTER COLUMN idingrediente SET DEFAULT nextval('public.ingrediente_idingrediente_seq'::regclass);
+
+
+--
+-- TOC entry 3360 (class 2604 OID 16668)
 -- Name: inventario idinventario; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1456,7 +1576,7 @@ ALTER TABLE ONLY public.inventario ALTER COLUMN idinventario SET DEFAULT nextval
 
 
 --
--- TOC entry 3322 (class 2604 OID 16502)
+-- TOC entry 3333 (class 2604 OID 16502)
 -- Name: item iditem; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1464,7 +1584,7 @@ ALTER TABLE ONLY public.item ALTER COLUMN iditem SET DEFAULT nextval('public.ite
 
 
 --
--- TOC entry 3355 (class 2604 OID 16743)
+-- TOC entry 3367 (class 2604 OID 16743)
 -- Name: item_inventario iditeminventario; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1472,7 +1592,7 @@ ALTER TABLE ONLY public.item_inventario ALTER COLUMN iditeminventario SET DEFAUL
 
 
 --
--- TOC entry 3328 (class 2604 OID 16558)
+-- TOC entry 3339 (class 2604 OID 16558)
 -- Name: legivel idlegivel; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1480,7 +1600,7 @@ ALTER TABLE ONLY public.legivel ALTER COLUMN idlegivel SET DEFAULT nextval('publ
 
 
 --
--- TOC entry 3316 (class 2604 OID 16403)
+-- TOC entry 3327 (class 2604 OID 16403)
 -- Name: mapa idmapa; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1488,7 +1608,7 @@ ALTER TABLE ONLY public.mapa ALTER COLUMN idmapa SET DEFAULT nextval('public.map
 
 
 --
--- TOC entry 3360 (class 2604 OID 16958)
+-- TOC entry 3372 (class 2604 OID 16958)
 -- Name: opcao idopcao; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1496,7 +1616,7 @@ ALTER TABLE ONLY public.opcao ALTER COLUMN idopcao SET DEFAULT nextval('public.o
 
 
 --
--- TOC entry 3337 (class 2604 OID 16620)
+-- TOC entry 3348 (class 2604 OID 16620)
 -- Name: personagem idpersonagem; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1504,7 +1624,7 @@ ALTER TABLE ONLY public.personagem ALTER COLUMN idpersonagem SET DEFAULT nextval
 
 
 --
--- TOC entry 3361 (class 2604 OID 16977)
+-- TOC entry 3373 (class 2604 OID 16977)
 -- Name: personagem_capitulo id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1512,7 +1632,15 @@ ALTER TABLE ONLY public.personagem_capitulo ALTER COLUMN id SET DEFAULT nextval(
 
 
 --
--- TOC entry 3318 (class 2604 OID 16413)
+-- TOC entry 3375 (class 2604 OID 17086)
+-- Name: receita idreceita; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.receita ALTER COLUMN idreceita SET DEFAULT nextval('public.receita_idreceita_seq'::regclass);
+
+
+--
+-- TOC entry 3329 (class 2604 OID 16413)
 -- Name: regiao idregiao; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1520,7 +1648,7 @@ ALTER TABLE ONLY public.regiao ALTER COLUMN idregiao SET DEFAULT nextval('public
 
 
 --
--- TOC entry 3320 (class 2604 OID 16428)
+-- TOC entry 3331 (class 2604 OID 16428)
 -- Name: sala idsala; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1528,7 +1656,7 @@ ALTER TABLE ONLY public.sala ALTER COLUMN idsala SET DEFAULT nextval('public.sal
 
 
 --
--- TOC entry 3353 (class 2604 OID 16724)
+-- TOC entry 3365 (class 2604 OID 16724)
 -- Name: tributo idtributo; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1536,7 +1664,7 @@ ALTER TABLE ONLY public.tributo ALTER COLUMN idtributo SET DEFAULT nextval('publ
 
 
 --
--- TOC entry 3356 (class 2604 OID 16887)
+-- TOC entry 3368 (class 2604 OID 16887)
 -- Name: usuario id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1544,7 +1672,7 @@ ALTER TABLE ONLY public.usuario ALTER COLUMN id SET DEFAULT nextval('public.usua
 
 
 --
--- TOC entry 3331 (class 2604 OID 16585)
+-- TOC entry 3342 (class 2604 OID 16585)
 -- Name: utilidade idutilidade; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1552,7 +1680,7 @@ ALTER TABLE ONLY public.utilidade ALTER COLUMN idutilidade SET DEFAULT nextval('
 
 
 --
--- TOC entry 3323 (class 2604 OID 16516)
+-- TOC entry 3334 (class 2604 OID 16516)
 -- Name: vestimenta idvestimenta; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1560,7 +1688,7 @@ ALTER TABLE ONLY public.vestimenta ALTER COLUMN idvestimenta SET DEFAULT nextval
 
 
 --
--- TOC entry 3340 (class 2604 OID 16635)
+-- TOC entry 3351 (class 2604 OID 16635)
 -- Name: vitalidade idvitalidade; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1568,7 +1696,7 @@ ALTER TABLE ONLY public.vitalidade ALTER COLUMN idvitalidade SET DEFAULT nextval
 
 
 --
--- TOC entry 3627 (class 0 OID 16697)
+-- TOC entry 3650 (class 0 OID 16697)
 -- Dependencies: 246
 -- Data for Name: animal; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1578,7 +1706,7 @@ COPY public.animal (idanimal, idpersonagem) FROM stdin;
 
 
 --
--- TOC entry 3606 (class 0 OID 16528)
+-- TOC entry 3629 (class 0 OID 16528)
 -- Dependencies: 225
 -- Data for Name: arma; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1597,7 +1725,7 @@ COPY public.arma (idarma, iditem, descricao, addano) FROM stdin;
 
 
 --
--- TOC entry 3629 (class 0 OID 16709)
+-- TOC entry 3652 (class 0 OID 16709)
 -- Dependencies: 248
 -- Data for Name: bestante; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1607,21 +1735,44 @@ COPY public.bestante (idbestante, idpersonagem, agilidade, nado, voo) FROM stdin
 
 
 --
--- TOC entry 3637 (class 0 OID 16910)
+-- TOC entry 3660 (class 0 OID 16910)
 -- Dependencies: 256
 -- Data for Name: capitulo; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.capitulo (idcapitulo, texto, objetivo) FROM stdin;
 1	Depois de um longo dia de viagem de trem, vocˆ finalmente chegou … Capital. Agora, vocˆ se encontra no Centro de Treinamento, onde passar  os pr¢ximos dois dias com os outros tributos.	Faca duas aulas
-2	Depois de uma longa aula cansativa, vocˆ ainda tem energia pra mais uma aula	Objetivo do segundo cap¡tulo
-3	Uma farta ceia ‚ servida na mesa de jantar. Sua colega de distrito, Pandora, est  sentada ao lado da mentora do distrito 1, vencedora da 64ø edi‡Æo dos Jogos Vorazes, Cashmere.	Aproveite o jantar da sua melhor forma
 4	Depois de um longo dia vocˆ est  sem energia!	V  descan‡ar!
+3	Depois de um dia de aulas, vocˆ subiu at‚ o Andar Moradia, onde uma farta ceia ‚ servida na mesa de jantar. Sua colega de distrito, Pandora, est  sentada ao lado da mentora do Distrito 1, vencedora da 64¦ edi‡Æo dos Jogos Vorazes, Cashmere	Aproveite o jantar da sua melhor forma
+2	Vocˆ ainda tem tempo pra mais uma aula	Continue o seu treinamento!
+5	Hoje ‚ um dia especial! Al‚m da sua £ltima aula, vocˆ ir  ter uma entrevista com Ceasar Flickerman para ser apresentado para toda Panem e ganhar patrocinadores	Escolha bem qual ser  a sua £ltima aula
+6	Ap¢s a aula vocˆ foi levado para te arrumarem para a entrevista. Como tudo nos Jogos Vorazes, por ordem de Distrito, come‡aram a chamar os tributos. "Dominic" foi o primeiro nome a ser chamado por Ceasar	Escolha bem as suas respostas, todos estÆo assistindo!
+7	Ceasar: "EntÆo Dominic.. Sabemos que o Distrito 1 sempre traz tributos de elite. O que te diferencia dos outros tributos que j  passaram por aqui?"	Escolha bem as suas respostas, todos estÆo assistindo!
+8	Ceasar: Todos aqui sabemos como vocˆs do Distrito 1 sÆo bons de briga e ‚ por isso que amamos vocˆs. No entanto, estamos curiosos para saber o que te motivou a entrar para a academia de treinamento e a se preparar para os Jogos.	Escolha bem as suas respostas, todos estÆo assistindo!
+9	A sua entrevista chegou ao fim. AmanhÆ, logo que acordar, vocˆ ser  levado para a Arena, para que finalmente comecem os Jogos.	Chegou o fim do dia, vocˆ est  cansado
+10	Quando vocˆ acordou, foi imediatamente levado at‚ uma aeronave. L , colocaram uma venda em seus olhos e um rastreador em seu pulso. A venda foi retirada quando vocˆ foi colocado dentro de uma c psula que come‡ou a subir repentinamente. Quando a c psula finalmente parou de subir, vocˆ conseguiu ver com dificuldade o ambiente ao seu redor. Havia apenas um pequeno buraco no teto que deixava a luz do sol penetrar no recinto. Vocˆ percebeu que estava em um espa‡o cercado por grandes t£neis, com todos os 24 tributos posicionados em um grande c¡rculo ao redor de um centro. No centro, havia diversos recursos: mochilas, comida, armas... De repente, um n£mero apareceu no c‚u, come‡ando a contagem regressiva: 4... 3... 2... 1...	Os jogos come‡aram, que a sorte esteja ao seu favor
+11	Chegando no centro, vocˆ pode ver uma s‚rie de armas na sua frente: Uma espada, Uma faca, Um Arco e Flecha e uma lan‡a	Qual arma ser  ideal?
+12	Depois que vocˆ pegou sua arma, ouviu passos se aproximando. Ao olhar para tr s, viu Octavio e June, do Distrito 2, correndo em sua dire‡Æo.	objetivo
+13	Vocˆ pode ouvir duas batidas serem tocadas quando Octavio e June foram eliminados. Eles eram uns dos £nicos tributos com o mesmo treinamento que vocˆ. Alguns tributos haviam corrido para os t£neis, mas a maioria ainda tentava pegar alguns recursos do centro	objetivo
+14	Ainda tinha um grupo tentando conquistar o centro, os tributos do 6 e do 7 se juntaram em uma alian‡a	objetivo
+15	Agora sim, contandando apenas os vivos, vocˆ e Pandora sÆo os £nicos no centro, com comida e equipamentos aos montes	objetivo
+16	A noite surgiu rapidamente. Agora com apenas a luz da lua vocˆ consegue ver que existem 3 grandes t£neis. Os outros tributos podem estar por todos esses lados, inclusive por cima, por onde entra toda luz	objetivo
+17	Depois que Pandora te salvou da morte, foi a vez dela de recuperar as energias, vocˆ est  de vigia	objetivo
+18	Vocˆ estava atento na sua vig¡lia, mas tudo estava aparentemente calmo, at‚ que vocˆ come‡ou a ouvir v rias batidas, as batidas do canhÆo que sinalizam quando algu‚m morre. Contando foram 3 batidas.	objetivo
+19	Correndo pelos t£neis vocˆ conseguiu avistar uma luz fraca e foi em dire‡Æo a ela, encontrando uma escada. A escada lavava at‚ um pr‚dio em ru¡nas, cuja a parede que impedia a  gua de avan‡ar estava cedendo.	objetivo
+20	Ao terminar de subir no telhado do pr‚dio, vocˆ viu Pandora tentando se segurar em um poste de luz, tentando lutar contra a for‡a da  gua	objetivo
+21	Com a arma em mÆos, vocˆ olha para todos os lados … procura da fonte do choque el‚trico e vˆ Gabriele, do Distrito 3, no pr‚dio vizinho	objetivo
+22	O barulho do fio que estava sobre a  gua parou. A  gua nÆo estava mais eletrificada. Ao olhar para a dire‡Æo que vinha o fio pode ver Icaro, do Distrito 4, em outro pr‚dio distante	objetivo
+23	Sem a adrenalina, come‡ou a sentir os efeitos da luta sobre o seu corpo. Gabrielle havia cortado profundamente a sua perna e aos poucos parou de sentir as duas pernas por completo	objetivo
+24	O seu noturno havia surgido quando o holograma dos tributos mortos passou pelo c‚u. Agora s¢ restam 3: Vocˆ, Icaro e Leslie, do Distrito 12	objetivo
+25	Vocˆ foi acordado com o barulho do canhÆo. Algu‚m morreu. Ao levantar-se vocˆ percebeu que a correnteza havia parado, a  gua estava calma, como um rio	objetivo
+26	O canhÆo tocou uma £ltima vez antes da m£sica dos vencedores come‡ar a tocar. Vocˆ ‚ o £ltimo tributo livre. Mais uma vez o favorito do Distrito 1 venceu. Parab‚ns! Vocˆ ‚ o vencedor da 67§ edi‡Æo dos Jogos Vorazes	objetivo
+27	Fim de Jogo!	Que a sorte continue ao seu favor
 \.
 
 
 --
--- TOC entry 3612 (class 0 OID 16570)
+-- TOC entry 3635 (class 0 OID 16570)
 -- Dependencies: 231
 -- Data for Name: compartimento; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1633,7 +1784,7 @@ COPY public.compartimento (idcompartimento, iditem, adcapmax) FROM stdin;
 
 
 --
--- TOC entry 3648 (class 0 OID 17058)
+-- TOC entry 3671 (class 0 OID 17058)
 -- Dependencies: 267
 -- Data for Name: consequencia; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1652,11 +1803,55 @@ COPY public.consequencia (idconsequencia, idopcao, idpersonagem, texto, atributo
 11	12	1	Os tributos realizaram a refei‡Æo em silˆncio, sem interagir com os outros. Este momento de quietude ajudou a focar e refletir sobre as experiˆncias do dia.	carisma	0
 12	13	27	Cashmere: "Nosso distrito ‚ o mais preparado para os Jogos, tente ser o mais agressivo que puder	perspicacia	0
 13	14	2	Depois de uma breve conversa, Pandora aceitou ser sua aliada durante os Jogos	amigo	1
+14	15	1	Vocˆ foi at‚ o seu Dormit¢rio e teve uma boa noite de sono	stamina	200
+15	16	1	Vocˆ teve uma ¢tima aula de combate!	combate	1
+16	17	1	Vocˆ teve uma ¢tima aula de Sobrevivˆncia	sobrevivencia	1
+17	18	1	Vocˆ teve uma ¢tima aula de Mira	precisao	1
+18	19	1	Vocˆ teve uma ¢tima aula de Nata‡Æo	nado	1
+19	20	1	Vocˆ teve uma ¢tima aula de Camuflagem	furtividade	1
+20	21	1	Ceasar: "Uau, Dominic, parece que temos um verdadeiro campeÆo aqui! Essa confian‡a ‚ algo que adoramos ver!"	popularidade	1
+21	22	1	Ceasar: "Ah, Dominic, vocˆ certamente vai ganhar muitos cora‡äes!"	popularidade	2
+22	23	1	Ceasar: "Hmm, um pouco de timidez, Dominic? Vamos l ! Se solte um pouquinho!"	popularidade	-1
+23	24	1	Ceasar: "Dominic, vocˆ est  aqui para vencer e nada vai te parar? Agora isso ‚ o tipo de atitude que electrifica a plateia!"	popularidade	-2
+24	25	1	Ceasar: "Uma combina‡Æo de estrat‚gia e habilidade? Dominic, com essa abordagem, vocˆ vai realmente fazer valer a sua posi‡Æo no Distrito 1!"	popularidade	1
+25	26	1	Ceasar: "Vocˆ tentou o seu melhor? N¢s amamos um homem modesto!"	popularidade	-1
+26	27	1	Ceasar: "Dominic, isso ‚ o que eu chamo de visÆo clara! Mostrar que o Distrito 1 nÆo ‚ s¢ for‡a, mas tamb‚m inteligˆncia? Agora, isso ‚ uma estrat‚gia que todos vÆo querer acompanhar!"	popularidade	-1
+27	28	1	Ceasar: "PaixÆo e dedica‡Æo, Dominic! Vocˆ nÆo est  apenas treinando, est  fazendo hist¢ria. E nÆo h  nada mais inspirador do que lutar pelo orgulho do seu distrito!"	popularidade	1
+28	29	1	Ceasar: "Um tributo com um objetivo claro e um cora‡Æo voltado para o distrito. Dominic, seu foco ‚ algo que certamente vai impressionar a todos!"	popularidade	0
+29	30	1	Vocˆ foi at‚ o seu Dormit¢rio e teve uma boa noite de sono	stamina	200
+30	31	1	Vocˆ conseguiu correr mais r pido do que todos e chegou primeiro no Centro	perspicacia	1
+31	32	1	Vocˆ correu at‚ o T£nel, mas foi acertado por uma flecha no pesco‡o	hp	-100
+32	33	1	Vocˆ est  empunhando a Espada	dano	20
+33	34	1	Vocˆ est  empunhando a Faca	dano	5
+34	35	1	Vocˆ est  empunhando a Lan‡a	dano	15
+35	36	1	Vocˆ atacou Octavio e conseguiu acerta-lo fatalmente, mas June cortou a sua garganta com uma faca	hp	-100
+36	37	1	Vocˆ correu em dire‡Æo ao T£nel, mas foi acertado por uma flecha	hp	-100
+37	38	1	Vocˆ gritou pela ajuda de Pandora. Vocˆ e a sua aliada derrotaram Octavio e June	\N	\N
+38	39	1	Vocˆ elimina o garotinho do 10 com muita facilidade. Ele tinha um Arco e Flecha em mÆos	perspicacia	1
+39	40	1	Ao virar as costas para o menino, ele te atingiu na cabe‡a com uma flecha	hp	-100
+40	41	1	Vocˆ e Pandora atacaram em conjunto os quatro tributos e os eliminaram com facilidade	popularidade	1
+42	43	1	Vocˆ equipou 1x Mochila Grande, 1x µgua e 2x Ra‡äes	agilidade	-1
+43	44	1	Vocˆ acordou com um barulho alto de algo caindo no chÆo. Quando sentou-se para entender o que tinha acontecido, viu Pandora do lado do corpo de Damon, que havia tentado te eliminar enquanto vocˆ dormia	stamina	300
+44	45	1	Vocˆ abriu o pacote de ra‡Æo e comeu	nutricao	20
+45	46	1	Vocˆ abriu a garrafinha de  gua e bebeu	hidratacao	100
+46	47	1	Vocˆ abriu o pacote de ra‡Æo, a garrafinha de  gua e consumiu tudo	stamina	5
+47	48	1	Vocˆ acordou a Pandora e os dois correram at‚ o T£nel. Olhando pra tr s vocˆ conseguiu ver uma onda gigante de  gua que entrava pelos outros t£neis e pelo buraco do teto	carisma	1
+48	49	1	O barulho ficou cada vez maior, at‚ que vocˆ foi atingido por 3 ondas. Uma que ca¡a do teto e as outras duas que vinham dos t£neis. A for‡a das ondas foi tÆo forte que vocˆ e Pandora morreram na hora	hp	-100
+49	50	1	Vocˆ correu at‚ o pr‚dio mais pr¢ximo quando a parede que segurava a  gua cedeu. Vocˆ foi levemente arrastado	popularidade	1
+50	51	1	A parede cedeu e caiu por cima de vocˆ e da Pandora	hp	-100
+51	52	1	Para estender a mÆo perto o suficiente de Pandora para que ela pudesse segurar em vocˆ, vocˆ se sentou, deixando os p‚s na  gua. Foi quando um zunido surgiu e de repente, a  gua tamb‚m come‡ou a fazer um barulho estranho. A  gua havia sido energizada e vocˆ e Pandora foram eliminados em alguns instantes	hp	-100
+52	53	1	Vocˆ vira de costas para Pandora e em alguns segundos, escuta diversos canhäes de elimina‡Æo. Ver um grande fio na  gua e o som que sa¡a dele, soube que a  gua estava energizada	popularidade	-1
+53	54	1	Vocˆ pula at‚ o outro pr‚dio e a Gabrielle tenta fugir de vocˆ, mas vocˆ a agarra. Gabrielle, na tentativa de se soltar, crava uma faca na sua perna. Soltando um grunhido de dor, vocˆ solta a garota na  gua energizada.	hp	-50
+54	55	1	Vocˆ apenas observa para onde Gabrielle est  indo e acaba sendo atingido por uma flecha pelas costas	hp	-100
+55	56	1	Vocˆ pula na  gua, mas devido ao corte na perna e … falta de talento em nado, vocˆ ‚ levado pela  gua e acaba se afogando	hp	-100
+56	57	1	Vocˆ recua e entra dentro do pr‚dio, sentando-se no chÆo	perspicacia	1
+57	58	1	Vocˆ pede ajuda para os patrocinadores e depois de alguns minutos recebe um paraquedas com um rem‚dio para usar. Em algumas horas o seu corte ir  se curar	hp	50
+58	59	1	Vocˆ acaba dormindo sentado onde est 	stamina	300
 \.
 
 
 --
--- TOC entry 3616 (class 0 OID 16600)
+-- TOC entry 3639 (class 0 OID 16600)
 -- Dependencies: 235
 -- Data for Name: construtor; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1666,7 +1861,7 @@ COPY public.construtor (idconstrutor, iditem) FROM stdin;
 
 
 --
--- TOC entry 3608 (class 0 OID 16543)
+-- TOC entry 3631 (class 0 OID 16543)
 -- Dependencies: 227
 -- Data for Name: consumivel; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1684,7 +1879,7 @@ COPY public.consumivel (idconsumivel, iditem, adhid, adnut, adsta, adhp, adcalor
 
 
 --
--- TOC entry 3641 (class 0 OID 16941)
+-- TOC entry 3664 (class 0 OID 16941)
 -- Dependencies: 260
 -- Data for Name: decisao; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1694,11 +1889,33 @@ COPY public.decisao (iddecisao, descricao) FROM stdin;
 2	Escolha a sua £ltima aula do dia
 3	Fa‡a a sua escolha:
 4	S¢ h  uma escolha:
+5	Escolha uma aula para fazer
+6	Escolha uma entrada
+7	Escolha como quer responder ao Ceasar
+8	Escolha como quer responder ao Ceasar
+9	Vocˆ s¢ tem uma op‡Æo
+10	Agora, os tributos irÆo fugir do conflito ou tentar dominar a  rea. O que vocˆ vai fazer?
+11	Escolha uma arma
+12	Os Tributos do Distrito 2 sÆo bem treinados tanto quanto vocˆ. O que vocˆ vai fazer?
+13	Walter, um garotinho de 12 anos do Distrito 10, est  tentando pegar uma mochila a apenas alguns passos de vocˆ. O que vocˆ vai fazer?
+14	O centro possui recursos muito escassos e armas que vocˆ nÆo quer nas mÆos dos seus inimigos. O que vocˆ vai fazer?
+15	Escolha o que quer fazer com os recursos … sua disposi‡Æo
+16	Vocˆ s¢ tem uma op‡Æo
+17	Aproveite o tempo livre para aumentar alguns atributos
+18	Usando toda a sua audi‡Æo, vocˆ consegue ouvir o que parecia o barulho de  gua. O som fica cada vez mais alto, muito rapidamente
+19	A parede est  balan‡ando, nÆo ir  ficar de p‚ por muito tempo. O que vocˆ vai fazer?
+20	Pandora est  quase cedendo … for‡a da  gua. Vocˆ vai ajud -la?
+21	Gabrielle est  em um pr‚dio a um pulo de distƒncia. Vocˆ ir  atr s dela?
+22	Icaro est  bem … vista. Vocˆ ir  atr s dele?
+23	Vocˆ est  perdendo muito sangue. O que vocˆ ir  fazer?
+24	Vocˆ s¢ tem uma op‡Æo
+25	Vocˆ escutou um barulho na  gua e foi olhar o que era, quando Öcaro te puxou para dentro da  gua. Vocˆ conseguiu segur -lo pelo uniforme com as duas mÆos. O que vocˆ faz?
+26	Vocˆ s¢ tem uma op‡Æo
 \.
 
 
 --
--- TOC entry 3622 (class 0 OID 16649)
+-- TOC entry 3645 (class 0 OID 16649)
 -- Dependencies: 241
 -- Data for Name: distrito; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1712,7 +1929,7 @@ COPY public.distrito (iddistrito, idpersonagem, popularidade, agilidade, forca, 
 
 
 --
--- TOC entry 3639 (class 0 OID 16919)
+-- TOC entry 3662 (class 0 OID 16919)
 -- Dependencies: 258
 -- Data for Name: historia; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1723,17 +1940,35 @@ COPY public.historia (idhistoria, idpersonagem, idcapitulo_inicial) FROM stdin;
 
 
 --
--- TOC entry 3624 (class 0 OID 16665)
--- Dependencies: 243
--- Data for Name: inventario; Type: TABLE DATA; Schema: public; Owner: postgres
+-- TOC entry 3675 (class 0 OID 17098)
+-- Dependencies: 271
+-- Data for Name: ingrediente; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.inventario (idinventario, idpersonagem, capmax, capatual) FROM stdin;
+COPY public.ingrediente (idingrediente, idreceita, iditem_necessario1, quantidade1, iditem_necessario2, quantidade2) FROM stdin;
+1	1	11	1	16	1
+2	2	11	1	15	1
+3	3	10	1	15	1
+4	4	17	1	28	1
+5	5	16	1	14	1
+6	6	16	5	16	1
+7	7	10	5	14	2
+8	8	10	15	14	2
 \.
 
 
 --
--- TOC entry 3602 (class 0 OID 16499)
+-- TOC entry 3647 (class 0 OID 16665)
+-- Dependencies: 243
+-- Data for Name: inventario; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.inventario (idinventario, idusuario, capmax, capatual) FROM stdin;
+\.
+
+
+--
+-- TOC entry 3625 (class 0 OID 16499)
 -- Dependencies: 221
 -- Data for Name: item; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1774,17 +2009,17 @@ COPY public.item (iditem, nome) FROM stdin;
 
 
 --
--- TOC entry 3633 (class 0 OID 16740)
+-- TOC entry 3656 (class 0 OID 16740)
 -- Dependencies: 252
 -- Data for Name: item_inventario; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.item_inventario (iditeminventario, idinventario, iditem) FROM stdin;
+COPY public.item_inventario (iditeminventario, idinventario, iditem, quantidade) FROM stdin;
 \.
 
 
 --
--- TOC entry 3610 (class 0 OID 16555)
+-- TOC entry 3633 (class 0 OID 16555)
 -- Dependencies: 229
 -- Data for Name: legivel; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1795,28 +2030,19 @@ COPY public.legivel (idlegivel, iditem, conteudo) FROM stdin;
 
 
 --
--- TOC entry 3646 (class 0 OID 17000)
+-- TOC entry 3669 (class 0 OID 17000)
 -- Dependencies: 265
 -- Data for Name: localizacao; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.localizacao (idcapitulo, idpersonagem, idsala, idusuario) FROM stdin;
-2	1	2	85
-2	1	5	88
-3	1	5	89
-3	1	2	91
-3	1	3	95
-2	1	3	96
-2	1	2	97
-2	1	2	98
-3	1	3	100
-2	1	2	101
-3	1	4	102
+3	1	5	109
+6	1	2	110
 \.
 
 
 --
--- TOC entry 3596 (class 0 OID 16400)
+-- TOC entry 3619 (class 0 OID 16400)
 -- Dependencies: 215
 -- Data for Name: mapa; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1828,7 +2054,7 @@ COPY public.mapa (idmapa, nomem, descricao) FROM stdin;
 
 
 --
--- TOC entry 3643 (class 0 OID 16955)
+-- TOC entry 3666 (class 0 OID 16955)
 -- Dependencies: 262
 -- Data for Name: opcao; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1847,11 +2073,60 @@ COPY public.opcao (idopcao, iddecisao, descricao, efeito_atributo, proximo_capit
 12	3	Fazer a refei‡Æo em silˆncio	-1	4	0	carisma
 13	3	Fazer uma pergunta para Cashmere	1	4	5	perspicacia
 14	3	Sugerir parceria para Pandora	0	4	6	popularidade
+15	4	Ir dormir	9	5	0	idsala
+16	5	Aula de Combate	2	6	0	idsala
+17	5	Aula de T‚cnicas de Sobrevivˆncia	3	6	0	idsala
+18	5	Aula de Mira	4	6	0	idsala
+19	5	Aula de Nata‡Æo	5	6	0	idsala
+20	5	Aula de Camuflagem	6	6	0	idsala
+21	6	Confiante	0	7	6	popularidade
+22	6	Carism tica	0	7	6	carisma
+23	6	T¡mida	0	7	0	carisma
+24	7	Eu sou o melhor que o Distrito 1 j  teve. Os outros tributos podem at‚ ter se destacado, mas nenhum deles possui a habilidade e a determina‡Æo que eu tenho. Eu estou aqui para vencer, e nada vai me parar	0	8	3	carisma
+25	7	Cada tributo do Distrito 1 tem sua pr¢pria for‡a, e eu tenho a sorte de ter sido treinado com os melhores. O que me diferencia ‚ a combina‡Æo de estrat‚gia, habilidade e um esp¡rito inabal vel. Vou mostrar a todos o que significa ser um verdadeiro tributo do Distrito 1	0	8	6	carisma
+26	7	Eu s¢ tentei fazer o melhor que pude durante o treinamento. Espero conseguir fazer um bom trabalho	0	8	4	carisma
+27	8	NÆo ‚ s¢ sobre a fama ou a gl¢ria. Eu entrei na academia para mostrar que o Distrito 1 nÆo ‚ apenas o melhor em combate, mas tamb‚m o mais astuto e estrat‚gico. E, claro, para provar que sou o melhor tributo que j  passaram por aqui	0	9	3	carisma
+28	8	Eu sempre quis ser mais do que apenas um bom lutador. A academia foi a chance de me aprimorar e mostrar que a for‡a vem nÆo s¢ do treinamento, mas da paixÆo e dedica‡Æo. Quero fazer a diferen‡a e dar um motivo para o meu distrito se orgulhar	0	9	6	carisma
+29	8	Eu entrei para a academia porque sempre quis fazer o melhor por meu distrito. Achei que essa era a melhor forma de me preparar para os Jogos	0	9	4	carisma
+30	9	Ir dormir	9	10	0	idsala
+31	10	Correr at‚ o Centro	11	11	0	idsala
+32	10	Fugir pelo T£nel	14	11	0	idsala
+33	11	Espada	8	12	0	iditem
+34	11	Faca	9	12	0	iditem
+35	11	Lan‡a	6	12	0	iditem
+36	12	Atacar	0	13	7	combate
+37	12	Fugir	0	13	0	combate
+38	12	Pedir ajuda para a Pandora	0	13	1	amigo
+39	13	Atacar	0	14	7	combate
+40	13	Ignorar	0	14	0	combate
+41	14	Atacar	0	15	7	combate
+42	14	Fugir	0	15	0	combate
+43	15	Equipar todos os objetos que estÆo no chÆo	0	16	0	combate
+44	16	Ir dormir	0	17	0	combate
+45	17	Comer ra‡Æo	0	18	0	combate
+46	17	Beber  gua	0	18	0	combate
+47	17	Comer e beber	0	18	6	pespicacia
+48	18	Acordar Pandora e fugir	0	19	6	pespicacia
+49	18	Empunhar a arma e esperar	0	19	8	combate
+50	19	Correr	0	20	6	pespicacia
+51	19	Ficar atr s da parede e se proteger do tsunami	0	20	0	pespicacia
+52	20	Ajudar Pandora	0	21	0	combate
+53	20	NÆo ajudar Pandora	0	21	0	combate
+54	21	Ir atr s de Gabrielle	0	22	7	combate
+55	21	NÆo ir atr s de Gabrielle	0	22	0	combate
+56	22	Ir atr s de Icaro	0	23	8	combate
+57	22	NÆo ir atr s de Icaro	0	23	0	combate
+58	23	Pedir ajuda	0	24	8	popularidade
+59	23	Ir dormir	0	24	0	combate
+60	24	Ir dormir	0	25	0	combate
+61	25	Afoga-lo	0	26	0	combate
+62	25	Leva-lo at‚ a superf¡cie	0	26	7	pespicacia
+63	26	Sair	0	27	0	combate
 \.
 
 
 --
--- TOC entry 3618 (class 0 OID 16617)
+-- TOC entry 3641 (class 0 OID 16617)
 -- Dependencies: 237
 -- Data for Name: personagem; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1895,15 +2170,15 @@ COPY public.personagem (idpersonagem, tipop, nomep, hpmax, hpatual) FROM stdin;
 41	nj	Liam	100	100
 42	nj	Sam	100	100
 43	nj	Willow	100	100
-1	pj	Dominic	100	100
 7	pj	Icaro	100	100
+1	pj	Dominic	100	100
 6	pj	Gabrielle	100	100
 24	pj	Leslie	100	100
 \.
 
 
 --
--- TOC entry 3645 (class 0 OID 16974)
+-- TOC entry 3668 (class 0 OID 16974)
 -- Dependencies: 264
 -- Data for Name: personagem_capitulo; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1913,7 +2188,7 @@ COPY public.personagem_capitulo (id, idpersonagem, idcapitulo, acao) FROM stdin;
 
 
 --
--- TOC entry 3625 (class 0 OID 16678)
+-- TOC entry 3648 (class 0 OID 16678)
 -- Dependencies: 244
 -- Data for Name: personagem_jogavel; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1923,7 +2198,25 @@ COPY public.personagem_jogavel (idpersonagem, iddistrito) FROM stdin;
 
 
 --
--- TOC entry 3598 (class 0 OID 16410)
+-- TOC entry 3673 (class 0 OID 17083)
+-- Dependencies: 269
+-- Data for Name: receita; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.receita (idreceita, iditem_resultado, nome) FROM stdin;
+1	3	Arco Artesanal
+2	7	Lan‡a Artesanal
+3	12	Flecha Artesanal
+5	25	Armadilha Pequena
+6	26	Armadilha Grande
+7	27	Fogueira Grande
+8	28	Fogueira Pequena
+4	18	Carne Assada
+\.
+
+
+--
+-- TOC entry 3621 (class 0 OID 16410)
 -- Dependencies: 217
 -- Data for Name: regiao; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1932,11 +2225,15 @@ COPY public.regiao (idregiao, idmapa, nomer, tempr, descricao) FROM stdin;
 1	1	Andar de Capacitação	24	O Andar de Capacitação é o lugar onde os tributos podem treinar e ter aulas
 2	1	Andar Moradia	24	O Andar Moradia é onde os tributos e seus tutores comem e dormem
 3	1	Andar Mídia	24	O Andar Mídia é onde os tributos fazem as suas entrevistas para a TV
+4	2	Esgoto	24	O esgoto ‚ o primeiro ambiente em que os Tributos sÆo colocados
+5	2	Cidade	24	A cidade est  abandonada, fica em cima do Esgoto
+6	2	Floresta	24	A Floresta fica logo atr s da Cidade
+7	2	Praia	24	A Praia fica logo a frente da Cidade
 \.
 
 
 --
--- TOC entry 3600 (class 0 OID 16425)
+-- TOC entry 3623 (class 0 OID 16425)
 -- Dependencies: 219
 -- Data for Name: sala; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1952,11 +2249,22 @@ COPY public.sala (idsala, idregiao, nomes, descricao) FROM stdin;
 8	2	Sala de Jantar	Aqui é onde fará suas refeições, onde poderá pedir conselhos e conversar com seu colega de distrito
 9	2	Dormitório	Aqui é onde você poderá recarregar suas energias para o próximo dia
 10	3	Sala de Entrevistas	É aqui onde você fará a sua entrevista que te apresentará para todo o povo de Panem.
+11	4	Centro	Parte do esgoto cheia de itens
+12	4	T£nel Esquerdo	T£neo do Centro
+13	4	T£nel Direito	T£neo do Centro
+14	4	T£nel Central	T£neo do Centro
+15	5	Pr‚dio em ru¡nas	Pr‚dio sa¡da do Esgoto
+16	5	Pr‚dio 1	Pr‚dio que pode salvar o Dominic
+17	5	Pr‚dio Fio	Pr‚dio em que o fio de energia ‚ pendurado
+18	5	Pr‚dio Energia	Pr‚dio onde h  um gerador no telhado
+19	5	Pr‚dio 2	Pr‚dio com bestantes
+20	6	Campo com µrvores Altas	énico lugar da Floresta
+21	6	Duna	énico lugar da Praia
 \.
 
 
 --
--- TOC entry 3631 (class 0 OID 16721)
+-- TOC entry 3654 (class 0 OID 16721)
 -- Dependencies: 250
 -- Data for Name: tributo; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1966,39 +2274,24 @@ COPY public.tributo (idtributo, idpersonagem, iddistrito, statust) FROM stdin;
 
 
 --
--- TOC entry 3635 (class 0 OID 16884)
+-- TOC entry 3658 (class 0 OID 16884)
 -- Dependencies: 254
 -- Data for Name: usuario; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.usuario (id, nome, senha, idpersonagem, idcapitulo) FROM stdin;
-80	xuxu	123	1	1
-94	wewe	123	1	1
-83	tata	123	1	1
-86	frfr	123	1	1
-97	gigi	123	1	2
-89	popo	123	1	3
-101	mama	123	1	2
-81	bubu	123	1	1
-84	jesus	123	1	1
-87	susu	123	1	1
-90	fifi	123	1	1
-95	nana	123	1	4
-93	xuxa	123	1	1
-98	nunu	123	1	2
-102	mm	123	1	3
-82	mimi	123	1	1
-96	kaka	123	1	2
-85	mds	123	1	2
-88	vruv	123	1	2
-100	na	123	1	3
-91	vivi	123	1	3
-79	cra	123	24	\N
+104	kiki	123	\N	\N
+105	mimi	123	\N	\N
+106	peeta	123	\N	\N
+107	lolo	123	\N	\N
+108	huhu	123	1	1
+109	momo	123	1	4
+110	juju	123	1	7
 \.
 
 
 --
--- TOC entry 3614 (class 0 OID 16582)
+-- TOC entry 3637 (class 0 OID 16582)
 -- Dependencies: 233
 -- Data for Name: utilidade; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -2008,7 +2301,7 @@ COPY public.utilidade (idutilidade, iditem, nome, descricao, geraitem, capturain
 
 
 --
--- TOC entry 3604 (class 0 OID 16513)
+-- TOC entry 3627 (class 0 OID 16513)
 -- Dependencies: 223
 -- Data for Name: vestimenta; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -2020,26 +2313,24 @@ COPY public.vestimenta (idvestimenta, iditem, descricao, adcalor) FROM stdin;
 
 
 --
--- TOC entry 3620 (class 0 OID 16632)
+-- TOC entry 3643 (class 0 OID 16632)
 -- Dependencies: 239
 -- Data for Name: vitalidade; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.vitalidade (idvitalidade, idusuario, nutricao, hidratacao, stamina, calor, dano, popularidade, agilidade, forca, nado, carisma, combate, perspicacia, furtividade, sobrevivencia, precisao, amigo) FROM stdin;
-1	93	100	100	100	50	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-2	94	100	100	100	50	0	6	4	5	4	4	8	5	3	4	7	\N
-3	95	100	100	100	50	0	6	4	5	4	5	8	5	3	4	7	\N
-4	96	100	100	100	50	0	6	4	5	4	4	8	5	3	4	7	\N
-5	97	100	100	100	50	0	6	4	5	4	4	8	5	3	4	7	\N
-6	98	100	100	100	50	0	6	4	5	4	4	8	5	3	4	7	\N
-7	100	100	100	100	50	0	6	4	5	4	4	8	5	3	4	7	\N
-8	101	100	100	100	50	0	6	4	5	4	4	8	5	3	4	7	\N
-9	102	100	100	100	50	0	6	4	5	4	4	8	5	3	4	7	\N
+COPY public.vitalidade (idvitalidade, idusuario, nutricao, hidratacao, stamina, calor, dano, popularidade, agilidade, forca, nado, carisma, combate, perspicacia, furtividade, sobrevivencia, precisao, amigo, hp) FROM stdin;
+11	104	100	100	100	50	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	100
+12	105	100	100	100	50	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	100
+13	106	100	100	100	50	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	100
+14	107	100	100	100	50	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	100
+15	108	100	100	100	50	0	6	4	5	4	4	8	5	3	4	7	\N	100
+16	109	100	100	100	50	0	6	4	5	4	4	8	4	3	4	7	\N	100
+17	110	100	100	300	50	0	7	4	5	4	5	11	5	3	4	7	\N	100
 \.
 
 
 --
--- TOC entry 3680 (class 0 OID 0)
+-- TOC entry 3709 (class 0 OID 0)
 -- Dependencies: 245
 -- Name: animal_idanimal_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -2048,7 +2339,7 @@ SELECT pg_catalog.setval('public.animal_idanimal_seq', 1, false);
 
 
 --
--- TOC entry 3681 (class 0 OID 0)
+-- TOC entry 3710 (class 0 OID 0)
 -- Dependencies: 224
 -- Name: arma_idarma_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -2057,7 +2348,7 @@ SELECT pg_catalog.setval('public.arma_idarma_seq', 9, true);
 
 
 --
--- TOC entry 3682 (class 0 OID 0)
+-- TOC entry 3711 (class 0 OID 0)
 -- Dependencies: 247
 -- Name: bestante_idbestante_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -2066,7 +2357,7 @@ SELECT pg_catalog.setval('public.bestante_idbestante_seq', 1, false);
 
 
 --
--- TOC entry 3683 (class 0 OID 0)
+-- TOC entry 3712 (class 0 OID 0)
 -- Dependencies: 255
 -- Name: capitulo_idcapitulo_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -2075,7 +2366,7 @@ SELECT pg_catalog.setval('public.capitulo_idcapitulo_seq', 2, true);
 
 
 --
--- TOC entry 3684 (class 0 OID 0)
+-- TOC entry 3713 (class 0 OID 0)
 -- Dependencies: 230
 -- Name: compartimento_idcompartimento_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -2084,7 +2375,7 @@ SELECT pg_catalog.setval('public.compartimento_idcompartimento_seq', 2, true);
 
 
 --
--- TOC entry 3685 (class 0 OID 0)
+-- TOC entry 3714 (class 0 OID 0)
 -- Dependencies: 266
 -- Name: consequencia_idconsequencia_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -2093,7 +2384,7 @@ SELECT pg_catalog.setval('public.consequencia_idconsequencia_seq', 13, true);
 
 
 --
--- TOC entry 3686 (class 0 OID 0)
+-- TOC entry 3715 (class 0 OID 0)
 -- Dependencies: 234
 -- Name: construtor_idconstrutor_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -2102,7 +2393,7 @@ SELECT pg_catalog.setval('public.construtor_idconstrutor_seq', 1, false);
 
 
 --
--- TOC entry 3687 (class 0 OID 0)
+-- TOC entry 3716 (class 0 OID 0)
 -- Dependencies: 226
 -- Name: consumivel_idconsumivel_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -2111,7 +2402,7 @@ SELECT pg_catalog.setval('public.consumivel_idconsumivel_seq', 8, true);
 
 
 --
--- TOC entry 3688 (class 0 OID 0)
+-- TOC entry 3717 (class 0 OID 0)
 -- Dependencies: 259
 -- Name: decisao_iddecisao_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -2120,7 +2411,7 @@ SELECT pg_catalog.setval('public.decisao_iddecisao_seq', 2, true);
 
 
 --
--- TOC entry 3689 (class 0 OID 0)
+-- TOC entry 3718 (class 0 OID 0)
 -- Dependencies: 240
 -- Name: distrito_iddistrito_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -2129,7 +2420,7 @@ SELECT pg_catalog.setval('public.distrito_iddistrito_seq', 1, true);
 
 
 --
--- TOC entry 3690 (class 0 OID 0)
+-- TOC entry 3719 (class 0 OID 0)
 -- Dependencies: 257
 -- Name: historia_idhistoria_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -2138,7 +2429,16 @@ SELECT pg_catalog.setval('public.historia_idhistoria_seq', 1, true);
 
 
 --
--- TOC entry 3691 (class 0 OID 0)
+-- TOC entry 3720 (class 0 OID 0)
+-- Dependencies: 270
+-- Name: ingrediente_idingrediente_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.ingrediente_idingrediente_seq', 8, true);
+
+
+--
+-- TOC entry 3721 (class 0 OID 0)
 -- Dependencies: 242
 -- Name: inventario_idinventario_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -2147,7 +2447,7 @@ SELECT pg_catalog.setval('public.inventario_idinventario_seq', 1, false);
 
 
 --
--- TOC entry 3692 (class 0 OID 0)
+-- TOC entry 3722 (class 0 OID 0)
 -- Dependencies: 220
 -- Name: item_iditem_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -2156,7 +2456,7 @@ SELECT pg_catalog.setval('public.item_iditem_seq', 31, true);
 
 
 --
--- TOC entry 3693 (class 0 OID 0)
+-- TOC entry 3723 (class 0 OID 0)
 -- Dependencies: 251
 -- Name: item_inventario_iditeminventario_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -2165,7 +2465,7 @@ SELECT pg_catalog.setval('public.item_inventario_iditeminventario_seq', 1, false
 
 
 --
--- TOC entry 3694 (class 0 OID 0)
+-- TOC entry 3724 (class 0 OID 0)
 -- Dependencies: 228
 -- Name: legivel_idlegivel_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -2174,7 +2474,7 @@ SELECT pg_catalog.setval('public.legivel_idlegivel_seq', 1, true);
 
 
 --
--- TOC entry 3695 (class 0 OID 0)
+-- TOC entry 3725 (class 0 OID 0)
 -- Dependencies: 214
 -- Name: mapa_idmapa_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -2183,7 +2483,7 @@ SELECT pg_catalog.setval('public.mapa_idmapa_seq', 2, true);
 
 
 --
--- TOC entry 3696 (class 0 OID 0)
+-- TOC entry 3726 (class 0 OID 0)
 -- Dependencies: 261
 -- Name: opcao_idopcao_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -2192,7 +2492,7 @@ SELECT pg_catalog.setval('public.opcao_idopcao_seq', 6, true);
 
 
 --
--- TOC entry 3697 (class 0 OID 0)
+-- TOC entry 3727 (class 0 OID 0)
 -- Dependencies: 263
 -- Name: personagem_capitulo_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -2201,7 +2501,7 @@ SELECT pg_catalog.setval('public.personagem_capitulo_id_seq', 1, false);
 
 
 --
--- TOC entry 3698 (class 0 OID 0)
+-- TOC entry 3728 (class 0 OID 0)
 -- Dependencies: 236
 -- Name: personagem_idpersonagem_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -2210,7 +2510,16 @@ SELECT pg_catalog.setval('public.personagem_idpersonagem_seq', 43, true);
 
 
 --
--- TOC entry 3699 (class 0 OID 0)
+-- TOC entry 3729 (class 0 OID 0)
+-- Dependencies: 268
+-- Name: receita_idreceita_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.receita_idreceita_seq', 8, true);
+
+
+--
+-- TOC entry 3730 (class 0 OID 0)
 -- Dependencies: 216
 -- Name: regiao_idregiao_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -2219,7 +2528,7 @@ SELECT pg_catalog.setval('public.regiao_idregiao_seq', 3, true);
 
 
 --
--- TOC entry 3700 (class 0 OID 0)
+-- TOC entry 3731 (class 0 OID 0)
 -- Dependencies: 218
 -- Name: sala_idsala_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -2228,7 +2537,7 @@ SELECT pg_catalog.setval('public.sala_idsala_seq', 10, true);
 
 
 --
--- TOC entry 3701 (class 0 OID 0)
+-- TOC entry 3732 (class 0 OID 0)
 -- Dependencies: 249
 -- Name: tributo_idtributo_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -2237,16 +2546,16 @@ SELECT pg_catalog.setval('public.tributo_idtributo_seq', 1, false);
 
 
 --
--- TOC entry 3702 (class 0 OID 0)
+-- TOC entry 3733 (class 0 OID 0)
 -- Dependencies: 253
 -- Name: usuario_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.usuario_id_seq', 102, true);
+SELECT pg_catalog.setval('public.usuario_id_seq', 110, true);
 
 
 --
--- TOC entry 3703 (class 0 OID 0)
+-- TOC entry 3734 (class 0 OID 0)
 -- Dependencies: 232
 -- Name: utilidade_idutilidade_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -2255,7 +2564,7 @@ SELECT pg_catalog.setval('public.utilidade_idutilidade_seq', 1, false);
 
 
 --
--- TOC entry 3704 (class 0 OID 0)
+-- TOC entry 3735 (class 0 OID 0)
 -- Dependencies: 222
 -- Name: vestimenta_idvestimenta_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -2264,16 +2573,16 @@ SELECT pg_catalog.setval('public.vestimenta_idvestimenta_seq', 2, true);
 
 
 --
--- TOC entry 3705 (class 0 OID 0)
+-- TOC entry 3736 (class 0 OID 0)
 -- Dependencies: 238
 -- Name: vitalidade_idvitalidade_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vitalidade_idvitalidade_seq', 9, true);
+SELECT pg_catalog.setval('public.vitalidade_idvitalidade_seq', 17, true);
 
 
 --
--- TOC entry 3396 (class 2606 OID 16702)
+-- TOC entry 3410 (class 2606 OID 16702)
 -- Name: animal animal_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2282,7 +2591,7 @@ ALTER TABLE ONLY public.animal
 
 
 --
--- TOC entry 3374 (class 2606 OID 16536)
+-- TOC entry 3388 (class 2606 OID 16536)
 -- Name: arma arma_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2291,7 +2600,7 @@ ALTER TABLE ONLY public.arma
 
 
 --
--- TOC entry 3398 (class 2606 OID 16714)
+-- TOC entry 3412 (class 2606 OID 16714)
 -- Name: bestante bestante_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2300,7 +2609,7 @@ ALTER TABLE ONLY public.bestante
 
 
 --
--- TOC entry 3406 (class 2606 OID 16917)
+-- TOC entry 3420 (class 2606 OID 16917)
 -- Name: capitulo capitulo_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2309,7 +2618,7 @@ ALTER TABLE ONLY public.capitulo
 
 
 --
--- TOC entry 3380 (class 2606 OID 16575)
+-- TOC entry 3394 (class 2606 OID 16575)
 -- Name: compartimento compartimento_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2318,7 +2627,7 @@ ALTER TABLE ONLY public.compartimento
 
 
 --
--- TOC entry 3416 (class 2606 OID 17065)
+-- TOC entry 3430 (class 2606 OID 17065)
 -- Name: consequencia consequencia_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2327,7 +2636,7 @@ ALTER TABLE ONLY public.consequencia
 
 
 --
--- TOC entry 3384 (class 2606 OID 16605)
+-- TOC entry 3398 (class 2606 OID 16605)
 -- Name: construtor construtor_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2336,7 +2645,7 @@ ALTER TABLE ONLY public.construtor
 
 
 --
--- TOC entry 3376 (class 2606 OID 16548)
+-- TOC entry 3390 (class 2606 OID 16548)
 -- Name: consumivel consumivel_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2345,7 +2654,7 @@ ALTER TABLE ONLY public.consumivel
 
 
 --
--- TOC entry 3410 (class 2606 OID 16948)
+-- TOC entry 3424 (class 2606 OID 16948)
 -- Name: decisao decisao_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2354,7 +2663,7 @@ ALTER TABLE ONLY public.decisao
 
 
 --
--- TOC entry 3390 (class 2606 OID 16658)
+-- TOC entry 3404 (class 2606 OID 16658)
 -- Name: distrito distrito_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2363,7 +2672,7 @@ ALTER TABLE ONLY public.distrito
 
 
 --
--- TOC entry 3408 (class 2606 OID 16924)
+-- TOC entry 3422 (class 2606 OID 16924)
 -- Name: historia historia_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2372,7 +2681,16 @@ ALTER TABLE ONLY public.historia
 
 
 --
--- TOC entry 3392 (class 2606 OID 16672)
+-- TOC entry 3434 (class 2606 OID 17103)
+-- Name: ingrediente ingrediente_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.ingrediente
+    ADD CONSTRAINT ingrediente_pkey PRIMARY KEY (idingrediente);
+
+
+--
+-- TOC entry 3406 (class 2606 OID 16672)
 -- Name: inventario inventario_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2381,7 +2699,7 @@ ALTER TABLE ONLY public.inventario
 
 
 --
--- TOC entry 3402 (class 2606 OID 16745)
+-- TOC entry 3416 (class 2606 OID 16745)
 -- Name: item_inventario item_inventario_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2390,7 +2708,7 @@ ALTER TABLE ONLY public.item_inventario
 
 
 --
--- TOC entry 3370 (class 2606 OID 16504)
+-- TOC entry 3384 (class 2606 OID 16504)
 -- Name: item item_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2399,7 +2717,7 @@ ALTER TABLE ONLY public.item
 
 
 --
--- TOC entry 3378 (class 2606 OID 16563)
+-- TOC entry 3392 (class 2606 OID 16563)
 -- Name: legivel legivel_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2408,7 +2726,7 @@ ALTER TABLE ONLY public.legivel
 
 
 --
--- TOC entry 3364 (class 2606 OID 16408)
+-- TOC entry 3378 (class 2606 OID 16408)
 -- Name: mapa mapa_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2417,7 +2735,7 @@ ALTER TABLE ONLY public.mapa
 
 
 --
--- TOC entry 3412 (class 2606 OID 16962)
+-- TOC entry 3426 (class 2606 OID 16962)
 -- Name: opcao opcao_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2426,7 +2744,7 @@ ALTER TABLE ONLY public.opcao
 
 
 --
--- TOC entry 3414 (class 2606 OID 16981)
+-- TOC entry 3428 (class 2606 OID 16981)
 -- Name: personagem_capitulo personagem_capitulo_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2435,7 +2753,7 @@ ALTER TABLE ONLY public.personagem_capitulo
 
 
 --
--- TOC entry 3394 (class 2606 OID 16682)
+-- TOC entry 3408 (class 2606 OID 16682)
 -- Name: personagem_jogavel personagem_jogavel_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2444,7 +2762,7 @@ ALTER TABLE ONLY public.personagem_jogavel
 
 
 --
--- TOC entry 3386 (class 2606 OID 16625)
+-- TOC entry 3400 (class 2606 OID 16625)
 -- Name: personagem personagem_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2453,7 +2771,16 @@ ALTER TABLE ONLY public.personagem
 
 
 --
--- TOC entry 3366 (class 2606 OID 16418)
+-- TOC entry 3432 (class 2606 OID 17090)
+-- Name: receita receita_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.receita
+    ADD CONSTRAINT receita_pkey PRIMARY KEY (idreceita);
+
+
+--
+-- TOC entry 3380 (class 2606 OID 16418)
 -- Name: regiao regiao_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2462,7 +2789,7 @@ ALTER TABLE ONLY public.regiao
 
 
 --
--- TOC entry 3368 (class 2606 OID 16433)
+-- TOC entry 3382 (class 2606 OID 16433)
 -- Name: sala sala_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2471,7 +2798,7 @@ ALTER TABLE ONLY public.sala
 
 
 --
--- TOC entry 3400 (class 2606 OID 16727)
+-- TOC entry 3414 (class 2606 OID 16727)
 -- Name: tributo tributo_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2480,7 +2807,7 @@ ALTER TABLE ONLY public.tributo
 
 
 --
--- TOC entry 3404 (class 2606 OID 16889)
+-- TOC entry 3418 (class 2606 OID 16889)
 -- Name: usuario usuario_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2489,7 +2816,7 @@ ALTER TABLE ONLY public.usuario
 
 
 --
--- TOC entry 3382 (class 2606 OID 16593)
+-- TOC entry 3396 (class 2606 OID 16593)
 -- Name: utilidade utilidade_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2498,7 +2825,7 @@ ALTER TABLE ONLY public.utilidade
 
 
 --
--- TOC entry 3372 (class 2606 OID 16521)
+-- TOC entry 3386 (class 2606 OID 16521)
 -- Name: vestimenta vestimenta_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2507,7 +2834,7 @@ ALTER TABLE ONLY public.vestimenta
 
 
 --
--- TOC entry 3388 (class 2606 OID 16642)
+-- TOC entry 3402 (class 2606 OID 16642)
 -- Name: vitalidade vitalidade_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2516,7 +2843,7 @@ ALTER TABLE ONLY public.vitalidade
 
 
 --
--- TOC entry 3451 (class 2620 OID 17034)
+-- TOC entry 3474 (class 2620 OID 17034)
 -- Name: localizacao trigger_atualizar_capitulo; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -2524,7 +2851,7 @@ CREATE TRIGGER trigger_atualizar_capitulo AFTER INSERT ON public.localizacao FOR
 
 
 --
--- TOC entry 3447 (class 2620 OID 17037)
+-- TOC entry 3469 (class 2620 OID 17037)
 -- Name: usuario trigger_atualizar_idcapitulo; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -2532,7 +2859,7 @@ CREATE TRIGGER trigger_atualizar_idcapitulo AFTER INSERT OR UPDATE OF idpersonag
 
 
 --
--- TOC entry 3448 (class 2620 OID 17056)
+-- TOC entry 3470 (class 2620 OID 17056)
 -- Name: usuario trigger_atualizar_vitalidade; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -2540,7 +2867,7 @@ CREATE TRIGGER trigger_atualizar_vitalidade AFTER UPDATE OF idpersonagem ON publ
 
 
 --
--- TOC entry 3446 (class 2620 OID 16763)
+-- TOC entry 3468 (class 2620 OID 16763)
 -- Name: personagem_jogavel trigger_criar_inventario; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -2548,7 +2875,7 @@ CREATE TRIGGER trigger_criar_inventario AFTER INSERT ON public.personagem_jogave
 
 
 --
--- TOC entry 3449 (class 2620 OID 17054)
+-- TOC entry 3471 (class 2620 OID 17054)
 -- Name: usuario trigger_criar_vitalidade; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -2556,7 +2883,7 @@ CREATE TRIGGER trigger_criar_vitalidade AFTER INSERT ON public.usuario FOR EACH 
 
 
 --
--- TOC entry 3452 (class 2620 OID 17026)
+-- TOC entry 3475 (class 2620 OID 17026)
 -- Name: localizacao trigger_excluir_localizacao_anterior; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -2564,7 +2891,15 @@ CREATE TRIGGER trigger_excluir_localizacao_anterior AFTER INSERT ON public.local
 
 
 --
--- TOC entry 3450 (class 2620 OID 16896)
+-- TOC entry 3472 (class 2620 OID 17120)
+-- Name: usuario trigger_reduzir_vitalidade; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER trigger_reduzir_vitalidade AFTER UPDATE OF idcapitulo ON public.usuario FOR EACH ROW WHEN ((old.idcapitulo IS DISTINCT FROM new.idcapitulo)) EXECUTE FUNCTION public.reduzir_vitalidade();
+
+
+--
+-- TOC entry 3473 (class 2620 OID 16896)
 -- Name: usuario trigger_verificar_nome_unico; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -2572,7 +2907,7 @@ CREATE TRIGGER trigger_verificar_nome_unico BEFORE INSERT ON public.usuario FOR 
 
 
 --
--- TOC entry 3430 (class 2606 OID 16703)
+-- TOC entry 3448 (class 2606 OID 16703)
 -- Name: animal animal_idpersonagem_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2581,7 +2916,7 @@ ALTER TABLE ONLY public.animal
 
 
 --
--- TOC entry 3420 (class 2606 OID 16537)
+-- TOC entry 3438 (class 2606 OID 16537)
 -- Name: arma arma_iditem_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2590,7 +2925,7 @@ ALTER TABLE ONLY public.arma
 
 
 --
--- TOC entry 3431 (class 2606 OID 16715)
+-- TOC entry 3449 (class 2606 OID 16715)
 -- Name: bestante bestante_idpersonagem_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2599,7 +2934,7 @@ ALTER TABLE ONLY public.bestante
 
 
 --
--- TOC entry 3423 (class 2606 OID 16576)
+-- TOC entry 3441 (class 2606 OID 16576)
 -- Name: compartimento compartimento_iditem_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2608,7 +2943,7 @@ ALTER TABLE ONLY public.compartimento
 
 
 --
--- TOC entry 3444 (class 2606 OID 17066)
+-- TOC entry 3462 (class 2606 OID 17066)
 -- Name: consequencia consequencia_idopcao_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2617,7 +2952,7 @@ ALTER TABLE ONLY public.consequencia
 
 
 --
--- TOC entry 3445 (class 2606 OID 17071)
+-- TOC entry 3463 (class 2606 OID 17071)
 -- Name: consequencia consequencia_idpersonagem_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2626,7 +2961,7 @@ ALTER TABLE ONLY public.consequencia
 
 
 --
--- TOC entry 3425 (class 2606 OID 16606)
+-- TOC entry 3443 (class 2606 OID 16606)
 -- Name: construtor construtor_iditem_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2635,7 +2970,7 @@ ALTER TABLE ONLY public.construtor
 
 
 --
--- TOC entry 3421 (class 2606 OID 16549)
+-- TOC entry 3439 (class 2606 OID 16549)
 -- Name: consumivel consumivel_iditem_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2644,7 +2979,7 @@ ALTER TABLE ONLY public.consumivel
 
 
 --
--- TOC entry 3427 (class 2606 OID 16659)
+-- TOC entry 3445 (class 2606 OID 16659)
 -- Name: distrito distrito_idpersonagem_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2653,7 +2988,7 @@ ALTER TABLE ONLY public.distrito
 
 
 --
--- TOC entry 3436 (class 2606 OID 16890)
+-- TOC entry 3454 (class 2606 OID 16890)
 -- Name: usuario fk_personagem; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2662,7 +2997,7 @@ ALTER TABLE ONLY public.usuario
 
 
 --
--- TOC entry 3443 (class 2606 OID 17020)
+-- TOC entry 3461 (class 2606 OID 17020)
 -- Name: localizacao fk_usuario; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2671,7 +3006,7 @@ ALTER TABLE ONLY public.localizacao
 
 
 --
--- TOC entry 3437 (class 2606 OID 16930)
+-- TOC entry 3455 (class 2606 OID 16930)
 -- Name: historia historia_idcapitulo_inicial_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2680,7 +3015,7 @@ ALTER TABLE ONLY public.historia
 
 
 --
--- TOC entry 3438 (class 2606 OID 16925)
+-- TOC entry 3456 (class 2606 OID 16925)
 -- Name: historia historia_idpersonagem_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2689,16 +3024,43 @@ ALTER TABLE ONLY public.historia
 
 
 --
--- TOC entry 3428 (class 2606 OID 16673)
--- Name: inventario inventario_idpersonagem_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- TOC entry 3465 (class 2606 OID 17109)
+-- Name: ingrediente ingrediente_iditem_necessario1_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.ingrediente
+    ADD CONSTRAINT ingrediente_iditem_necessario1_fkey FOREIGN KEY (iditem_necessario1) REFERENCES public.item(iditem);
+
+
+--
+-- TOC entry 3466 (class 2606 OID 17114)
+-- Name: ingrediente ingrediente_iditem_necessario2_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.ingrediente
+    ADD CONSTRAINT ingrediente_iditem_necessario2_fkey FOREIGN KEY (iditem_necessario2) REFERENCES public.item(iditem);
+
+
+--
+-- TOC entry 3467 (class 2606 OID 17104)
+-- Name: ingrediente ingrediente_idreceita_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.ingrediente
+    ADD CONSTRAINT ingrediente_idreceita_fkey FOREIGN KEY (idreceita) REFERENCES public.receita(idreceita);
+
+
+--
+-- TOC entry 3446 (class 2606 OID 17076)
+-- Name: inventario inventario_idusuario_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.inventario
-    ADD CONSTRAINT inventario_idpersonagem_fkey FOREIGN KEY (idpersonagem) REFERENCES public.personagem(idpersonagem) ON DELETE CASCADE;
+    ADD CONSTRAINT inventario_idusuario_fkey FOREIGN KEY (idusuario) REFERENCES public.usuario(id) ON DELETE CASCADE;
 
 
 --
--- TOC entry 3434 (class 2606 OID 16746)
+-- TOC entry 3452 (class 2606 OID 16746)
 -- Name: item_inventario item_inventario_idinventario_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2707,7 +3069,7 @@ ALTER TABLE ONLY public.item_inventario
 
 
 --
--- TOC entry 3435 (class 2606 OID 16751)
+-- TOC entry 3453 (class 2606 OID 16751)
 -- Name: item_inventario item_inventario_iditem_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2716,7 +3078,7 @@ ALTER TABLE ONLY public.item_inventario
 
 
 --
--- TOC entry 3422 (class 2606 OID 16564)
+-- TOC entry 3440 (class 2606 OID 16564)
 -- Name: legivel legivel_iditem_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2725,7 +3087,7 @@ ALTER TABLE ONLY public.legivel
 
 
 --
--- TOC entry 3439 (class 2606 OID 16963)
+-- TOC entry 3457 (class 2606 OID 16963)
 -- Name: opcao opcao_iddecisao_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2734,7 +3096,7 @@ ALTER TABLE ONLY public.opcao
 
 
 --
--- TOC entry 3440 (class 2606 OID 16968)
+-- TOC entry 3458 (class 2606 OID 16968)
 -- Name: opcao opcao_proximo_capitulo_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2743,7 +3105,7 @@ ALTER TABLE ONLY public.opcao
 
 
 --
--- TOC entry 3441 (class 2606 OID 16987)
+-- TOC entry 3459 (class 2606 OID 16987)
 -- Name: personagem_capitulo personagem_capitulo_idcapitulo_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2752,7 +3114,7 @@ ALTER TABLE ONLY public.personagem_capitulo
 
 
 --
--- TOC entry 3442 (class 2606 OID 16982)
+-- TOC entry 3460 (class 2606 OID 16982)
 -- Name: personagem_capitulo personagem_capitulo_idpersonagem_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2761,7 +3123,7 @@ ALTER TABLE ONLY public.personagem_capitulo
 
 
 --
--- TOC entry 3429 (class 2606 OID 16683)
+-- TOC entry 3447 (class 2606 OID 16683)
 -- Name: personagem_jogavel personagem_jogavel_iddistrito_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2770,7 +3132,16 @@ ALTER TABLE ONLY public.personagem_jogavel
 
 
 --
--- TOC entry 3417 (class 2606 OID 16419)
+-- TOC entry 3464 (class 2606 OID 17091)
+-- Name: receita receita_iditem_resultado_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.receita
+    ADD CONSTRAINT receita_iditem_resultado_fkey FOREIGN KEY (iditem_resultado) REFERENCES public.item(iditem);
+
+
+--
+-- TOC entry 3435 (class 2606 OID 16419)
 -- Name: regiao regiao_idmapa_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2779,7 +3150,7 @@ ALTER TABLE ONLY public.regiao
 
 
 --
--- TOC entry 3418 (class 2606 OID 16434)
+-- TOC entry 3436 (class 2606 OID 16434)
 -- Name: sala sala_idregiao_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2788,7 +3159,7 @@ ALTER TABLE ONLY public.sala
 
 
 --
--- TOC entry 3432 (class 2606 OID 16733)
+-- TOC entry 3450 (class 2606 OID 16733)
 -- Name: tributo tributo_iddistrito_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2797,7 +3168,7 @@ ALTER TABLE ONLY public.tributo
 
 
 --
--- TOC entry 3433 (class 2606 OID 16728)
+-- TOC entry 3451 (class 2606 OID 16728)
 -- Name: tributo tributo_idpersonagem_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2806,7 +3177,7 @@ ALTER TABLE ONLY public.tributo
 
 
 --
--- TOC entry 3424 (class 2606 OID 16594)
+-- TOC entry 3442 (class 2606 OID 16594)
 -- Name: utilidade utilidade_iditem_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2815,7 +3186,7 @@ ALTER TABLE ONLY public.utilidade
 
 
 --
--- TOC entry 3419 (class 2606 OID 16522)
+-- TOC entry 3437 (class 2606 OID 16522)
 -- Name: vestimenta vestimenta_iditem_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2824,7 +3195,7 @@ ALTER TABLE ONLY public.vestimenta
 
 
 --
--- TOC entry 3426 (class 2606 OID 17048)
+-- TOC entry 3444 (class 2606 OID 17048)
 -- Name: vitalidade vitalidade_idusuario_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2832,7 +3203,7 @@ ALTER TABLE ONLY public.vitalidade
     ADD CONSTRAINT vitalidade_idusuario_fkey FOREIGN KEY (idusuario) REFERENCES public.usuario(id) ON DELETE CASCADE;
 
 
--- Completed on 2024-09-08 16:08:26
+-- Completed on 2024-09-09 06:05:53
 
 --
 -- PostgreSQL database dump complete

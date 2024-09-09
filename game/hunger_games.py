@@ -519,7 +519,6 @@ def exibir_texto_com_cores(stdscr, texto, objetivo, texto_consequencia):
 
 def iniciar_jogo(usuario_id):
     try:
-        TocarSom()  # Tocar a música de fundo no início
         while True:
             # Busca o personagem e capítulo atual do usuário
             cur.execute(
@@ -538,7 +537,6 @@ def iniciar_jogo(usuario_id):
                 print("O personagem ainda não foi vinculado a um capítulo.")
                 break
 
-            # Condições para tocar músicas específicas nos capítulos
             if capitulo_atual == 6:
                 MusicaAbertura()
             elif capitulo_atual in [7, 8, 9]:

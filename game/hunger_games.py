@@ -456,8 +456,7 @@ def exibir_opcoes_com_curses(stdscr, opcoes):
             return opcoes[current_selection][0]  # Retorna o id da opção selecionada
         elif key == ord('q'):  # Tecla 'q' para sair
             return 'sair'
-
-# Função para exibir texto com cores específicas usando curses
+        
 def exibir_texto_com_cores(stdscr, texto, objetivo, texto_consequencia):
     curses.start_color()
     curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLACK)
@@ -467,29 +466,36 @@ def exibir_texto_com_cores(stdscr, texto, objetivo, texto_consequencia):
     stdscr.clear()
     height, width = stdscr.getmaxyx()
 
-    # Exibe o texto da história
-    stdscr.attron(curses.color_pair(2))
-    stdscr.addstr(0, 0, texto)
-    stdscr.attroff(curses.color_pair(2))
+    def add_centered_text(y, text, color_pair):
+        """ Helper function to add centered text, clipping if too long. """
+        if y < 0 or y >= height:
+            return  # Avoid adding text outside the screen bounds
+        clipped_text = text[:width]  # Clip text to the screen width
+        x_pos = (width - len(clipped_text)) // 2
+        try:
+            stdscr.attron(curses.color_pair(color_pair))
+            stdscr.addstr(y, x_pos, clipped_text)
+            stdscr.attroff(curses.color_pair(color_pair))
+        except curses.error:
+            pass  # Ignore errors related to drawing outside screen bounds
 
-    # Exibe o objetivo
-    stdscr.attron(curses.color_pair(1))
-    stdscr.addstr(2, 0, objetivo)
-    stdscr.attroff(curses.color_pair(1))
+    # Centraliza o texto da história
+    add_centered_text(height // 2 - 3, texto, 2)
 
-    # Exibe o texto da consequência
+    # Centraliza o objetivo
+    add_centered_text(height // 2 - 1, objetivo, 1)
+
+    # Centraliza o texto da consequência, se existir
     if texto_consequencia:
-        stdscr.attron(curses.color_pair(3))
-        stdscr.addstr(4, 0, texto_consequencia)
-        stdscr.attroff(curses.color_pair(3))
+        add_centered_text(height // 2 + 1, texto_consequencia, 3)
 
+    # Centraliza a mensagem de continuação
     mensagem = "Aperte Enter para continuar..."
-    x_pos = (width - len(mensagem)) // 2
-    stdscr.addstr(8, x_pos, mensagem)
+    add_centered_text(height // 2 + 5, mensagem, 3)
+
     stdscr.refresh()
     stdscr.getch()
 
-# Função principal do jogo
 def iniciar_jogo(usuario_id):
     try:
         while True:
@@ -573,14 +579,13 @@ def iniciar_jogo(usuario_id):
             # Processa a opção selecionada para obter o texto da consequência
             texto_consequencia = processar_opcao(usuario_id, escolha)
             if texto_consequencia is None:
-                texto_consequencia = ""  # Exibe vazio se não houver consequência
+                texto_consequencia = ""
 
-            # Exibe o texto do capítulo com a nova consequência
+            # Exibe o texto da consequência
             curses.wrapper(exibir_texto_com_cores, " ", " ", texto_consequencia)
 
     except Exception as e:
         print(f"Erro ao iniciar o jogo: {e}")
-
 
 # Função para exibir o menu na tela com curses
 def print_menu(stdscr, selected_row_idx):

@@ -78,6 +78,7 @@ def iniciar_display(stats):
     display_thread = threading.Thread(target=curses.wrapper, args=(curses_thread,))
     display_thread.daemon = True  # Permite que a thread seja encerrada com o programa principal
     display_thread.start()  # Inicia a thread
+    
 # Funções do jogo
 class Game:
     @staticmethod
@@ -338,6 +339,7 @@ def processar_opcao(usuario_id, opcao_id):
             print("Opção não encontrada.")
             return
         efeito_atributo, atributo, proximo_capitulo = opcao
+
         # Passo 3: Verificar o atributo e realizar a movimentação
         if atributo == 'idsala':
             cur.execute(
@@ -421,30 +423,48 @@ def exibir_texto_com_cores(stdscr, texto, objetivo, texto_consequencia):
     curses.init_pair(3, curses.COLOR_WHITE, curses.COLOR_BLACK)
     stdscr.clear()
     height, width = stdscr.getmaxyx()
-    def add_centered_text(y, text, color_pair):
-        """ Helper function to add centered text, clipping if too long. """
+
+    def add_centered_text(y, text, color_pair, width, stdscr):
         if y < 0 or y >= height:
-            return  # Avoid adding text outside the screen bounds
-        clipped_text = text[:width]  # Clip text to the screen width
-        x_pos = (width - len(clipped_text)) // 2
-        try:
-            stdscr.attron(curses.color_pair(color_pair))
-            stdscr.addstr(y, x_pos, clipped_text)
-            stdscr.attroff(curses.color_pair(color_pair))
-        except curses.error:
-            pass  # Ignore errors related to drawing outside screen bounds
-    # Centraliza o texto da história
-    add_centered_text(height // 2 - 3, texto, 2)
-    # Centraliza o objetivo
-    add_centered_text(height // 2 - 1, objetivo, 1)
-    # Centraliza o texto da consequência, se existir
+            return
+        # Divide o texto em várias linhas para caber na largura da tela
+        lines = []
+        while len(text) > 0:
+            line = text[:width]  # Pega uma linha do tamanho máximo da largura da tela
+            if len(text) > width:
+                # Tenta cortar a linha no último espaço em branco
+                space_idx = line.rfind(' ')
+                if space_idx != -1:
+                    line = text[:space_idx]
+            lines.append(line)
+            text = text[len(line):].lstrip()  # Remove a linha já exibida
+
+        for i, line in enumerate(lines):
+            x_pos = (width - len(line)) // 2  # Centraliza cada linha
+            try:
+                stdscr.attron(curses.color_pair(color_pair))
+                stdscr.addstr(y + i, x_pos, line)
+                stdscr.attroff(curses.color_pair(color_pair))
+            except curses.error:
+                pass
+
+    # Exibe o texto da história com quebra de linha
+    add_centered_text(height // 2 - 6, texto, 2, width, stdscr)
+    
+    # Exibe o objetivo com quebra de linha
+    add_centered_text(height // 2 - 3, objetivo, 1, width, stdscr)
+    
+    # Exibe o texto da consequência, se existir, com quebra de linha
     if texto_consequencia:
-        add_centered_text(height // 2 + 1, texto_consequencia, 3)
-    # Centraliza a mensagem de continuação
+        add_centered_text(height // 2, texto_consequencia, 3, width, stdscr)
+
+    # Exibe a mensagem de continuação
     mensagem = "Aperte Enter para continuar..."
-    add_centered_text(height // 2 + 5, mensagem, 3)
+    add_centered_text(height // 2 + 5, mensagem, 3, width, stdscr)
+
     stdscr.refresh()
     stdscr.getch()
+
 
 def iniciar_jogo(usuario_id):
     try:
@@ -464,6 +484,23 @@ def iniciar_jogo(usuario_id):
                 print("O personagem ainda não foi vinculado a um capítulo.")
                 break
 
+            # Verifica o HP do usuário antes de continuar
+            cur.execute(
+                "SELECT hp FROM vitalidade WHERE idusuario = %s",
+                (usuario_id,)
+            )
+            hp = cur.fetchone()
+            if hp is None or hp[0] <= 0:
+                print("Você morreu. O jogo será reiniciado do capítulo 1.")
+                # Reinicia o usuário para o capítulo 1
+                cur.execute(
+                    "UPDATE usuario SET idcapitulo = 1 WHERE id = %s",
+                    (usuario_id,)
+                )
+                # Commit na transação para salvar as alterações no banco de dados
+                cur.connection.commit()
+                continue  # Reinicia o loop para começar do capítulo 1
+
             # Condições para tocar músicas específicas nos capítulos
             if capitulo_atual == 6:
                 MusicaAbertura()
@@ -473,6 +510,7 @@ def iniciar_jogo(usuario_id):
                 # Retorna à música de fundo se nenhuma outra estiver tocando
                 if not pygame.mixer.music.get_busy():
                     TocarSom()
+            
             # Busca o texto e objetivo do capítulo atual
             cur.execute(
                 "SELECT texto, objetivo FROM capitulo WHERE idcapitulo = %s",
@@ -483,8 +521,10 @@ def iniciar_jogo(usuario_id):
                 print("Capítulo não encontrado.")
                 break
             texto, objetivo = capitulo
+            
             # Exibe o texto do capítulo e o objetivo
             curses.wrapper(exibir_texto_com_cores, texto, objetivo, "")
+            
             # Busca as opções disponíveis para o capítulo atual
             cur.execute(
                 "SELECT idopcao, descricao, efeito_atributo, atributo, peso FROM opcao WHERE iddecisao = %s",
@@ -494,6 +534,7 @@ def iniciar_jogo(usuario_id):
             if not opcoes:
                 print("Nenhuma opção encontrada para o capítulo atual.")
                 break
+            
             # Busca os atributos do usuário para filtrar as opções
             cur.execute(
                 "SELECT popularidade, agilidade, forca, nado, carisma, combate, perspicacia, furtividade, sobrevivencia, precisao FROM vitalidade WHERE idusuario = %s",
@@ -507,6 +548,7 @@ def iniciar_jogo(usuario_id):
                 ['popularidade', 'agilidade', 'forca', 'nado', 'carisma', 'combate', 'perspicacia', 'furtividade', 'sobrevivencia', 'precisao'],
                 atributos
             ))
+            
             # Filtra as opções com base nos atributos do usuário
             opcoes_filtradas = [
                 (idopcao, descricao) for idopcao, descricao, efeito_atributo, atributo, peso in opcoes
@@ -515,6 +557,7 @@ def iniciar_jogo(usuario_id):
             if not opcoes_filtradas:
                 print("Nenhuma opção disponível com base em seus atributos.")
                 continue
+            
             # Exibe as opções filtradas para o usuário
             escolha = curses.wrapper(exibir_opcoes_com_curses, opcoes_filtradas)
             if escolha == 'sair':
@@ -523,14 +566,17 @@ def iniciar_jogo(usuario_id):
             if escolha not in [opcao[0] for opcao in opcoes_filtradas]:
                 print("Escolha inválida.")
                 continue
+            
             # Processa a opção selecionada para obter o texto da consequência
             texto_consequencia = processar_opcao(usuario_id, escolha)
             if texto_consequencia is None:
                 texto_consequencia = ""
+            
             # Exibe o texto da consequência
             curses.wrapper(exibir_texto_com_cores, " ", " ", texto_consequencia)
     except Exception as e:
         print(f"Erro ao iniciar o jogo: {e}")
+
 # Função para exibir o menu na tela com curses
 def print_menu(stdscr, selected_row_idx):
     stdscr.clear()

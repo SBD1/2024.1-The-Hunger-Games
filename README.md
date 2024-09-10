@@ -26,6 +26,7 @@ Você assume o papel de um tributo, competindo em desafios e batalhas enquanto e
 
 - [MÓDULO 1](https://youtu.be/5YzNXej9BE8?si=OnlFL7Rn5b7EIj5Y)
 - [MÓDULO 2](https://youtu.be/OgMNaJGtN2w)
+- [MÓDULO 3](https://youtu.be/dh4F4A17cRM)
 
 # Entregas
 

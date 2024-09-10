@@ -1786,6 +1786,25 @@ COPY public.capitulo (idcapitulo, texto, objetivo) FROM stdin;
 25	Vocˆ foi acordado com o barulho do canhÆo. Algu‚m morreu. Ao levantar-se vocˆ percebeu que a correnteza havia parado, a  gua estava calma, como um rio	objetivo
 26	O canhÆo tocou uma £ltima vez antes da m£sica dos vencedores come‡ar a tocar. Vocˆ ‚ o £ltimo tributo livre. Mais uma vez o favorito do Distrito 1 venceu. Parab‚ns! Vocˆ ‚ o vencedor da 67§ edi‡Æo dos Jogos Vorazes	objetivo
 27	Fim de Jogo!	Que a sorte continue ao seu favor
+28	Depois de uma longa jornada, você finalmente chega à Capital. O brilho das luzes e a grandiosidade dos prédios são de tirar o fôlego. Você é levada para o Centro de Treinamento, onde passará os próximos dias se preparando para os Jogos Vorazes.	Aproveite para treinar 
+29	Você começa as aulas no Centro de Treinamento. A cada dia, novas habilidades são ensinadas.	Faça aulas para se preparar
+30	Em uma de suas escapadas pela Capital, você se aventura escondida pelos corredores e encontra Haymitch, o mentor do Distrito 12. Ele parece surpreso ao vê-la.	Escolha como agir nessa situação
+31	Depois do encontro com Haymitch, você volta ao dormitório decidida a treinar e planejar suas estratégias para os Jogos. Sua estratégia pode definir o rumo dos Jogos; escolha com sabedoria
+32	O grande dia chegou: a entrevista com Ceasar Flickerman. A Capital está de olho em você. Haymitch te observa da plateia, e suas palavras ainda ecoam na sua mente. Agora é sua chance de brilhar e conquistar patrocinadores.	Escolha bem suas palavras para impressionar a Capital
+33	Após a entrevista, você passa por uma última rodada de treinos. Prepare-se para o primeiro dia na Arena
+34	Finalmente, o dia dos Jogos chegou. Você é transportada para dentro de um esgoto com os demais tributos. Ao olhar bem, você percebe que há uma floresta densa com um rio ao longe próximo a prédios. A contagem regressiva começa.	Escolha para onde vai
+35	Correndo para a floresta conseguiu despistar dos demais tributos e achou um terreno para se abrigar. Escolha como pretende agir
+36	Enquanto explora a floresta, você se depara com um tributo ferido do Distrito 8. Ele não parece uma ameaça, mas ajudando-o, você corre o risco de se expor.	Escolha como agir
+37	Você mantem-se viva. No entanto, as condições na Arena começam a mudar, com tempestades e armadilhas aparecendo em todos os lados.	Adapte sua estratégia às mudanças no ambiente
+38	Enquanto descansa em uma caverna, você ouve os canhões tocando ao longe, sinalizando a morte de outros tributos. Você sabe que as chances de sobrevivência aumentam, mas também que a competição está se tornando ainda mais acirrada.	Permaneça alerta e use sua furtividade para evitar encontros indesejados
+39	Você encontra um tributo que parece querer se aliar. No entanto, você se lembra das palavras de Haymitch sobre confiar em si mesma. A decisão é difícil.	Decida sobre como irá responder a proposta
+40	As condições na Arena continuam a piorar. Você se encontra em uma situação crítica quando um tsunami atinge a floresta. Usando sua agilidade, você consegue escapar das áreas mais perigosas, mas o desgaste físico começa a se acumular.	Escolha o que fazer
+41	Antes de sair da floresta, você encontrou dois galhos, um longo e tres secos, duas cordas e duas pedras lascadas.	Escolha o que fazer com esses itens
+42	A Arena se estreita, empurrando todos os tributos para uma área central. Olhando para o outro prédio você vê um tributo, Dominic do Distrito 1.	Escolha como vai agir
+43	Após ouvir várias vezes o canhão disparando, uma voz fala que só restaram dois tributos. Escolha como vai agir
+44  Após avistar Gabrielle no fim da rua, ambas sacam suas armas automaticamente, você se esconde atrás da parede e mantem o seu arco tensionado com a última flecha que restou
+45	O canhÆo tocou uma £ltima vez antes da m£sica dos vencedores come‡ar a tocar. Vocˆ ‚ o £ltimo tributo livre. Mais uma vez o favorito do Distrito 12 venceu. Parab‚ns! Vocˆ ‚ o vencedor da 67§ edi‡Æo dos Jogos Vorazes	objetivo
+46	Fim de Jogo!	Que a sorte continue ao seu favor
 \.
 
 
@@ -1813,7 +1832,7 @@ COPY public.consequencia (idconsequencia, idopcao, idpersonagem, texto, atributo
 6	7	39	Os tributos participaram de uma aula de combate intensiva com Jennifer, melhorando suas habilidades em luta corpo a corpo e estrat‚gias de combate.	combate	1
 7	8	40	Josh fez uma revisÆo dos conceitos de sobrevivˆncia com os tributos, enfatizando a importƒncia de estrat‚gias adaptativas e o uso eficiente dos recursos dispon¡veis.	sobrevivencia	1
 11	12	1	Os tributos realizaram a refei‡Æo em silˆncio, sem interagir com os outros. Este momento de quietude ajudou a focar e refletir sobre as experiˆncias do dia.	carisma	0
-12	13	27	Cashmere: "Nosso distrito ‚ o mais preparado para os Jogos, tente ser o mais agressivo que puder	perspicacia	0
+12	13	27	Cashmere: "Nosso distrito ‚ o mais preparado para os Jogos, tente ser o mais agressivo que puder"	perspicacia	0
 13	14	2	Depois de uma breve conversa, Pandora aceitou ser sua aliada durante os Jogos	amigo	1
 14	15	1	Vocˆ foi at‚ o seu Dormit¢rio e teve uma boa noite de sono	stamina	200
 15	16	1	Vocˆ teve uma ¢tima aula de combate!	combate	1
@@ -1869,6 +1888,53 @@ COPY public.consequencia (idconsequencia, idopcao, idpersonagem, texto, atributo
 62	63	1	Obrigada por jogar!	hp	1000
 4	5	42	Na aula de nata‡Æo com Sam, os tributos treinaram suas habilidades na  gua, aprendendo t‚cnicas de nata‡Æo e estrat‚gias de sobrevivˆncia aqu tica.	nado	1
 9	10	42	Sam supervisionou uma pr tica de nata‡Æo em ambientes simulados, desafiando os tributos a manter a calma e a eficiˆncia sob pressÆo.	nado	1
+64  64  24  Os tributos treinaram técnicas de luta, come‡ando com uma introdução teórica antes de enfrentar desafios realistas. Ao final da aula, a instrutora Jennifer liberou todos.	combate	1
+65  65  24  Os tributos praticaram t‚cnicas de sobrevivˆncia com o instrutor Josh, que mostrou como lidar com situa‡äes de escassez de recursos e perigos naturais. Ao final, todos estavam mais preparados para enfrentar desafios de sobrevivˆncia.	sobrevivencia	1
+66  66  24	Durante a aula de mira com Liam, os tributos aperfei‡oaram suas habilidades de precisÆo e tiro. Cada um teve a oportunidade de praticar com diferentes armas e t‚cnicas.	precisao	1
+67  67  24  Na aula de nata‡Æo com Sam, os tributos treinaram suas habilidades na  gua, aprendendo t‚cnicas de nata‡Æo e estrat‚gias de sobrevivˆncia aqu tica.	nado	1
+68  68  24  Willow conduziu uma aula de camuflagem, ensinando os tributos a se esconder e se misturar com o ambiente. A pr tica envolveu t‚cnicas de camuflagem em diferentes cen rios.	furtividade	1
+69  69  24  Os tributos treinaram técnicas de luta, come‡ando com uma introdução teórica antes de enfrentar desafios realistas. Ao final da aula, a instrutora Jennifer liberou todos.	combate	1
+70  70  24  Os tributos praticaram t‚cnicas de sobrevivˆncia com o instrutor Josh, que mostrou como lidar com situa‡äes de escassez de recursos e perigos naturais. Ao final, todos estavam mais preparados para enfrentar desafios de sobrevivˆncia.	sobrevivencia	1
+71  71  24  Durante a aula de mira com Liam, os tributos aperfei‡oaram suas habilidades de precisÆo e tiro. Cada um teve a oportunidade de praticar com diferentes armas e t‚cnicas.	precisao	1
+72  72  24  Na aula de nata‡Æo com Sam, os tributos treinaram suas habilidades na  gua, aprendendo t‚cnicas de nata‡Æo e estrat‚gias de sobrevivˆncia aqu tica.	nado	1
+73  73  24  Willow conduziu uma aula de camuflagem, ensinando os tributos a se esconder e se misturar com o ambiente. A pr tica envolveu t‚cnicas de camuflagem em diferentes cen rios.	furtividade	1
+74  74  24  Haymitch gostou da sua sinceridade e te deu conselhos para os jogos.  carisma  1
+75  75  24  Haymitch te achou grossa e contou aos superiores seu andar noturno.  carisma  -2
+76  76  24  Haymitch te parou e indicou onde era o dormitório para onde deveria voltar.  carisma  0
+77  77  24  Você decidiu ser uma guerreira, espero que valha a pena...  combate  2
+78  78  24  Você está prezando pela sua vida, mas estará pronta quando o combate vier?  perspicacia  2
+79  79  24  Audaciosa e cativante! A capital te amou!  carisma  6
+80  80  24  Ceasar "Esperamos que ela se desenvolva no campo mais do que aqui (risos)"  carisma  0
+81  81  24  Os tributos treinaram técnicas de luta, come‡ando com uma introdução teórica antes de enfrentar desafios realistas. Ao final da aula, a instrutora Jennifer liberou todos.	combate	1
+82  82  24  Os tributos praticaram t‚cnicas de sobrevivˆncia com o instrutor Josh, que mostrou como lidar com situa‡äes de escassez de recursos e perigos naturais. Ao final, todos estavam mais preparados para enfrentar desafios de sobrevivˆncia.	sobrevivencia	1
+83  83  24	Durante a aula de mira com Liam, os tributos aperfei‡oaram suas habilidades de precisÆo e tiro. Cada um teve a oportunidade de praticar com diferentes armas e t‚cnicas.	precisao	1
+84  84  24  Na aula de nata‡Æo com Sam, os tributos treinaram suas habilidades na  gua, aprendendo t‚cnicas de nata‡Æo e estrat‚gias de sobrevivˆncia aqu tica.	nado	1
+85  85  24  Willow conduziu uma aula de camuflagem, ensinando os tributos a se esconder e se misturar com o ambiente. A pr tica envolveu t‚cnicas de camuflagem em diferentes cen rios.	furtividade	1
+86  86  24  Melhor decisão possível! As árvores são ótimas para se camuflar e despistar os outros tributos.  camuflagem  4
+87  87  24  Os grupos dos outros tributos decidiram eliminar o máximo de pessoas o mais rápido possível, você morreu.  hp  -100 
+88  88  24  Muitos tributos decidiram ir para lugares altos e você teve que disputar espaço com muita gente, você morreu.  hp  -100
+89  89  24  O tributo esperou você vir o ajudar e a esfaqueou para pegar os seus suprimentos, você morreu.  hp  -100
+90  90  24  Você saiu com vida, nesses jogos é importante confiar no seu instinto...  perspicacia  4
+91  91  24  Você foi sábia e decidiu poupar energia, não se sabe o que vem pela frente.  perspicacia  1
+92  92  24  Outros tributos ouviram o movimento, ao tentar escapar você escorregou e foi morta.  hp  -100
+93  93  24  Os tributos que ficaram nos prédios no começo tiveram uma boa posição pra te atacar de cima, você morreu.  hp  -100
+94  94  24  Você poupou energia.  stamina  200
+95  95  24  Você aceitou a proposta, mas ao virar as costas, você foi esfaqueada, você morreu.  hp  -100
+96  96  24  Você ouviu muito bem o Haymitch, podia ser amigou ou inimigo, não vale a pena arriscar...  carisma  0
+97  97  24  Você conseguiu chegar a tempo e ganhou uma boa posição em relação aos seus inimigos.  agilidade  6
+98  98  24  O tsunami derrubou tudo, você acabou morrendo afogada.  hp  -100
+99  99  24  O tsunami derrubou tudo, você acabou morrendo afogada.  hp  -100
+100  100  24  Ótimo, agora você tem mais um meio de se defender, rápido, discreto, letal...  combate  5
+101  101  24  Um tributo o viu pegar os itens e o seguiu discretamente, enquanto guardava foi pego pelas costas e morreu.  hp  -100
+102  102  24  Ao fazer a fogueira, a fumaça denunciou a sua posição, os aliados do Distrito 1 a caçaram e você morreu.  hp  -100
+103  103  24  Um inimigo a menos, pela frente ou pelas costas não importa, o importante é não ser você o alvo.  combate  2
+104  104  24  Enquanto ficava focada em vigiar a janela, outros tributos subiram a escada e a pegaram pelas costas, você morreu.  hp  -100
+105  105  24  Enquanto saia pelos fundos, mais tributos estavam chegando, você até conseguiu derrubar um, mas acabou perecendo.  hp  -100
+106  106  24  A sua flecha denunciou onde você estava, Gabrielle acabou tendo visão e a matando com o arco dela.  hp  -100
+107  107  24  Andar no aberto é perigoso, mas pelo menos é umca cidade grande para apenas duas pessoas... camuflagem  2
+108  108  24  Enquanto esperava, Gabrielle a atacou rapidamente sem você esperar, o combate foi díficil, mas mesmo com a perna quebrada, Gabrielle levou a melhor e você morreu.  hp  -100
+109  109  24  A sua última flecha foi a única coisa necessária, com seus treinos de mira acertou Gabrielle na cabeça que caiu instantaneamente.  combate 5
+110  110  24  Ela a atacou e a acertou em cheio, as vezes o melhor ataque é a defesa, você morreu.  hp -100
 \.
 
 
@@ -2110,7 +2176,7 @@ COPY public.opcao (idopcao, iddecisao, descricao, efeito_atributo, proximo_capit
 21	6	Confiante	0	7	6	popularidade
 22	6	Carism tica	0	7	6	carisma
 23	6	T¡mida	0	7	0	carisma
-24	7	Eu sou o melhor que o Distrito 1 j  teve. Os outros tributos podem at‚ ter se destacado, mas nenhum deles possui a habilidade e a determina‡Æo que eu tenho. Eu estou aqui para vencer, e nada vai me parar	0	8	3	carisma
+24	7	Eu sou o melhor que o Distrito 1 j  teve	0	8	3	carisma
 25	7	Cada tributo do Distrito 1 tem sua pr¢pria for‡a, e eu tenho a sorte de ter sido treinado com os melhores. O que me diferencia ‚ a combina‡Æo de estrat‚gia, habilidade e um esp¡rito inabal vel. Vou mostrar a todos o que significa ser um verdadeiro tributo do Distrito 1	0	8	6	carisma
 26	7	Eu s¢ tentei fazer o melhor que pude durante o treinamento. Espero conseguir fazer um bom trabalho	0	8	4	carisma
 27	8	NÆo ‚ s¢ sobre a fama ou a gl¢ria. Eu entrei na academia para mostrar que o Distrito 1 nÆo ‚ apenas o melhor em combate, mas tamb‚m o mais astuto e estrat‚gico. E, claro, para provar que sou o melhor tributo que j  passaram por aqui	0	9	3	carisma
@@ -2150,6 +2216,53 @@ COPY public.opcao (idopcao, iddecisao, descricao, efeito_atributo, proximo_capit
 62	25	Leva-lo at‚ a superf¡cie	0	26	7	pespicacia
 63	26	Sair	0	27	0	combate
 58	23	Pedir Ajuda	0	24	8	popularidade
+64	28	Aula de Combate	2	29	0	idsala
+65	28	Aula de T‚cnicas de Sobrevivˆncia	3	29	0	idsala
+66	28	Aula de Mira	4	29	0	idsala
+67	28	Aula de Nata‡Æo	5	29	0	idsala
+68	28	Aula de Camuflagem	6	29	0	idsala
+69	29	Aula de Combate	2	30	0	idsala
+70	29	Aula de T‚cnicas de Sobrevivˆncia	3	30	0	idsala
+71	29	Aula de Mira	4	30	0	idsala
+72	29	Aula de Nata‡Æo	5	30	0	idsala
+73	29	Aula de Camuflagem	6	30	0	idsala
+74  30  Falar abertamente com Haymitch sobre a situação 2 31 1 carisma
+75  30  Ignorar Haymitch e continuar explorando 2 31 1 carisma
+76  30  Fingir que está perdida 2 31 0 carisma
+77  31  Atacar quando puder 3 32 1 combate
+78  31  Manter-se escondida 3 32 1 furtividade
+79	32	Carismática	0	33	6	carisma
+80	32	Tímida	0	33	0	carisma
+81	33	Aula de Combate	2	34	0	idsala
+82	33	Aula de T‚cnicas de Sobrevivˆncia	3	34	0	idsala
+83	33	Aula de Mira	4	34	0	idsala
+84	33	Aula de Nata‡Æo	5	34	0	idsala
+85	33	Aula de Camuflagem	6	34	0	idsala
+86  34  Ir para a floresta 5 36 2 perspicacia
+87  34  Manter-se no esgoto 0 36 0 combate
+88  34  Ficar nos prédios 1 36 2 combate
+89  36  Ajudar o tributo ferido 1 37 2 carisma
+90  36  Ignorar o tributo ferido e continuar seu caminho 2 37 2 perspicacia
+91  37  Abrigar-se na caverna ao lado 0 38 0 idsala
+92  37  Correr pela floresta em busca de ajuda 0 38 0 idsala
+93  37  Tentar alcançar os prédios 0 38 0 idsala
+94  38  Ficar quieta e descansar 2 39 1 agilidade
+95  39  Aceitar a aliança proposta 1 40 1 carisma
+96  39 Recusar a aliança e confiar em si mesma 5 40 2 perspicacia
+97  40 Ir até o prédio próximo 2 41 1 agilidade
+98  40 Subir na árvore 0 41 0 agilidade
+99  40 Correr de volta pra floresta 0 41 0 agilidade
+100  41 Craftar um arco tradicional e flechas 2 42 1 combate
+101  41 Guardar os itens 0 42 0 agilidade
+102  41 Craftar uma Fogueira 0 42 0 perspicacia
+103  42 Atacar Dominic com o arco 2 42 1 combate
+104  42 Manter-se escondido observando a janela 2 43 1 furtividade
+105  42 Descer o prédio e ir na direção oposta 2 43 1 furtividade
+106  43 Manter-se no prédio onde acertou Dominic 0 44 0 combate
+107  43 Mudar de posição e andar pelas ruas 5 44 2 camuflagem
+108  44 Esperar e observar antes de agir 2 45 1 furtividade
+109  44 Atirar a flecha em Gabrielle 2 45 5 combate
+110  44 Esperar que Gabrielle faça o primeiro movimento 2 45 1 camuflagem
 \.
 
 

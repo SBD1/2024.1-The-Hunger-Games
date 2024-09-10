@@ -5,7 +5,7 @@
 -- Dumped from database version 15.8
 -- Dumped by pg_dump version 16.4
 
--- Started on 2024-09-09 23:56:19
+-- Started on 2024-09-09 23:58:08
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -2090,25 +2090,6 @@ COPY public.legivel (idlegivel, iditem, conteudo) FROM stdin;
 --
 
 COPY public.localizacao (idcapitulo, idpersonagem, idsala, idusuario) FROM stdin;
-11	1	14	130
-11	1	14	131
-11	1	14	113
-11	1	14	113
-11	1	14	113
-11	1	14	113
-11	1	14	113
-6	1	2	117
-11	1	14	113
-3	1	3	120
-6	1	2	114
-3	1	2	121
-6	1	2	122
-6	1	2	123
-6	1	2	124
-6	1	2	125
-11	1	11	126
-11	1	11	127
-11	1	11	128
 \.
 
 
@@ -2351,22 +2332,6 @@ COPY public.tributo (idtributo, idpersonagem, iddistrito, statust) FROM stdin;
 --
 
 COPY public.usuario (id, nome, senha, idpersonagem, idcapitulo) FROM stdin;
-126	papa	123	1	11
-122	teste4	123	1	7
-117	huhu	123	1	7
-125	vamo	123	1	6
-113	kiki	123	1	11
-118	usuario	123	\N	\N
-123	teste6	123	1	7
-119	teste1	123	1	1
-120	teste2	123	1	3
-114	gugu	123	1	6
-124	mimi	123	1	7
-130	yuyu	123	1	19
-127	loli	123	1	11
-121	teste3	123	1	4
-128	nono	123	1	11
-131	nino	123	1	27
 \.
 
 
@@ -2399,22 +2364,6 @@ COPY public.vestimenta (idvestimenta, iditem, descricao, adcalor) FROM stdin;
 --
 
 COPY public.vitalidade (idvitalidade, idusuario, nutricao, hidratacao, stamina, calor, dano, popularidade, agilidade, forca, nado, carisma, combate, perspicacia, furtividade, sobrevivencia, precisao, amigo, hp) FROM stdin;
-30	125	100	100	100	50	0	7	4	5	4	3	11	5	3	4	7	0	100
-20	113	100	100	100	50	0	6	4	5	4	4	8	5	3	4	7	0	100
-23	118	100	100	100	50	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	100
-24	119	100	100	100	50	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	100
-25	120	100	100	100	50	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	100
-21	114	100	100	175	50	0	6	4	5	6	4	9	5	3	4	7	1	100
-29	124	100	100	125	50	0	7	4	5	4	3	11	5	3	4	7	0	100
-26	121	100	100	0	50	0	6	4	5	4	3	10	5	3	4	7	0	100
-31	126	100	100	275	50	0	7	3	5	4	4	8	6	3	4	7	0	100
-34	130	100	100	100	50	0	6	4	5	4	4	8	5	3	4	7	0	100
-32	127	100	100	225	50	0	4	4	5	4	3	11	6	3	4	7	0	100
-27	122	100	100	125	50	0	7	4	5	4	3	11	5	3	4	7	0	100
-22	117	100	100	150	50	0	7	4	5	5	4	10	5	3	4	7	1	100
-28	123	100	100	125	50	0	7	4	5	4	3	11	5	3	4	7	0	100
-33	128	100	100	225	50	0	4	4	5	4	3	11	6	3	4	7	0	100
-35	131	100	100	75	50	0	6	4	5	4	4	8	5	3	4	7	0	1100
 \.
 
 
@@ -3300,7 +3249,7 @@ ALTER TABLE ONLY public.vitalidade
     ADD CONSTRAINT vitalidade_idusuario_fkey FOREIGN KEY (idusuario) REFERENCES public.usuario(id) ON DELETE CASCADE;
 
 
--- Completed on 2024-09-09 23:56:20
+-- Completed on 2024-09-09 23:58:08
 
 --
 -- PostgreSQL database dump complete

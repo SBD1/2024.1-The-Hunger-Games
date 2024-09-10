@@ -35,3 +35,20 @@ Você assume o papel de um tributo, competindo em desafios e batalhas enquanto e
 | [MERV](docs/modulo_01/MERV.md)            |         [DML](docs/modulo_02/DML.md)                             |
 | [Dicionário](docs/modulo_01/dicionario.md)|         [DQL](docs/modulo_02/DQL.md)                             |
 
+# Como rodar o jogo
+
+O jogo precisa de 'psycopg2' 'colorama' 'pygame' para funcionar, para instalar ultilize o arquivo 'requirements.txt'
+
+Adicionar um servidor PostgreSQL:
+
+- No PGAdmin, clique em "Adicionar Novo Servidor".
+- Em "General", insira um nome para o servidor: `hunger_games`.
+- Em "Conexão", configure as seguintes informações:
+  - Hostname/address: `postgres`.
+  - Port: `5432`
+  - Username: `postgres`
+  - Password: `20082003`
+-  Depois de preencher essas informações, clique em "Salvar".
+
+Rode o código normalmente.
+

@@ -37,7 +37,7 @@ Você assume o papel de um tributo, competindo em desafios e batalhas enquanto e
 
 # Como rodar o jogo
 
-O jogo precisa de 'psycopg2' 'colorama' 'pygame' para funcionar, para instalar ultilize o arquivo 'requirements.txt'
+O jogo precisa de `psycopg2`  `colorama` `pygame`  para funcionar, para instalar ultilize o arquivo 'requirements.txt'
 
 Adicionar um servidor PostgreSQL:
 

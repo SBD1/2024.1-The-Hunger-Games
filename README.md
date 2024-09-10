@@ -42,6 +42,8 @@ O jogo precisa de `psycopg2`  `colorama` `pygame`  para funcionar, para instalar
 
 Adicionar um servidor PostgreSQL:
 
+- Arquivo do banco de dados: hunger_games_sql.sql
+
 - No PGAdmin, clique em "Adicionar Novo Servidor".
 - Em "General", insira um nome para o servidor: `hunger_games`.
 - Em "Conexão", configure as seguintes informações:
